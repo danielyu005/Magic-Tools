@@ -43,7 +43,7 @@ Agent／GitHub Action ── API Key ──┘
      或按「發佈應用程式」改成正式版（只用到 email／個人資料，不需要 Google 審查）。
 3. **API 和服務 → 憑證 → 建立憑證 → OAuth 用戶端 ID**，類型選「網頁應用程式」。
    「已授權的 JavaScript 來源」加入：
-   - `https://<你的 GitHub 帳號>.github.io`（正式網址）
+   - `https://danielyu005.github.io`（正式網址；只填網域，不含 `/Magic-Tools` 路徑）
    - `http://localhost:8000`（本機測試用，可省略）
 4. 複製產生的用戶端 ID（`xxxx.apps.googleusercontent.com`），回到試算表點 **工具陳列窗 → 設定 Google Client ID** 貼上。
 
@@ -72,7 +72,9 @@ Apps Script 右上角 **部署 → 新增部署作業**：
 ### 5. 部署前端
 
 1. 編輯 `web/config.js`，填入 `API_URL`（上一步的網址）和 `GOOGLE_CLIENT_ID`。兩者都不是機密，可以公開。
-2. 把 `web/` 裡的檔案推到一個 GitHub repo，**Settings → Pages** 選擇分支發佈。
+2. repo **Settings → Pages → Source** 選「GitHub Actions」（只需設定一次）。之後每次推到 `main` 且 `web/` 有變動，
+   [`.github/workflows/pages.yml`](.github/workflows/pages.yml) 會自動發佈到 `https://danielyu005.github.io/Magic-Tools/`。
+   也可以在 repo 的 Actions 頁籤手動執行「Deploy web to GitHub Pages」。
 3. 本機測試：在 `web/` 資料夾執行 `python -m http.server 8000`，開 `http://localhost:8000`。
 
 ### 6. 加入成員
@@ -170,7 +172,8 @@ apps-script/Code.gs          後端（貼到 Apps Script）
 apps-script/appsscript.json  Apps Script 設定（選用）
 web/index.html               前端頁面
 web/config.js                前端設定：API_URL、GOOGLE_CLIENT_ID
-examples/report-release.yml  GitHub Action 範例
+examples/report-release.yml  GitHub Action 範例（放到工具 repo 用）
+.github/workflows/pages.yml  本 repo 的 GitHub Pages 自動部署
 acd-tool-shelf.html          舊版（claude.ai Artifact）
 legacy/*.d.ts                舊版 Artifact 執行環境的型別參考
 ```
