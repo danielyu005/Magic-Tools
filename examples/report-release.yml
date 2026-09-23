@@ -1,0 +1,34 @@
+# 放到「工具的 repo」裡：.github/workflows/report-release.yml
+# 每次發佈 GitHub Release，就自動把版本更新送進 ACD 工具陳列窗的審核佇列。
+#
+# 需要在該 repo 的 Settings → Secrets and variables → Actions 設定：
+#   Secrets:   ACD_API_KEY   —— 管理者在試算表選單「建立 Agent 金鑰」產生的金鑰
+#   Variables: ACD_API_URL   —— Apps Script 網頁應用程式網址（/exec 結尾）
+#              ACD_TOOL_ID   —— 這個工具在陳列窗的 id（試算表 tools 工作表的 id 欄）
+name: Report release to ACD tool shelf
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit update
+        env:
+          API_URL: ${{ vars.ACD_API_URL }}
+          API_KEY: ${{ secrets.ACD_API_KEY }}
+          TOOL_ID: ${{ vars.ACD_TOOL_ID }}
+          TAG: ${{ github.event.release.tag_name }}
+          NAME: ${{ github.event.release.name }}
+          BODY: ${{ github.event.release.body }}
+          DATE: ${{ github.event.release.published_at }}
+        run: |
+          SUMMARY=$(printf '%s' "${BODY:-$NAME}" | sed -E 's/!\[[^]]*\]\([^)]*\)//g; s/\[([^]]*)\]\([^)]*\)/\1/g; s/^#+ *//; s/[*_`]//g' | tr '\n' ' ' | cut -c1-480)
+          jq -n --arg key "$API_KEY" --arg id "$TOOL_ID" --arg v "$TAG" --arg d "${DATE:0:10}" --arg s "${SUMMARY:-$TAG 發佈}" \
+            '{action:"submit", apiKey:$key, data:{kind:"update", toolId:$id, version:$v, date:$d, summary:$s}}' > payload.json
+          # Apps Script 會 302 轉址，-L 讓 curl 跟過去取回結果
+          RES=$(curl -sSL -H 'Content-Type: text/plain;charset=utf-8' --data @payload.json "$API_URL")
+          echo "$RES"
+          echo "$RES" | jq -e '.ok' > /dev/null

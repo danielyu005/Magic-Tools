@@ -1,0 +1,15 @@
+# 系統與編輯器
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# 本機工具
+node_modules/
+.clasp.json
+.claude/settings.local.json
+
+# 暫存
+*.log
+*.tmp
