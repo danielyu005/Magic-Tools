@@ -170,6 +170,9 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
 }}
 ```
 
+一次送一整批：把文章寫成 JSON 陣列（格式見 [`examples/news-seed.json`](examples/news-seed.json)），執行
+`ACD_API_KEY=acd_… node examples/push-news.mjs examples/news-seed.json`。已存在的文章會自動略過。
+
 回應：`{ "ok": true, "data": { … } }` 或 `{ "ok": false, "error": { "code": "invalid", "message": "…" } }`。
 
 ```bash
@@ -201,6 +204,8 @@ apps-script/appsscript.json  Apps Script 設定（選用）
 web/index.html               前端頁面
 web/config.js                前端設定：API_URL、GOOGLE_CLIENT_ID
 examples/report-release.yml  GitHub Action 範例（放到工具 repo 用）
+examples/push-news.mjs       批次分享文章到每週美術技術精選
+examples/news-seed.json      文章清單範例（15 篇，2026-08～09）
 .github/workflows/pages.yml  本 repo 的 GitHub Pages 自動部署
 acd-tool-shelf.html          舊版（claude.ai Artifact）
 legacy/*.d.ts                舊版 Artifact 執行環境的型別參考

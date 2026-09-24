@@ -1,0 +1,137 @@
+[
+  {
+    "url": "https://80.lv/articles/mesmerizing-tft-inspired-real-time-stylized-butterfly-spell-vfx",
+    "topic": "vfx",
+    "title": "Mesmerizing TFT-Inspired Real-Time Stylized Butterfly Spell VFX",
+    "source": "80 Level",
+    "publishedAt": "2026-09-16",
+    "excerpt": "VFX 美術 Elenna Raguin 以《聯盟戰棋》為靈感，在 Unreal Engine 5 搭配 PopcornFX 外掛製作蝴蝶法術特效。效果分三段：起點形成蝴蝶漩渦、膨脹成巨大風格化蝴蝶，最後散成大量小蝴蝶飛向終點。文章說明她從草圖、Blockout 到反覆調整的流程，並以自訂 UE 材質補強氣流線條、光柱與螺旋等細節。",
+    "note": "風格化技能特效的分段節奏設計範例，適合參考"
+  },
+  {
+    "url": "https://80.lv/articles/check-out-these-detailed-sparkling-vfx-made-with-unity",
+    "topic": "vfx",
+    "title": "Check Out These Detailed Sparkling VFX Made with Unity",
+    "source": "80 Level",
+    "publishedAt": "2026-08-31",
+    "excerpt": "日本創作者 effectくん（X：effectlab555）分享一段類似魔法變身、角色轉換瞬間的閃爍特效。作品主要以 Unity 內建的 Shuriken 粒子系統製作，靠多層閃光粒子堆疊出細緻的亮晶晶質感，並搭配 Photoshop 與 Blender 準備素材。文章也藉此說明 CPU 粒子系統在細部控制與直覺操作上的優勢。",
+    "note": "Unity 團隊可直接參考的 Shuriken 疊層閃光手法"
+  },
+  {
+    "url": "https://80.lv/articles/artist-shows-process-of-creating-stylized-vfx-with-blender-s-geometry-nodes",
+    "topic": "vfx",
+    "title": "Artist Shows How to Create Stylized VFX with Blender's Geometry Nodes",
+    "source": "80 Level",
+    "publishedAt": "2026-09-21",
+    "excerpt": "3D 美術 Good Good 展示用 Blender Geometry Nodes 與 Shader Editor 製作風格化特效的實驗。作者認為技術設定不難，真正困難的是時間節奏與配色。材質以 Noise、Voronoi 紋理為主，並改用 Mapping 節點取代 4D 紋理的 W 動畫輸入，讓效果更容易移植進遊戲引擎；單一材質保持精簡，再靠多層疊加做出豐富畫面。",
+    "note": "在 Blender 預演特效再導入引擎的實用思路"
+  },
+  {
+    "url": "https://www.cgchannel.com/2026/09/playcanvas-releases-supersplat-editor-3-0/",
+    "topic": "3d",
+    "title": "SuperSplat Editor 3.0 is a huge performance update",
+    "source": "CG Channel",
+    "publishedAt": "2026-09-11",
+    "excerpt": "PlayCanvas 推出免費開源的瀏覽器版 3D Gaussian Splat 編輯器 SuperSplat 3.0，底層改用 WebGPU 重寫，閒置與渲染時記憶體用量降到原本十分之一以下。新增 Stochastic Alpha 渲染模式，讓上千萬顆高斯點的大場景仍保持流暢；另有球形筆刷可直接在表面選取，以及可針對局部選取套用的色彩調整，支援 PLY 匯入與 SOG 壓縮匯出。",
+    "note": "免安裝就能整理掃描場景的高斯潑濺編輯器"
+  },
+  {
+    "url": "https://www.cgchannel.com/2026/09/armorpaint-1-0-is-out-after-eight-years-in-early-access/",
+    "topic": "3d",
+    "title": "ArmorPaint 1.0 is out after eight years in early access",
+    "source": "CG Channel",
+    "publishedAt": "2026-09-04",
+    "excerpt": "經過八年搶先體驗，3D 貼圖繪製軟體 ArmorPaint 正式推出 1.0 版。程式以 C 語言全面重寫，能在更大的模型與更高解析度圖層上即時繪製；新增基礎雕刻與修改器、UV 編輯、蒙皮角色動畫時間軸、可做 AI 放大與照片轉材質的 Neural Nodes，以及 GLB 匯出。執行檔售價 19 美元，原始碼以 zlib 授權免費提供。",
+    "note": "Substance Painter 之外的低成本貼圖方案"
+  },
+  {
+    "url": "https://www.cgchannel.com/2026/08/check-out-promising-new-blender-retopology-tool-smart-remesh/",
+    "topic": "3d",
+    "title": "Check out promising new Blender retopology tool Smart Remesh",
+    "source": "CG Channel",
+    "publishedAt": "2026-08-25",
+    "excerpt": "美術 Milad Kambari 推出 Blender 重新拓樸外掛 Smart Remesh（15 美元，支援 Blender 4.2 以上），分為有機與硬表面兩種模式，可將 CAD 匯入檔、3D 掃描或布林運算後的破碎網格轉成乾淨的四邊面。硬表面模式會找出真正的邊緣、把平面重建為 n-gon 並移除多餘的環線；後續 2.02 版加強多象限 UV 保留與有機模式的細節烘焙。",
+    "note": "處理掃描與布林模型時可省下大量手動拓樸"
+  },
+  {
+    "url": "https://80.lv/articles/learn-how-to-recreate-vfx-inspired-by-plasma-ball-lamps-in-godot",
+    "topic": "shader",
+    "title": "Learn How to Recreate VFX Inspired by Plasma Ball Lamps in Godot",
+    "source": "80 Level",
+    "publishedAt": "2026-09-07",
+    "excerpt": "Tendex Line Projects 推出約 46 分鐘的教學影片，示範在 Godot 重現電漿球燈的電流效果。內容從 GPU 渲染基礎講起，說明 Shader 與網格的關係，並逐一拆解法線、切線空間、UV、頂點色、視角向量與 Perlin 雜訊等概念，同時示範 Blender 與 Godot 之間來回迭代的流程。此為系列第一集，後續還有續篇。",
+    "note": "從零理解 Shader 基礎概念的好入門教材"
+  },
+  {
+    "url": "https://80.lv/articles/tutorial-how-to-make-any-texture-look-painterly-in-blender",
+    "topic": "shader",
+    "title": "Tutorial: How To Make Any Texture Look Painterly In Blender",
+    "source": "80 Level",
+    "publishedAt": "2026-09-10",
+    "excerpt": "SouthernShotty 分享在 Blender Shader Editor 內把任何貼圖變成手繪油畫感的方法。技術靈感來自 Kuwahara 濾鏡：取樣周邊像素、找出較平滑的區域，再用其顏色形成筆觸般的色塊。整套效果完全以節點從頭搭建，可包成可重複使用的節點群組並調整強度，在打光與合成之前就能得到繪畫風格的結果。",
+    "note": "NPR 風格化材質可直接套用的 Kuwahara 做法"
+  },
+  {
+    "url": "https://80.lv/articles/get-free-access-to-over-70-shader-tutorials",
+    "topic": "shader",
+    "title": "Get Free Access To Over 70 Shader Tutorials",
+    "source": "80 Level",
+    "publishedAt": "2026-09-01",
+    "excerpt": "以 GM Shaders 聞名的圖學程式設計師 XorDev，將超過 70 篇教學免費公開在他打造的 Shader 分享平台 FragCoord（定位類似 Shadertoy）。內容涵蓋圖學數學、Shader 基礎與程序化技巧，包括雜訊、Ray Marching 與碎形等主題；另外也提供 21 個名為「Minis」的現成效果，例如玻璃與磁磚效果，方便直接研究或改寫。",
+    "note": "技術美術自學 GLSL 與程序化效果的免費寶庫"
+  },
+  {
+    "url": "https://www.cgchannel.com/2026/09/check-out-free-maya-animation-productivity-toolset-keyflow/",
+    "topic": "tool",
+    "title": "Check out free Maya animation productivity toolset KeyFlow",
+    "source": "CG Channel",
+    "publishedAt": "2026-09-16",
+    "excerpt": "曾任職 Platige Image 與 Flying Wild Hog 的動畫師 Sebastian Jaksan 推出免費 Maya 動畫工具組 KeyFlow，包含 25 種以上工具，涵蓋補間、跨角色複製動畫、姿勢庫、變換與烘焙等，適用 Maya 2021 以上與任何標準綁定。另附獨立審片程式 KeyFlow Studio，支援 A/B 比對、文字與手繪標註、連線協作審查，並可將參考影片匯出至 Maya 或 Blender。",
+    "note": "免費可商用，3D 動畫組可直接導入提升效率"
+  },
+  {
+    "url": "https://80.lv/articles/developing-tools-for-large-scale-3d-game-environments",
+    "topic": "tool",
+    "title": "Developing Tools for Large-Scale 3D Game Environments",
+    "source": "80 Level",
+    "publishedAt": "2026-09-04",
+    "excerpt": "環境美術 Jolan Huijskes 分享為同人專案《Saros》沙漠場景自製的一整套工具，核心原則是減少摩擦、縮短等待並保留美術控制權。內容包含 Blender Geometry Nodes 非破壞式碎裂工具（將免費釋出）、UE 藍圖陣列建構元件、以 Socket 記錄碎片位置的引擎內破壞系統，以及結合自動散佈與手動標記的 PCG 擺放圖。",
+    "note": "技術美術設計場景管線工具的完整思路參考"
+  },
+  {
+    "url": "https://80.lv/articles/create-line-art-from-rendered-images-in-blender-s-compositor-with-this-tool",
+    "topic": "tool",
+    "title": "Create Line Art From Rendered Images In Blender's Compositor With This Tool",
+    "source": "80 Level",
+    "publishedAt": "2026-09-23",
+    "excerpt": "aVersionOfReality 推出 Blender 5.2 LTS 合成器用的描線外掛 aVersion_Lines。與 Freestyle 不同，它在螢幕空間運算，可依深度、法線或自訂色彩 ID 偵測邊緣，再以 Jump Flood 演算法修飾線條，對卡通著色與帶貼圖的表面都有效。使用時需關閉一般濾鏡反鋸齒改用合成器的 AA 節點，且顯示記憶體低於 8 GB 可能變慢；於 Gumroad 販售。",
+    "note": "做卡通渲染宣傳圖或概念圖時的描線利器"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/spine-godot-native-3d",
+    "topic": "spine",
+    "title": "Native 3D rendering in spine-godot",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-09-11",
+    "excerpt": "Spine 官方為 spine-godot 執行環境加入 SpineSprite3D 節點，骨架幾何可直接送進 Godot 3D 渲染器，不必再透過 Viewport 貼到 3D 面片上。支援網格與權重網格、裁切、Skin、Tint Black 與多種混合模式，可接收方向光、點光與聚光燈及陰影，並支援法線貼圖與多角度正確的繪製順序；另有 SpineSlotNode3D、AnimationPlayer 整合與五個範例專案。",
+    "note": "2D 角色放進 3D 場景打光的官方解法"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/Spine-Connect-Tokyo-2026-announced",
+    "topic": "spine",
+    "title": "Spine Connect Tokyo 2026 announced!",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-09-03",
+    "excerpt": "Esoteric Software 宣布將於 2026 年 10 月 17 日（六）在東京舉辦首場官方實體活動 Spine Connect Tokyo。第一部分由團隊成員 Erika、Davide 與 Misaki 介紹 Spine 最新功能並示範實用技巧，第二部分為交流時間，可直接與開發團隊面對面討論，主要邀請日本當地的 Spine 使用者參加。",
+    "note": "有赴日需求的 Spine 動畫師可留意報名"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/New-Twitch-streams-optimizing-skeletons",
+    "topic": "spine",
+    "title": "New Twitch streams: Optimizing skeletons in Spine",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-08-21",
+    "excerpt": "Spine 官方推出新的 Twitch 直播系列，由 Erika 主持，主題是遊戲動畫骨架的效能最佳化，示範如何查看 Metrics 與 Problems 檢視，找出並改善骨架中拖累效能的設定。可追蹤官方 Twitch 頻道收看直播，錯過的場次也整理在官方封存頁面可隨時回放，並歡迎到 Spine 論壇回饋意見。",
+    "note": "手遊 Spine 資源效能優化的官方實作示範"
+  }
+]
