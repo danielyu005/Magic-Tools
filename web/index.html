@@ -252,6 +252,7 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .gate-card p{color:var(--muted);margin:0 0 20px;font-size:14px}
 .gate-card .gsi{display:flex;justify-content:center;min-height:44px}
 .gate-msg{margin-top:14px;font-size:13.5px;color:var(--bad);word-break:break-all}
+.gate-msg.wait{color:var(--muted)}
 .who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .who[hidden]{display:none}
 @media (max-width:560px){.cover-field{grid-template-columns:1fr}}
@@ -565,6 +566,7 @@ function withGsi(fn){
 function showGate(msg){
   $('#gate').hidden = false;
   $('#gateMsg').textContent = msg || '';
+  $('#gateMsg').classList.remove('wait');
   if (!CFG.API_URL || !CFG.GOOGLE_CLIENT_ID){
     $('#gateText').textContent = '尚未設定 config.js 的 API_URL 與 GOOGLE_CLIENT_ID，請參考 README 完成設定。';
     return;
@@ -583,8 +585,12 @@ function signOut(msg){
   render(); showGate(msg);
 }
 function start(){
-  $('#gateMsg').textContent = '登入中…';
+  const msg = $('#gateMsg');
+  msg.textContent = '登入中…'; msg.classList.add('wait');
+  // Apps Script 閒置後的第一次呼叫要冷啟動，常常要十幾秒，先告訴使用者不是當掉
+  const slowT = setTimeout(() => { if (!$('#gate').hidden && msg.textContent === '登入中…') msg.textContent = '登入中…第一次連線可能要 10～30 秒，請稍候。'; }, 5000);
   refresh().then(() => {
+    clearTimeout(slowT); msg.classList.remove('wait');
     clearInterval(A.pollT);
     A.pollT = setInterval(() => { if (!document.hidden && A.token) refresh(); }, POLL_MS);
   });
@@ -609,7 +615,17 @@ async function api(action, payload={}){
   }
   return j.data;
 }
-async function refresh(){
+/* 同一時間只送一個 list：定時同步撞上還沒回來的請求就略過；
+   送出、審核等操作後傳 queue=true，保證在進行中的那次結束後再抓一次最新資料 */
+const R = { inflight:null, again:false };
+function refresh(queue){
+  if (R.inflight){ if (queue) R.again = true; return R.inflight; }
+  R.inflight = (async () => {
+    do { R.again = false; await refreshOnce(); } while (R.again && A.token);
+  })().finally(() => { R.inflight = null; });
+  return R.inflight;
+}
+async function refreshOnce(){
   try {
     const d = await api('list');
     S.tools = d.tools || []; S.subs = d.subs || [];
@@ -997,7 +1013,7 @@ form.addEventListener('submit', async e => {
     await api('submit', { data });
     $('#submitDlg').close();
     toast(data.kind==='new' ? '已送出審核，可在「提交狀態」追蹤進度。' : '更新已送出審核。');
-    refresh();
+    refresh(true);
   } catch(err){
     $('#formMsg').style.color='var(--bad)';
     $('#formMsg').textContent = '送出失敗：' + err.message;
@@ -1137,7 +1153,7 @@ $('#ghRelFill').addEventListener('click', ghReleaseFill);
 async function adminCall(action, payload, okMsg){
   try { await api(action, payload); toast(okMsg); return true; }
   catch(err){ if (!AUTH_CODES.includes(err.code)) toast(err.message); return false; }
-  finally { if (A.token) await refresh(); }
+  finally { if (A.token) await refresh(true); }
 }
 function approve(id){
   const s = S.subs.find(x=>x.id===id); if (!s) return;
