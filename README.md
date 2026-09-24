@@ -31,7 +31,7 @@ Agent／GitHub Action ── API Key ──┘
 2. 選單 **擴充功能 → Apps Script**，把 `apps-script/Code.gs` 的內容整份貼上，儲存。
 3. （選用）Apps Script 左側 **專案設定** → 勾選「在編輯器中顯示 appsscript.json」，把 `apps-script/appsscript.json` 貼進去。
 4. 回到試算表並重新整理，選單列會出現 **工具陳列窗**。點 **工具陳列窗 → 初始化／修復工作表**，依指示授權。
-   - 會建立 `members / tools / updates / submissions / agents` 五個工作表
+   - 會建立 `members / tools / updates / submissions / agents / news / feeds` 七個工作表
    - 會在你的 Drive 建立「ACD 工具陳列窗 封面」資料夾
    - 會把你自己加進 `members` 並設為 `admin`
 
@@ -100,6 +100,22 @@ Apps Script 右上角 **部署 → 新增部署作業**：
 - **審核**：管理者右上角「審核佇列」，核准或填原因退回。
 - 頁面每 60 秒自動同步一次，切回分頁時也會同步。
 
+### 產業趨勢：每週美術技術精選
+
+產業趨勢頁籤最上方會列出 **特效／3D／Shader／美術工具／Spine** 的文章與教學，依「本週／上週／更早」分組，可以按主題篩選。
+
+- **自動收集**：後端每天早上 8 點讀 `feeds` 工作表裡的 RSS 來源（Real-Time VFX、Graphics Programming weekly、80 Level、
+  Unreal、Unity、Blender、Spine 官方教學影片等），依關鍵字分類，節錄摘要，並用 Google 翻譯翻成繁中。
+  - 第一次使用：試算表選單 **工具陳列窗 → 初始化／修復工作表**（建立 `news`、`feeds` 並放入預設來源），
+    再點 **最新資訊：開啟每日自動抓取**（會要求一次新的授權，用來建立排程）。
+  - 增刪來源直接改 `feeds` 工作表：`topic` 填 `vfx`／`3d`／`shader`／`tool`／`spine` 表示整個來源都歸這類；
+    填 `auto` 表示依關鍵字分類、跟這五類無關的文章不收。`mode` 一般填 `rss`；`digest` 用於一期多篇的週報，會拆成一篇一篇。
+    `enabled` 改成 `FALSE` 即停用。
+  - 文章抓取時只收 120 天內的，超過 180 天會自動清掉（設為精選的保留）。
+- **分享文章**：任何成員按「分享文章」貼網址即可，標題、摘要、縮圖由後端從網頁讀取。分享後直接出現，不經審核。
+- **複製本週摘要**：把本週文章整理成 Markdown，方便貼到群組或 Claude。
+- **管理者**：可「設為精選」（固定顯示在本週）、「隱藏」（成員看不到，也不會再被抓回來）、「立即抓取」。
+
 ---
 
 ## 給 Agent 用的 API
@@ -139,6 +155,18 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
 // 回報版本更新
 { "action": "submit", "apiKey": "acd_…", "data": {
     "kind": "update", "toolId": "t…", "version": "v1.1.0", "summary": "新增批次重新命名"
+}}
+```
+
+```jsonc
+// 分享一篇文章到「每週美術技術精選」（直接上架，不經審核）
+// 例如讓 Claude 排程 Agent 每週搜尋 Spine／特效加速技巧，寫好中文摘要後送進來
+{ "action": "shareNews", "apiKey": "acd_…", "data": {
+    "url": "https://…",          // 必填
+    "topic": "spine",            // vfx | 3d | shader | tool | spine，省略則自動判斷
+    "title": "",                 // 省略就從網頁 og:title 讀
+    "excerpt": "",               // 摘要，省略就從網頁 og:description 讀；已是中文就不翻譯
+    "note": "一句話推薦"
 }}
 ```
 
