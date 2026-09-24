@@ -253,6 +253,8 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .gate-card .gsi{display:flex;justify-content:center;min-height:44px}
 .gate-msg{margin-top:14px;font-size:13.5px;color:var(--bad);word-break:break-all}
 .gate-msg.wait{color:var(--muted)}
+.who .sync{font-size:12px;opacity:.75}
+.who .sync:not(:empty)::after{content:"・";margin-left:8px}
 .who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .who[hidden]{display:none}
 @media (max-width:560px){.cover-field{grid-template-columns:1fr}}
@@ -444,7 +446,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
       <p class="sub">找到團隊正在用的美術工具，一鍵開啟，順便看看最近又改了什麼。</p>
     </div>
     <div class="head-actions">
-      <span class="who" id="who" hidden><span id="whoName"></span><button class="link-btn" type="button" id="signOut">登出</button></span>
+      <span class="who" id="who" hidden><span class="sync" id="syncState" aria-live="polite"></span><span id="whoName"></span><button class="link-btn" type="button" id="signOut">登出</button></span>
       <button class="btn" id="openQueue" type="button">提交狀態 <span class="count-pill" id="queueCount" hidden>0</span></button>
       <button class="btn primary" id="openSubmit" type="button"><svg><use href="#i-plus"/></svg>提交工具</button>
     </div>
@@ -609,7 +611,29 @@ const store = { get(k){ try { return localStorage.getItem(k); } catch { return n
 const TOKEN_KEY = 'acd.idToken';
 const A = { token:'', exp:0, gsiReady:false, refreshT:0, pollT:0 };
 const AUTH_CODES = ['auth_required','auth_invalid','auth_expired','not_member'];
-function jwtExp(t){ try { const b = t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); return (JSON.parse(atob(b)).exp||0)*1000; } catch { return 0; } }
+function jwtPayload(t){ try { return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))) || {}; } catch { return {}; } }
+function jwtExp(t){ return (jwtPayload(t).exp||0)*1000; }
+
+/* 清單快取：Apps Script 每次呼叫常要 3～20 秒，開頁時先顯示上次的資料，同步回來再換新 */
+const CACHE_KEY = 'acd.cache.v1';
+function applyList(d){
+  S.tools = d.tools || []; S.subs = d.subs || []; S.news = d.news || [];
+  S.me = d.me?.email || ''; S.meName = d.me?.name || ''; S.admin = d.me?.role === 'admin';
+  S.loaded = true; S.dbState = 'on'; S.lastErr = '';
+}
+function saveCache(d){ store.set(CACHE_KEY, JSON.stringify({ at: Date.now(), email: String(d.me?.email||'').toLowerCase(), d })); }
+function loadCache(token){
+  try {
+    const c = JSON.parse(store.get(CACHE_KEY) || 'null');
+    if (!c || !c.d || !c.email || c.email !== String(jwtPayload(token).email||'').toLowerCase()) return false;
+    applyList(c.d); S.syncedAt = c.at; return true;
+  } catch { return false; }
+}
+function renderSync(){
+  const el = $('#syncState'); if (!el) return;
+  const hm = t => { const d = new Date(t); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  el.textContent = S.syncing ? '同步中…' : (S.syncedAt ? '已同步 ' + hm(S.syncedAt) : '');
+}
 function setToken(t){
   A.token = t; A.exp = jwtExp(t); store.set(TOKEN_KEY, t);
   // ID Token 一小時過期；提前 5 分鐘請 Google 靜默換一張（使用者之前登入過就不會跳視窗）
@@ -640,8 +664,11 @@ function showGate(msg){
     if (!msg) google.accounts.id.prompt();
   });
 }
-function signOut(msg){
+// keepCache：登入過期時保留清單快取，重新登入後可以馬上顯示；主動登出或被移出白名單時清掉
+function signOut(msg, keepCache){
   A.token = ''; A.exp = 0; store.del(TOKEN_KEY);
+  if (!keepCache) store.del(CACHE_KEY);
+  S.syncedAt = 0;
   clearTimeout(A.refreshT); clearInterval(A.pollT);
   S.loaded = false; S.tools = []; S.subs = []; S.news = []; S.me = ''; S.admin = false;
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
@@ -649,6 +676,7 @@ function signOut(msg){
   render(); showGate(msg);
 }
 function start(){
+  if (!S.loaded && loadCache(A.token)){ $('#gate').hidden = true; render(); }
   const msg = $('#gateMsg');
   msg.textContent = '登入中…'; msg.classList.add('wait');
   // Apps Script 閒置後的第一次呼叫要冷啟動，常常要十幾秒，先告訴使用者不是當掉
@@ -667,7 +695,7 @@ function apiErr(code, message){ const e = new Error(message); e.code = code; ret
 // 只讀取、重送也不會重複寫入的動作；Apps Script 偶爾回錯誤頁時自動重試一次
 const RETRY_SAFE = ['list', 'me', 'github', 'fetchImage'];
 async function api(action, payload={}){
-  if (!A.token || A.exp < Date.now() + 30e3){ signOut('登入已過期，請重新登入。'); throw apiErr('auth_expired','登入已過期'); }
+  if (!A.token || A.exp < Date.now() + 30e3){ signOut('登入已過期，請重新登入。', true); throw apiErr('auth_expired','登入已過期'); }
   let r, j;
   for (let attempt = 0; ; attempt++){
     try {
@@ -683,7 +711,7 @@ async function api(action, payload={}){
   }
   if (!j.ok){
     const e = apiErr(j.error?.code || 'server', j.error?.message || '操作失敗，請稍後再試。');
-    if (AUTH_CODES.includes(e.code)) signOut(e.message);
+    if (AUTH_CODES.includes(e.code)) signOut(e.message, e.code !== 'not_member');
     throw e;
   }
   return j.data;
@@ -699,18 +727,17 @@ function refresh(queue){
   return R.inflight;
 }
 async function refreshOnce(){
+  S.syncing = true; renderSync();
   try {
     const d = await api('list');
-    S.tools = d.tools || []; S.subs = d.subs || []; S.news = d.news || [];
-    S.me = d.me?.email || ''; S.meName = d.me?.name || ''; S.admin = d.me?.role === 'admin';
-    S.loaded = true; S.dbState = 'on'; S.lastErr = '';
+    applyList(d); saveCache(d); S.syncedAt = Date.now();
     $('#gate').hidden = true;
   } catch(e){
     if (AUTH_CODES.includes(e.code)) return;
     $('#gate').hidden = true;
     if (!S.loaded){ S.dbState = 'off'; S.lastErr = e.message; }
     else toast('同步失敗：' + e.message);
-  }
+  } finally { S.syncing = false; renderSync(); }
   render();
 }
 

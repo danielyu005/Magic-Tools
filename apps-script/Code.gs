@@ -128,7 +128,7 @@ function auth_(req) {
     if (t.aud !== clientId || !issOk || String(t.email_verified) !== 'true' || Number(t.exp) < now)
       throw err_('auth_invalid', '登入憑證無效，請重新登入');
     email = String(t.email).toLowerCase();
-    const ttl = Math.min(600, Math.floor(Number(t.exp) - now));
+    const ttl = Math.min(3600, Math.floor(Number(t.exp) - now)); // 保留到憑證到期；白名單每次都會重新比對
     if (ttl > 30) cache.put(key, email, ttl);
   }
   const m = readTable_('members').find(x => norm_(x.email) === email);
@@ -687,10 +687,14 @@ function trashFile_(id) {
 
 /* ============================== 試算表存取 ============================== */
 
+// 同一次執行只開一次試算表、只查一次時區（每次呼叫 Spreadsheet 服務都要花時間）
+let SS_ = null, TZ_ = '';
 function ss_() {
+  if (SS_) return SS_;
   const id = prop_('SPREADSHEET_ID');
-  return id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  return (SS_ = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet());
 }
+function tz_() { return TZ_ || (TZ_ = ss_().getSpreadsheetTimeZone()); }
 
 function sheet_(name) {
   const sh = ss_().getSheetByName(name);
@@ -701,7 +705,7 @@ function sheet_(name) {
 function readTable_(name) {
   const sh = sheet_(name), cols = SHEETS[name], n = sh.getLastRow() - 1;
   if (n <= 0) return [];
-  const tz = ss_().getSpreadsheetTimeZone();
+  const tz = tz_();
   return sh.getRange(2, 1, n, cols.length).getValues()
     .map((r, i) => {
       const o = { _row: i + 2 };
@@ -770,7 +774,7 @@ function bool_(v) { return v === true || norm_(v) === 'true'; }
 function cmp_(a, b) { return String(a || '').localeCompare(String(b || '')); }
 function splitTags_(s) { return String(s || '').split(/[,，、]/).map(x => x.trim()).filter(Boolean); }
 function nowIso_() { return new Date().toISOString(); }
-function today_() { return Utilities.formatDate(new Date(), ss_().getSpreadsheetTimeZone(), 'yyyy-MM-dd'); }
+function today_() { return Utilities.formatDate(new Date(), tz_(), 'yyyy-MM-dd'); }
 function newId_(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function sha_(s) {
   return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8)
