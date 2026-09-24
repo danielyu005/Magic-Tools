@@ -600,14 +600,23 @@ $('#signOut').addEventListener('click', () => signOut('已登出。'));
 
 /* ---------- API ---------- */
 function apiErr(code, message){ const e = new Error(message); e.code = code; return e; }
+// 只讀取、重送也不會重複寫入的動作；Apps Script 偶爾回錯誤頁時自動重試一次
+const RETRY_SAFE = ['list', 'me', 'github', 'fetchImage'];
 async function api(action, payload={}){
   if (!A.token || A.exp < Date.now() + 30e3){ signOut('登入已過期，請重新登入。'); throw apiErr('auth_expired','登入已過期'); }
   let r, j;
-  try {
-    r = await fetch(CFG.API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ ...payload, action, idToken:A.token }) });
-  } catch { throw apiErr('network', '連不上後端，請確認網路連線或 config.js 的 API_URL。'); }
-  try { j = await r.json(); } catch { throw apiErr('server', '後端回應格式錯誤，請確認 Apps Script 已部署，且存取權設為「任何人」。'); }
+  for (let attempt = 0; ; attempt++){
+    try {
+      r = await fetch(CFG.API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ ...payload, action, idToken:A.token }) });
+    } catch { throw apiErr('network', '連不上後端，請確認網路連線或 config.js 的 API_URL。'); }
+    try { j = await r.json(); break; }
+    catch {
+      if (attempt === 0 && RETRY_SAFE.includes(action)) continue;
+      throw apiErr('server', `後端暫時沒有正常回應（HTTP ${r.status}），Google Apps Script 偶爾會這樣，請稍後再試一次。`
+        + (action === 'submit' ? '（送出前請先到「提交狀態」確認是否已經送出，避免重複）' : ''));
+    }
+  }
   if (!j.ok){
     const e = apiErr(j.error?.code || 'server', j.error?.message || '操作失敗，請稍後再試。');
     if (AUTH_CODES.includes(e.code)) signOut(e.message);

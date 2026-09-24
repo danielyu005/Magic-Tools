@@ -291,9 +291,7 @@ function github_(req) {
   const token = prop_('GITHUB_TOKEN');
   const base = { 'User-Agent': 'acd-tool-shelf', Accept: 'application/vnd.github+json' };
   if (token) base.Authorization = 'Bearer ' + token;
-  const get = (path, raw) => {
-    const headers = raw ? Object.assign({}, base, { Accept: 'application/vnd.github.raw' }) : base;
-    const res = UrlFetchApp.fetch('https://api.github.com' + path, { headers, muteHttpExceptions: true });
+  const parse = (res, raw) => {
     const code = res.getResponseCode();
     if (code === 404) return null;
     if (code === 403 || code === 429)
@@ -302,10 +300,16 @@ function github_(req) {
     return raw ? res.getContentText() : JSON.parse(res.getContentText());
   };
 
-  const r = get('/repos/' + gh);
+  // 三個查詢同時送出，縮短執行時間（Apps Script 執行太久時，Google 可能改回錯誤頁而不是結果）
+  const paths = [['/repos/' + gh, false], ['/repos/' + gh + '/releases/latest', false], ['/repos/' + gh + '/readme', true]];
+  const res = UrlFetchApp.fetchAll(paths.map(([p, raw]) => ({
+    url: 'https://api.github.com' + p, muteHttpExceptions: true,
+    headers: raw ? Object.assign({}, base, { Accept: 'application/vnd.github.raw' }) : base
+  })));
+  const r = parse(res[0], false);
   if (!r) return { repo: null, release: null, readme: null };
-  const rel = get('/repos/' + gh + '/releases/latest');
-  const readme = get('/repos/' + gh + '/readme', true);
+  const rel = parse(res[1], false);
+  const readme = parse(res[2], true);
   const out = {
     repo: { name: r.name, html_url: r.html_url, description: r.description, homepage: r.homepage, topics: r.topics || [],
             default_branch: r.default_branch, owner: { login: r.owner && r.owner.login } },
