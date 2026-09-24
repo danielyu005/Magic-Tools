@@ -75,7 +75,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .tab .code{display:block;font-family:var(--display);font-weight:700;font-size:16px;line-height:1.2}
 .tab .name{display:block;font-size:12.5px;color:var(--muted)}
 .tab .n{margin-left:auto;font-family:var(--display);font-weight:700;font-size:13px;color:var(--muted);padding-left:6px}
-.tab:hover{background:var(--sunk)}
+.tab:not([aria-selected="true"]):hover{background:var(--sunk)}
 .tab[aria-selected="true"]{background:var(--ink);color:var(--btn-ink)}
 .tab[aria-selected="true"] .name,.tab[aria-selected="true"] .n{color:inherit;opacity:.7}
 .tab[aria-selected="true"] .ico{background:rgba(255,255,255,.16)}
@@ -278,6 +278,44 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:var(--ink);color:var(--btn-ink);padding:11px 20px;border-radius:99px;font-size:14px;z-index:10;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s var(--ease);box-shadow:var(--sh-2)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+/* ---------- 每週美術技術精選（產業趨勢頁籤） ---------- */
+:root{--tp-vfx:#C4410C;--tp-3d:#0B7A8C;--tp-shader:#6A45D9;--tp-tool:#2B8A3E;--tp-spine:#A8580A}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--tp-vfx:#FF9F5A;--tp-3d:#4FD1E0;--tp-shader:#B8A1FF;--tp-tool:#74D98A;--tp-spine:#FFC47A}
+}
+:root[data-theme="dark"]{--tp-vfx:#FF9F5A;--tp-3d:#4FD1E0;--tp-shader:#B8A1FF;--tp-tool:#74D98A;--tp-spine:#FFC47A}
+.news{margin:22px 0 36px}
+.news-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}
+.news-head h2,.sec-h{font-size:20px;margin:0}
+.news-head p{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:60ch}
+.news-actions{display:flex;gap:8px;flex-wrap:wrap}
+.news .chips{margin-bottom:18px}
+.n-group{margin-bottom:22px}
+.n-group h3{font-size:13px;color:var(--muted);font-weight:500;margin:0 0 10px;display:flex;gap:10px;align-items:baseline}
+.n-group h3 b{color:var(--ink);font-size:15px}
+.n-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.n-card{border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.n-card:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.n-card.is-hidden{opacity:.5}
+.n-thumb{display:block;aspect-ratio:16/9;background:var(--sunk);overflow:hidden}
+.n-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s var(--ease)}
+.n-card:hover .n-thumb img{transform:scale(1.04)}
+.n-body{padding:12px 16px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.n-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.n-topic,.n-pin{font-weight:700;font-size:12px;border-radius:99px;padding:1px 9px}
+.n-topic{color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.n-pin{color:var(--warn);background:var(--warn-soft)}
+.n-card h4{margin:0;font-size:16px;line-height:1.4;word-break:break-word}
+.n-card h4 a{text-decoration:none}
+.n-card h4 a:hover{text-decoration:underline}
+.n-orig{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-ex{margin:0;font-size:13.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.n-note{margin:0;font-size:13px;border-left:3px solid var(--c);background:var(--glass-soft);border-radius:4px 10px 10px 4px;padding:6px 10px}
+.n-foot{display:flex;gap:12px;align-items:center;margin-top:auto;padding-top:6px;font-size:12.5px;color:var(--muted)}
+.n-foot .spacer{flex:1}
+.n-more{margin-top:12px}
+.sec-h{margin:8px 0 0}
+
 @media (max-width:900px){
   .overview{grid-template-columns:1fr 1fr}
   .tile.feature{grid-column:1/-1;grid-row:auto}
@@ -334,7 +372,7 @@ body{background:var(--bg);min-height:100%}
 .aurora::after{content:"";position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 /* glass surfaces */
-nav.tabs,.tile:not(.cta),.card,.howto,.empty,.chip,.search,.btn:not(.primary):not(.ghost),.icon-btn,.q-item,.link-na{
+nav.tabs,.tile:not(.cta),.card,.n-card,.howto,.empty,.chip,.search,.btn:not(.primary):not(.ghost),.icon-btn,.q-item,.link-na{
   background:var(--glass);
   -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
   border:1px solid var(--glass-border);
@@ -345,7 +383,7 @@ nav.tabs,.tile:not(.cta),.card,.howto,.empty,.chip,.search,.btn:not(.primary):no
   background:linear-gradient(145deg,rgba(255,255,255,.45) 0%,rgba(255,255,255,0) 38%,rgba(255,255,255,0) 70%,rgba(255,255,255,.12) 100%);opacity:.7}
 nav.tabs{position:relative}
 .tab[aria-selected="true"]{background:rgba(20,24,40,.86);box-shadow:0 6px 18px rgba(20,24,40,.22),inset 0 1px 0 rgba(255,255,255,.14)}
-.tab:hover{background:var(--glass-soft)}
+.tab:not([aria-selected="true"]):hover{background:var(--glass-soft)}
 .tab .ico{background:var(--glass-soft);border:1px solid var(--glass-border)}
 .tile.cta{background:linear-gradient(135deg,rgba(24,28,40,.88),rgba(52,48,110,.82));-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:1px solid rgba(255,255,255,.14);box-shadow:var(--sh-2),inset 0 1px 0 rgba(255,255,255,.14)}
 .btn.primary{background:rgba(20,24,40,.9);box-shadow:0 6px 18px rgba(20,24,40,.2),inset 0 1px 0 rgba(255,255,255,.16)}
@@ -416,6 +454,15 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 
 <main class="wrap" id="panel" role="tabpanel">
   <div id="banner"></div>
+  <section class="news" id="news" hidden aria-labelledby="newsTitle">
+    <div class="news-head">
+      <div><h2 id="newsTitle">每週美術技術精選</h2><p>特效、3D、Shader、美術工具、Spine 的文章與教學，每天自動收集並翻成中文。看到好文章也歡迎分享。</p></div>
+      <div class="news-actions" id="newsActions"></div>
+    </div>
+    <div class="chips" id="newsChips" role="group" aria-label="文章主題"></div>
+    <div id="newsList"></div>
+  </section>
+  <h2 class="sec-h" id="toolsHead" hidden>熱門趨勢工具</h2>
   <section class="overview" id="overview" aria-label="本頁籤概況"></section>
   <div class="toolbar">
     <div class="chips" id="chips" role="group" aria-label="工具分類"></div>
@@ -499,6 +546,18 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
   <div class="dlg-body" id="queueBody"></div>
 </dialog>
 
+<dialog id="shareDlg" aria-labelledby="shareTitle">
+  <div class="dlg-head"><h2 id="shareTitle">分享文章</h2><button class="x" type="button" data-close aria-label="關閉">×</button></div>
+  <form class="dlg-body" id="shareForm" novalidate>
+    <div class="field"><label for="s-url">文章網址<span class="req">*</span></label><input type="url" id="s-url" name="url" maxlength="500" placeholder="https://"><div class="hint">標題、摘要和縮圖會自動從網頁讀取，英文內容會翻成中文。</div></div>
+    <div class="field"><span class="lbl">主題</span><div class="radio-row" id="topicRadios"></div></div>
+    <div class="field"><label for="s-title">標題</label><input type="text" id="s-title" name="title" maxlength="200" placeholder="留空就自動讀取"></div>
+    <div class="field"><label for="s-note">推薦一句話</label><textarea id="s-note" name="note" maxlength="200" placeholder="例如：用 Houdini 批次輸出爆炸序列圖，技能特效可以參考。"></textarea></div>
+    <div class="form-foot"><span class="note">分享後會直接出現在產業趨勢頁籤。</span><button class="btn primary" type="submit" id="shareBtn">分享</button></div>
+    <div class="form-msg" id="shareMsg" role="status"></div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="gate" id="gate">
@@ -519,16 +578,21 @@ const TABS = {
   trend: {code:'產業趨勢',  name:'熱門趨勢工具', ico:'↗',  ownerLabel:'開發商／來源',   ownerHint:'例如：官方團隊、開源社群。'}
 };
 const CATS = { setting:{label:'美術設定', color:'var(--set)'}, post:{label:'美術後製', color:'var(--post)'} };
+const TOPICS = { vfx:{label:'特效', color:'var(--tp-vfx)'}, '3d':{label:'3D', color:'var(--tp-3d)'}, shader:{label:'Shader', color:'var(--tp-shader)'},
+  tool:{label:'美術工具', color:'var(--tp-tool)'}, spine:{label:'Spine', color:'var(--tp-spine)'} };
 const FRESH_DAYS = 14;
 const POLL_MS = 60000;
+const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
 const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat:'all', q:'',
-  tools:[], subs:[], loaded:false, me:'', meName:'', admin:false, dbState:'loading', lastErr:'', detailId:null };
+  tools:[], subs:[], news:[], loaded:false, me:'', meName:'', admin:false, dbState:'loading', lastErr:'', detailId:null,
+  nTopic:'all', nOpen:{}, nHidden:false };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl = u => { try { const x = new URL(u); return (x.protocol==='https:'||x.protocol==='http:') ? x.href : ''; } catch { return ''; } };
-const today = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today = () => ymd(new Date());
 const fmtDate = s => s ? String(s).slice(0,10).replace(/-/g,'/') : '';
 const daysAgo = s => { const t = Date.parse(s); return isNaN(t) ? 1e9 : (Date.now()-t)/864e5; };
 const relDate = s => { const d = Math.floor(daysAgo(s)); if (d>=1e8) return ''; if (d<=0) return '今天'; if (d===1) return '昨天'; if (d<30) return d+' 天前'; return fmtDate(s); };
@@ -579,7 +643,7 @@ function showGate(msg){
 function signOut(msg){
   A.token = ''; A.exp = 0; store.del(TOKEN_KEY);
   clearTimeout(A.refreshT); clearInterval(A.pollT);
-  S.loaded = false; S.tools = []; S.subs = []; S.me = ''; S.admin = false;
+  S.loaded = false; S.tools = []; S.subs = []; S.news = []; S.me = ''; S.admin = false;
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
   try { google.accounts.id.disableAutoSelect(); } catch {}
   render(); showGate(msg);
@@ -637,7 +701,7 @@ function refresh(queue){
 async function refreshOnce(){
   try {
     const d = await api('list');
-    S.tools = d.tools || []; S.subs = d.subs || [];
+    S.tools = d.tools || []; S.subs = d.subs || []; S.news = d.news || [];
     S.me = d.me?.email || ''; S.meName = d.me?.name || ''; S.admin = d.me?.role === 'admin';
     S.loaded = true; S.dbState = 'on'; S.lastErr = '';
     $('#gate').hidden = true;
@@ -806,13 +870,95 @@ function renderDetail(){
       ${S.admin?`<span style="display:flex;gap:14px;align-items:center"><label class="link-btn" for="adminCover">更換封面</label>${coverSrc(t)?`<button class="link-btn" type="button" data-clearcover="${esc(t.id)}">改用漸層</button>`:''}<button class="link-btn danger" type="button" data-remove="${esc(t.id)}">下架</button></span>`:''}
     </div>`;
 }
+/* ---------- 每週美術技術精選 ---------- */
+const newsGroup = n => { if (n.pinned) return 'week'; const d = daysAgo(n.publishedAt); return d < 7 ? 'week' : d < 14 ? 'last' : 'older'; };
+const urlKey = u => String(u||'').trim().toLowerCase().replace(/^https?:\/\/(www\.)?/,'').replace(/#.*$/,'').replace(/\/+$/,'');
+const visibleNews = () => S.news
+  .filter(n => TOPICS[n.topic] && safeUrl(n.url) && (S.nHidden || !n.hidden))
+  .sort((a,b) => (b.pinned - a.pinned) || String(b.publishedAt||'').localeCompare(String(a.publishedAt||'')));
+function newsCard(n){
+  const url = safeUrl(n.url), img = safeUrl(n.image), tp = TOPICS[n.topic];
+  const title = n.titleZh || n.title, ex = n.excerptZh || n.excerpt;
+  const by = n.kind==='agent' ? `由 ${esc(n.via||'Agent')} 整理` : n.kind==='share' ? `${esc(n.byName||'成員')} 分享` : '';
+  const admin = S.admin ? `<button class="link-btn" type="button" data-npin="${esc(n.id)}">${n.pinned?'取消精選':'設為精選'}</button>
+    <button class="link-btn danger" type="button" data-nhide="${esc(n.id)}">${n.hidden?'取消隱藏':'隱藏'}</button>` : '';
+  return `<article class="n-card${n.hidden?' is-hidden':''}" style="--c:${tp.color}">
+    ${img?`<a class="n-thumb" href="${esc(url)}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></a>`:''}
+    <div class="n-body">
+      <div class="n-meta"><span class="n-topic">${esc(tp.label)}</span>${n.pinned?'<span class="n-pin">精選</span>':''}<span>${esc(n.source||host(url))}・${esc(relDate(n.publishedAt))}</span></div>
+      <h4><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a></h4>
+      ${n.titleZh && n.titleZh!==n.title ? `<div class="n-orig" title="${esc(n.title)}">${esc(n.title)}</div>` : ''}
+      ${ex?`<p class="n-ex">${esc(ex)}</p>`:''}
+      ${n.note?`<p class="n-note">${esc(n.note)}</p>`:''}
+      ${by||admin?`<div class="n-foot"><span>${by}</span><span class="spacer"></span>${admin}</div>`:''}
+    </div>
+  </article>`;
+}
+function renderNews(){
+  const on = S.tab==='trend' && S.loaded;
+  $('#news').hidden = !on; $('#toolsHead').hidden = !on;
+  if (!on) return;
+  const all = visibleNews(), nHid = S.news.filter(n=>n.hidden).length;
+  $('#newsActions').innerHTML = `
+    ${S.admin&&nHid?`<button class="btn small ghost" type="button" data-nshowhidden>${S.nHidden?'收起':'顯示'}已隱藏（${nHid}）</button>`:''}
+    ${S.admin?`<button class="btn small" type="button" data-nfetch>立即抓取</button>`:''}
+    ${all.some(n=>newsGroup(n)==='week')?`<button class="btn small" type="button" data-ncopy>複製本週摘要</button>`:''}
+    <button class="btn primary small" type="button" data-nshare>${icon('plus')}分享文章</button>`;
+  const opts = [['all','全部',null]].concat(Object.entries(TOPICS).map(([k,t])=>[k,t.label,t.color]));
+  $('#newsChips').innerHTML = opts.map(([k,l,c]) => {
+    const n = k==='all' ? all.length : all.filter(x=>x.topic===k).length;
+    return `<button class="chip" type="button" data-ntopic="${k}" aria-pressed="${S.nTopic===k}">${c?`<span class="dot" style="background:${c}"></span>`:''}${esc(l)} <span class="muted">${n}</span></button>`;
+  }).join('');
+  const list = all.filter(n => S.nTopic==='all' || n.topic===S.nTopic);
+  if (!list.length){
+    $('#newsList').innerHTML = `<div class="empty"><strong>${S.news.length?'這個主題還沒有文章':'還沒有文章'}</strong>`
+      + (S.admin && !S.news.length ? '在試算表選單執行「最新資訊：開啟每日自動抓取」，或按上面的「立即抓取」。' : '看到好文章？按「分享文章」貼上網址就好。') + '</div>';
+    return;
+  }
+  $('#newsList').innerHTML = [['week','本週','近 7 天'],['last','上週','7～14 天前'],['older','更早','']].map(([g,label,hint]) => {
+    const items = list.filter(n=>newsGroup(n)===g);
+    if (!items.length) return '';
+    const shown = S.nOpen[g] ? items : items.slice(0, g==='older' ? 0 : NEWS_PAGE); // 更早的預設收起
+    const rest = items.length - shown.length;
+    return `<div class="n-group"><h3><b>${label}</b>${hint?`<span>${hint}</span>`:''}<span>${items.length} 篇</span></h3>
+      ${shown.length?`<div class="n-grid">${shown.map(newsCard).join('')}</div>`:''}
+      ${rest?`<button class="btn small n-more" type="button" data-nmore="${g}">${shown.length?`再顯示 ${rest} 篇`:`展開 ${rest} 篇`}</button>`:''}</div>`;
+  }).join('');
+}
+/* 本週摘要（Markdown），方便貼到群組或 Claude */
+function weeklyMd(){
+  const items = visibleNews().filter(n => !n.hidden && newsGroup(n)==='week');
+  const L = [`# 每週美術技術精選（${fmtDate(ymd(new Date(Date.now()-6*864e5)))}～${fmtDate(today())}）`];
+  Object.entries(TOPICS).forEach(([k,t]) => {
+    const xs = items.filter(n=>n.topic===k); if (!xs.length) return;
+    L.push('', `## ${t.label}`);
+    xs.forEach(n => { const ex = String(n.excerptZh||n.excerpt||'').slice(0,80);
+      L.push(`- [${n.titleZh||n.title}](${safeUrl(n.url)})｜${n.source||host(n.url)}${ex?'：'+ex:''}${n.note?`（推薦：${n.note}）`:''}`); });
+  });
+  return L.join('\n');
+}
+async function fetchNewsNow(btn){
+  btn.disabled = true; btn.textContent = '抓取中…';
+  try {
+    const r = await api('fetchNews');
+    toast(`新增 ${r.added} 篇文章` + (r.errors?.length ? `，${r.errors.length} 個來源失敗：${r.errors[0]}` : '。'));
+  } catch(e){ if (!AUTH_CODES.includes(e.code)) toast(e.message); }
+  finally { if (A.token) await refresh(true); }
+}
+function setNews(id, patch){
+  const n = S.news.find(x=>x.id===id); if (!n) return;
+  const msg = 'pinned' in patch ? (patch.pinned ? '已設為精選，會固定顯示在「本週」。' : '已取消精選。')
+    : (patch.hidden ? '已隱藏，成員不會再看到這篇。' : '已取消隱藏。');
+  adminCall('setNews', { id, ...patch }, msg);
+}
+
 function renderQueueCount(){
   const n = S.subs.filter(s=>s.status==='pending').length; // 後端只回傳自己看得到的提交
   const el = $('#queueCount'); el.textContent = n; el.hidden = !n;
   $('#openQueue').firstChild.textContent = S.admin ? '審核佇列 ' : '提交狀態 ';
 }
 function render(){
-  renderTabs(); renderBanner(); renderWho(); renderOverview(); renderChips(); renderGrid(); renderQueueCount();
+  renderTabs(); renderBanner(); renderWho(); renderNews(); renderOverview(); renderChips(); renderGrid(); renderQueueCount();
   if ($('#queueDlg').open) renderQueue();
   if ($('#detailDlg').open) renderDetail();
 }
@@ -1184,11 +1330,46 @@ $('#adminCover').addEventListener('change', async e => {
   setToolCover(S.detailId, data);
 });
 
+/* ---------- 分享文章 ---------- */
+const shareForm = $('#shareForm');
+function buildTopicRadios(){
+  $('#topicRadios').innerHTML = `<label><input type="radio" name="topic" value="" checked> 自動判斷</label>`
+    + Object.entries(TOPICS).map(([k,t])=>`<label><input type="radio" name="topic" value="${k}"><span style="width:9px;height:9px;border-radius:50%;background:${t.color}"></span> ${esc(t.label)}</label>`).join('');
+}
+function openShare(){
+  shareForm.reset();
+  shareForm.querySelectorAll('.err').forEach(e=>e.remove());
+  $('#shareMsg').textContent = '';
+  if (S.nTopic !== 'all') shareForm.topic.value = S.nTopic;
+  $('#shareBtn').disabled = S.dbState!=='on';
+  $('#shareDlg').showModal();
+}
+shareForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  shareForm.querySelectorAll('.err').forEach(x=>x.remove());
+  const v = n => (shareForm.elements[n]?.value || '').trim();
+  const data = { url:v('url'), topic:shareForm.topic.value, title:v('title'), note:v('note') };
+  if (!safeUrl(data.url)){ setErr($('#s-url'), '請貼上 https:// 開頭的文章網址。'); $('#s-url').focus(); return; }
+  if (S.news.some(n => urlKey(n.url)===urlKey(data.url))){ setErr($('#s-url'), '這篇文章已經在清單裡了。'); $('#s-url').focus(); return; }
+  const btn = $('#shareBtn'), msg = $('#shareMsg');
+  btn.disabled = true; msg.style.color = ''; msg.textContent = '分享中…正在讀取網頁標題與摘要';
+  try {
+    const r = await api('shareNews', { data });
+    $('#shareDlg').close();
+    toast(`已分享到「${TOPICS[r.topic]?.label || '最新資訊'}」，謝謝！`);
+    refresh(true);
+  } catch(err){
+    msg.style.color = 'var(--bad)'; msg.textContent = '分享失敗：' + err.message;
+    btn.disabled = false;
+  }
+});
+
 /* ---------- events ---------- */
 function setTab(k){ S.tab=k; S.cat='all'; history.replaceState(null,'','#'+k); render(); }
 document.addEventListener('click', e => {
   if (e.target.closest('a')) return;
-  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail]');
+  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
+    + '[data-ntopic],[data-nmore],[data-npin],[data-nhide],[data-nshare],[data-nfetch],[data-ncopy],[data-nshowhidden]');
   if (!t) return;
   const d = t.dataset;
   if (d.tab) setTab(d.tab);
@@ -1206,6 +1387,14 @@ document.addEventListener('click', e => {
   else if (d.chip){ S.cat=d.chip; renderChips(); renderGrid(); }
   else if (d.report) openSubmit({kind:'update', toolId:d.report});
   else if (d.remove) removeTool(d.remove);
+  else if (d.ntopic){ S.nTopic=d.ntopic; renderNews(); }
+  else if (d.nmore){ S.nOpen[d.nmore]=true; renderNews(); }
+  else if (d.npin){ t.disabled=true; setNews(d.npin, { pinned: !S.news.find(n=>n.id===d.npin)?.pinned }); }
+  else if (d.nhide){ t.disabled=true; setNews(d.nhide, { hidden: !S.news.find(n=>n.id===d.nhide)?.hidden }); }
+  else if (t.hasAttribute('data-nshare')) openShare();
+  else if (t.hasAttribute('data-nfetch')) fetchNewsNow(t);
+  else if (t.hasAttribute('data-nshowhidden')){ S.nHidden=!S.nHidden; renderNews(); }
+  else if (t.hasAttribute('data-ncopy')) copyText(weeklyMd()).then(ok => toast(ok ? '已複製本週摘要（Markdown），可以貼到群組或 Claude。' : '複製失敗，請再試一次。'));
   else if (d.approve){ t.disabled=true; approve(d.approve); }
   else if (d.reject){ t.disabled=true; reject(d.reject); }
   else if (t.hasAttribute('data-close')) t.closest('dialog').close();
@@ -1228,7 +1417,7 @@ $('#openQueue').addEventListener('click', () => { renderQueue(); $('#queueDlg').
 document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target===d) d.close(); }));
 
 /* ---------- boot ---------- */
-buildRadios(); render();
+buildRadios(); buildTopicRadios(); render();
 const saved = store.get(TOKEN_KEY);
 if (CFG.API_URL && CFG.GOOGLE_CLIENT_ID && saved && jwtExp(saved) > Date.now() + 60e3){ setToken(saved); $('#gate').hidden = true; start(); withGsi(() => {}); }
 else showGate();
