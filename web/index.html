@@ -941,7 +941,7 @@ function renderDetail(){
       </div>
     </div>
     <h4 class="sec-title">更新紀錄</h4>
-    ${ups.length?`<ol class="timeline">${ups.map(u=>`<li><div class="h-meta">${u.version?`<b>${esc(u.version)}</b>`:''}${esc(fmtDate(u.date))}</div><p>${esc(u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
+    ${ups.length?`<ol class="timeline">${ups.map(u=>`<li><div class="h-meta">${u.version?`<b>${esc(u.version)}</b>`:''}${esc(fmtDate(u.date))}${u.via?`　（經由 ${esc(u.via)}）｜${esc(fmtDate(u.createdAt))}`:''}</div><p>${esc(u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
     <div class="sheet-foot">
       <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
       ${t.canEdit?`<button class="btn" type="button" data-edittool="${esc(t.id)}">編輯工具資訊</button>`:''}</span>

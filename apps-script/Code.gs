@@ -191,9 +191,16 @@ function agentAuth_(key) {
 function list_(req, who) {
   const names = {};
   readTable_('members').forEach(m => { names[norm_(m.email)] = m.name || String(m.email).split('@')[0]; });
+  // 經由 Agent 送來的更新：核准時更新紀錄的 createdAt 和提交的 reviewedAt 是同一個時間，用它對回原本的提交
+  const viaAgent = {};
+  readTable_('submissions').forEach(s => {
+    if (s.status === 'approved' && String(s.source).startsWith('agent:')) viaAgent[s.toolId + '|' + s.reviewedAt] = String(s.source).slice(6);
+  });
   const byTool = {};
   readTable_('updates').forEach(u => {
-    (byTool[u.toolId] = byTool[u.toolId] || []).push({ date: u.date, version: u.version, summary: u.summary, createdAt: u.createdAt });
+    (byTool[u.toolId] = byTool[u.toolId] || []).push({
+      date: u.date, version: u.version, summary: u.summary, createdAt: u.createdAt, via: viaAgent[u.toolId + '|' + u.createdAt] || ''
+    });
   });
   const rawTools = readTable_('tools');
   const tools = rawTools.map(t => ({
