@@ -1580,7 +1580,12 @@ $('#detailBody').addEventListener('keydown', e => {
 $('#search').addEventListener('input', e => { S.q = e.target.value; clearTimeout(searchT); searchT = setTimeout(renderGrid, 120); });
 $('#openSubmit').addEventListener('click', () => openSubmit());
 $('#openQueue').addEventListener('click', () => { renderQueue(); $('#queueDlg').showModal(); });
-document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target===d) d.close(); }));
+/* 點遮罩關閉：按下和放開都要在遮罩上。在面板裡拖選文字、放開時滑出面板，click 會落在 dialog 本身，不能算 */
+document.querySelectorAll('dialog').forEach(d => {
+  let downOnBackdrop = false;
+  d.addEventListener('pointerdown', e => { downOnBackdrop = e.target===d; });
+  d.addEventListener('click', e => { if (e.target===d && downOnBackdrop) d.close(); downOnBackdrop = false; });
+});
 
 /* ---------- boot ---------- */
 buildRadios(); buildTopicRadios(); render();
