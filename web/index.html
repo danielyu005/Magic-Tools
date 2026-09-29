@@ -176,7 +176,12 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
 .sheet .cover{border-radius:18px;margin-bottom:16px}
 .sheet h3{font-size:24px;margin:0 0 2px;line-height:1.3}
-.sheet .desc{margin:12px 0;white-space:pre-wrap}
+.sheet .desc{margin:0;white-space:pre-wrap}
+.desc-wrap{margin:12px 0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.desc-edit{margin:12px 0}
+.desc-bar{display:flex;align-items:center;gap:8px;margin-top:8px}
+.desc-bar .spacer{flex:1}
+.c-desc{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tags span{font-size:12.5px;color:var(--muted);background:var(--sunk);border-radius:99px;padding:2px 10px}
 .link-list{display:flex;flex-direction:column;gap:8px;margin:18px 0}
@@ -589,7 +594,7 @@ const FRESH_DAYS = 14;
 const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
 const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat:'all', q:'',
-  tools:[], subs:[], news:[], loaded:false, me:'', meName:'', admin:false, dbState:'loading', lastErr:'', detailId:null,
+  tools:[], subs:[], news:[], loaded:false, me:'', meName:'', admin:false, dbState:'loading', lastErr:'', detailId:null, descEdit:null, descDraft:'',
   nTopic:'all', nOpen:{}, nHidden:false };
 
 const $ = s => document.querySelector(s);
@@ -844,6 +849,7 @@ function cardHTML(t){
     <div class="card-body">
       <h3>${esc(t.name)}</h3>
       <div class="owner">${esc(t.owner||'未填')}</div>
+      ${t.desc?`<p class="c-desc">${esc(t.desc)}</p>`:''}
       ${l?`<div class="update-line"><span class="d">${l.version?`<span class="ver">${esc(l.version)}</span>`:''}${esc(relDate(l.date))}更新</span><span class="s">${esc(l.summary)}</span></div>`:''}
     </div>
     <div class="card-actions">
@@ -870,10 +876,33 @@ function renderGrid(){
   }
   g.innerHTML = `<div class="grid">${list.map(cardHTML).join('')}</div>`;
 }
+/* 工具簡介：擁有者（上架提交者）與管理者可以直接編輯，後端回傳 canEdit */
+function descHTML(t){
+  if (S.descEdit===t.id && t.canEdit) return `<div class="field desc-edit">
+      <textarea id="descInput" aria-label="工具簡介" maxlength="300" placeholder="這個工具幫美術做什麼？一到三句即可。">${esc(S.descDraft)}</textarea>
+      <div class="desc-bar"><span class="hint" id="descCount">${S.descDraft.length} / 300</span><span class="spacer"></span>
+        <button class="btn small ghost" type="button" data-desccancel>取消</button>
+        <button class="btn primary small" type="button" data-descsave="${esc(t.id)}">儲存</button></div>
+    </div>`;
+  return `<div class="desc-wrap"><p class="desc">${t.desc?esc(t.desc):'<span class="muted">還沒有工具簡介。</span>'}</p>
+    ${t.canEdit?`<button class="link-btn" type="button" data-descedit="${esc(t.id)}">編輯簡介</button>`:''}</div>`;
+}
+async function saveDesc(id, btn){
+  const desc = S.descDraft.trim();
+  if (!desc){ toast('工具簡介不能是空的。'); $('#descInput')?.focus(); return; }
+  btn.disabled = true; btn.textContent = '儲存中…';
+  try {
+    await api('setDesc', { id, desc });
+    const t = S.tools.find(x=>x.id===id); if (t) t.desc = desc;
+    S.descEdit = null; toast('工具簡介已更新。'); render();
+  } catch(err){ if (!AUTH_CODES.includes(err.code)) toast(err.message); btn.disabled = false; btn.textContent = '儲存'; return; }
+  if (A.token) refresh(true);
+}
 function renderDetail(){
   const t = S.tools.find(x=>x.id===S.detailId);
   const dlg = $('#detailDlg');
   if (!t){ if (dlg.open) dlg.close(); return; }
+  const typing = document.activeElement?.id === 'descInput';
   const ups = Array.isArray(t.updates) ? t.updates : [];
   const links = [['main','open','開啟工具',t.clientUrl],['','code','Repo',t.repoUrl],['','book','使用說明',t.docUrl]]
     .map(([cls,ic,label,u])=>{const x=safeUrl(u); if (x) return `<a class="${cls}" href="${esc(x)}" target="_blank" rel="noopener noreferrer">${icon(ic)}<span class="lt"><span>${label}</span><small>${esc(host(x))}</small></span></a>`; return label==='使用說明' ? `<div class="link-na">${icon(ic)}<span class="lt"><span>${label}</span><small>尚未提供，可在「回報更新」時補上</small></span></div>` : '';}).join('');
@@ -882,7 +911,7 @@ function renderDetail(){
     ${cover(t,true)}
     <h3 id="detailTitle">${esc(t.name)}</h3>
     <div class="owner">${esc(TABS[t.tab]?.ownerLabel||'負責人')}：${esc(t.owner||'未填')}</div>
-    <p class="desc">${esc(t.desc)}</p>
+    ${descHTML(t)}
     ${(t.tags||[]).length?`<div class="tags">${t.tags.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
     <div class="link-list">${links}
       <div class="claude-row">
@@ -896,6 +925,8 @@ function renderDetail(){
       <button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
       ${S.admin?`<span style="display:flex;gap:14px;align-items:center"><label class="link-btn" for="adminCover">更換封面</label>${coverSrc(t)?`<button class="link-btn" type="button" data-clearcover="${esc(t.id)}">改用漸層</button>`:''}<button class="link-btn danger" type="button" data-remove="${esc(t.id)}">下架</button></span>`:''}
     </div>`;
+  const ta = $('#descInput');
+  if (ta && typing){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
 }
 /* ---------- 每週美術技術精選 ---------- */
 const newsGroup = n => { if (n.pinned) return 'week'; const d = daysAgo(n.publishedAt); return d < 7 ? 'week' : d < 14 ? 'last' : 'older'; };
@@ -989,7 +1020,7 @@ function render(){
   if ($('#queueDlg').open) renderQueue();
   if ($('#detailDlg').open) renderDetail();
 }
-function openDetail(id){ S.detailId = id; renderDetail(); const d=$('#detailDlg'); if(!d.open) d.showModal(); }
+function openDetail(id){ S.detailId = id; S.descEdit = null; renderDetail(); const d=$('#detailDlg'); if(!d.open) d.showModal(); }
 
 /* ---------- For Claude ---------- */
 function claudeMd(t){
@@ -1396,6 +1427,7 @@ function setTab(k){ S.tab=k; S.cat='all'; history.replaceState(null,'','#'+k); r
 document.addEventListener('click', e => {
   if (e.target.closest('a')) return;
   const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
+    + '[data-descedit],[data-descsave],[data-desccancel],'
     + '[data-ntopic],[data-nmore],[data-npin],[data-nhide],[data-nshare],[data-nfetch],[data-ncopy],[data-nshowhidden]');
   if (!t) return;
   const d = t.dataset;
@@ -1411,6 +1443,12 @@ document.addEventListener('click', e => {
   }
   else if (d.forclaude){ const tool=S.tools.find(x=>x.id===d.forclaude); if (tool) copyText(claudeMd(tool)).then(ok => toast(ok ? '已複製，貼到 Claude 對話就能使用。' : '複製失敗，請改用「在 Claude 開啟」。')); }
   else if (d.clearcover) setToolCover(d.clearcover, '');
+  else if (d.descedit){
+    S.descEdit = d.descedit; S.descDraft = S.tools.find(x=>x.id===d.descedit)?.desc || ''; renderDetail();
+    const ta = $('#descInput'); if (ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }
+  else if (d.descsave) saveDesc(d.descsave, t);
+  else if (t.hasAttribute('data-desccancel')){ S.descEdit = null; renderDetail(); }
   else if (d.chip){ S.cat=d.chip; renderChips(); renderGrid(); }
   else if (d.report) openSubmit({kind:'update', toolId:d.report});
   else if (d.remove) removeTool(d.remove);
@@ -1438,6 +1476,15 @@ $('#tabs').addEventListener('keydown', e => {
   setTab(keys[i]); $('#tab-'+S.tab).focus();
 });
 let searchT = 0;
+$('#detailBody').addEventListener('input', e => {
+  if (e.target.id !== 'descInput') return;
+  S.descDraft = e.target.value; $('#descCount').textContent = `${S.descDraft.length} / 300`;
+});
+$('#detailBody').addEventListener('keydown', e => {
+  if (e.target.id !== 'descInput') return;
+  if (e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); S.descEdit = null; renderDetail(); }
+  else if (e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); $('[data-descsave]')?.click(); }
+});
 $('#search').addEventListener('input', e => { S.q = e.target.value; clearTimeout(searchT); searchT = setTimeout(renderGrid, 120); });
 $('#openSubmit').addEventListener('click', () => openSubmit());
 $('#openQueue').addEventListener('click', () => { renderQueue(); $('#queueDlg').showModal(); });

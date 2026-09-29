@@ -107,6 +107,7 @@ const ACTIONS = {
   reject:     { fn: reject_, admin: true },
   removeTool: { fn: removeTool_, admin: true },
   setCover:   { fn: setCover_, admin: true },
+  setDesc:    { fn: setDesc_ },
   fetchImage: { fn: fetchImage_ },
   github:     { fn: github_ },
   shareNews:  { fn: shareNews_, agent: true },
@@ -193,6 +194,7 @@ function list_(req, who) {
     id: t.id, tab: t.tab, category: t.category, name: t.name, owner: t.owner, desc: t.desc,
     clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, tags: splitTags_(t.tags), version: t.version,
     coverUrl: coverUrl_(t.coverFileId), coverSeed: Number(t.coverSeed) || 0, createdAt: t.createdAt, updatedAt: t.updatedAt,
+    canEdit: canEditTool_(t, who),
     updates: (byTool[t.id] || [])
       .sort((a, b) => cmp_(b.date, a.date) || cmp_(b.createdAt, a.createdAt))
       .slice(0, MAX_UPDATES_PER_TOOL)
@@ -329,6 +331,23 @@ function setCover_(req) {
   }
   if (old && old !== fileId) trashFile_(old);
   return { coverUrl: coverUrl_(fileId) };
+}
+
+/** 擁有者（上架時的提交者）與管理者可以直接改工具簡介，不用走審核 */
+function canEditTool_(tool, who) {
+  return who.kind === 'user' && (who.role === 'admin' || (!!tool.submitter && norm_(tool.submitter) === who.email));
+}
+
+function setDesc_(req, who) {
+  const desc = str_(req.desc, 300);
+  if (!desc) throw err_('invalid', '工具簡介不能是空的');
+  return withLock_(() => {
+    const tool = readTable_('tools').find(t => t.id === req.id);
+    if (!tool) throw err_('not_found', '找不到這個工具');
+    if (!canEditTool_(tool, who)) throw err_('forbidden', '只有工具擁有者或管理者可以編輯簡介');
+    updateRow_('tools', tool._row, { desc });
+    return { id: tool.id, desc };
+  });
 }
 
 /** 代抓 GitHub 上的圖片（瀏覽器直接抓會被 CORS 擋，無法裁切） */
