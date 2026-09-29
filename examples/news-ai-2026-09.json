@@ -1,0 +1,83 @@
+[
+  {
+    "url": "https://unity.com/blog/unity-plugin-for-claude-code",
+    "topic": "ai",
+    "title": "Official Unity Plugin for Claude Code",
+    "source": "Unity Blog",
+    "publishedAt": "2026-09-09",
+    "excerpt": "Unity 推出官方 Claude Code 外掛，一次安裝 29 個由 Unity 工程團隊維護的技能，涵蓋建專案、套件管理、UI Toolkit／uGUI、2D Sprite 與 Tilemap、URP 後處理與 Shader Graph、音效、多人連線與 WebGPU 最佳化等。外掛內建 unity-cli，可從終端機直接操控 Editor，不需每個專案個別設定，需 Unity 6 以上；9/16 也推出了 Codex 版本。Unity 強調官方技能會隨引擎版本更新，避免 AI 抄到過時的論壇寫法。",
+    "note": "用 Claude Code 寫 Unity 的團隊建議直接裝，Shader Graph／URP 技能對 TA 也有用"
+  },
+  {
+    "url": "https://developers.meta.com/blog/meta-connect-recap-horizon-create-and-horizon-studio/",
+    "topic": "ai",
+    "title": "Meta Connect Recap: Horizon Create and Horizon Studio",
+    "source": "Meta for Developers",
+    "publishedAt": "2026-09-24",
+    "excerpt": "Meta 在 Connect 2026 發表兩款建立在 Horizon Engine 代理式（agentic）AI 上的遊戲製作工具：Horizon Create 是手機 App，用文字描述就能生成完整的 2D／3D 手機遊戲，含進度系統、難度平衡與美術風格；Horizon Studio 則是免安裝的瀏覽器開發環境，負責管理遊戲整個生命週期。發佈後可直接在 Facebook、Instagram 與 Horizon 上點開遊玩，目前以候補名單方式開放搶先體驗。",
+    "note": "繼 Roblox、Google Genie 之後又一家大廠做「文字生遊戲」，可觀察 AI 美術風格控制做到什麼程度"
+  },
+  {
+    "url": "https://openai.com/index/introducing-chatgpt-images-2-5/",
+    "topic": "aiimg",
+    "title": "Introducing ChatGPT Images 2.5",
+    "source": "OpenAI",
+    "publishedAt": "2026-09-08",
+    "excerpt": "OpenAI 推出 ChatGPT Images 2.5，細節更銳利、光影與材質更自然，參考照片中的主體保留得更好，多輪修圖也更聽話，生成延遲比 2.0 最多減少一半。新增 Sketch 功能，輸入 @Sketch 就能直接手繪草圖當構圖參考，另有海報等模板，以及在圖上指定區域留言要求局部修改。API 同步推出兩個模型：速度優先的 GPT-Image-2.5 Flare 與精度優先的 Sunburst。",
+    "note": "Sketch 手繪構圖＋局部留言修改，很適合快速出概念草圖"
+  },
+  {
+    "url": "https://www.meshy.ai/blog/meshy-7-1-launch",
+    "topic": "aiimg",
+    "title": "Meshy 7.1: Attention to the Closest Detail",
+    "source": "Meshy Blog",
+    "publishedAt": "2026-09-10",
+    "excerpt": "Meshy 7.1 主打圖生 3D 的幾何細節，新增 Ultra 4K 模式，把生成解析度從 2048³ 拉到 4096³，原始網格最高可達 8000 萬面，雕花、縫線、鱗片等細節不再只是雜訊。官方同時推出 Detail Richness 評測，宣稱在 1K／2K／4K 各解析度都排名第一。基本模型所有註冊使用者都能用，Ultra 2K／4K 與下載需付費訂閱；Ultra 4K 只接受單張圖輸入。",
+    "note": "8000 萬面的原始網格仍需重拓樸，比較適合當高模或雕刻底稿"
+  },
+  {
+    "url": "https://blog.chaos.com/cosmos-ai-3d-generation-image-search",
+    "topic": "aiimg",
+    "title": "Generate 3D Models from Images and Search by Image with Chaos Cosmos",
+    "source": "Chaos Blog",
+    "publishedAt": "2026-09-09",
+    "excerpt": "Chaos 的素材庫 Cosmos 新增兩項 AI 功能：一是用單張參考圖生成 3D 模型，可選騰訊 HY 3D（品質優先）或微軟 TRELLIS.2（速度優先，適合配角物件），生成結果可直接用在 V-Ray、Corona、Vantage 與 Envision；二是以圖搜圖，上傳參考圖就能找相似的模型、材質與室內場景，還能裁切或加文字條件。AI 生成目前為早期 Beta，測試期間免費、不扣 Chaos Credits。",
+    "note": "V-Ray 用戶可免費試玩 HY 3D／TRELLIS.2 兩種圖生 3D 模型"
+  },
+  {
+    "url": "https://www.cgchannel.com/2026/09/adobe-to-acquire-topaz-labs/",
+    "topic": "aiimg",
+    "title": "Adobe acquires Topaz Labs",
+    "source": "CG Channel",
+    "publishedAt": "2026-09-23",
+    "excerpt": "Adobe 完成收購以 AI 影像／影片放大與增強聞名的 Topaz Labs（6 月宣布）。Gigapixel、Topaz Photo、Topaz Video 等獨立產品會繼續販售，執行長 Eric Yang 留任；目前已有五個 Topaz 模型整合進 Firefly Boards 等 Adobe 產品，Adobe 也取得其 GPU 記憶體最佳化技術 NeuroStream。訂價是否調整尚未公布。",
+    "note": "常用 Gigapixel 把低解析算圖放大的人可留意後續授權與價格變動"
+  },
+  {
+    "url": "https://community.adobe.com/announcements-402/what-s-new-in-adobe-firefly-september-2026-1642552",
+    "topic": "aiimg",
+    "title": "What's new in Adobe Firefly - September 2026",
+    "source": "Adobe Community",
+    "publishedAt": "2026-09-18",
+    "excerpt": "Firefly 九月更新：影片可自動辨識主體並整段去背，不必逐格遮罩；GPT Image 2 在網頁版與 Boards 支援的長寬比從 3 種增加到 10 種；Kling 3.0 Omni 可在影片生成與 Boards 中使用參考圖；圖像與影片模型的提示詞長度上限提高。另外也調整了 Firefly AI 助理的語氣，減少自誇式回覆。",
+    "note": "影片自動去背對做宣傳素材、合成很實用"
+  },
+  {
+    "url": "https://beeble.ai/research/switchx-2-0",
+    "topic": "aiimg",
+    "title": "Meet SwitchX 2.0 — 4K, 20s, 10-bit, Camera Tracking & Fast Motion",
+    "source": "Beeble",
+    "publishedAt": "2026-09-09",
+    "excerpt": "Beeble 的影片轉影片模型 SwitchX 2.0 可在保留原始人物的前提下，替換打光、背景、道具或服裝。新版長度從 10 秒倍增到 20 秒、解析度升到 4K、色深升到 10-bit，手持、搖鏡與視差鏡頭的追蹤更穩，對嘴與快速動作也更不易崩。操作需要原始影片、指定保留區域的遮罩與風格參考圖，可先用 720p／1080p 草稿迭代再輸出 4K 以節省點數。",
+    "note": "實拍素材換場景、換光的 AI 方案，10-bit 輸出方便後製調色"
+  },
+  {
+    "url": "https://magazine.reallusion.com/2026/09/01/ai-studio-1-1-major-update-standalone-application-seedance-2-5-and-upgraded-ai-actor-creator/",
+    "topic": "aiimg",
+    "title": "AI Studio 1.1 Major Update: Standalone Application, Seedance 2.5, and Upgraded AI Actor Creator",
+    "source": "Reallusion Magazine",
+    "publishedAt": "2026-09-01",
+    "excerpt": "Reallusion 的 3D 引導式 AI 算圖工具 AI Studio 1.1 改為獨立應用程式，不必開 iClone 或 Character Creator 就能生成，仍可選擇用 3D 場景控制構圖與動作。新增 Seedance 2.5，可生成最長 30 秒的 4K 影片並支援多達 50 張參考輸入維持一致性，另有便宜一半的 Seedance 2.0 Mini；AI Actor Creator 新增基本模式，可從參考圖自動生成角色設定圖。圖像與影片全面支援 4K。",
+    "note": "用 3D 擺姿勢／鏡頭再交給 AI 算圖，比純文字生圖更好控制"
+  }
+]
