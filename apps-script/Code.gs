@@ -5,7 +5,7 @@
  * 封面圖放在 Google Drive 的一個資料夾。前端與 Agent 都用 POST 呼叫這個 Web App：
  *
  *   body（Content-Type: text/plain）= JSON {
- *     action: 'list' | 'me' | 'submit' | 'approve' | 'reject' | 'removeTool' | 'setCover' | 'fetchImage'
+ *     action: 'list' | 'me' | 'submit' | 'approve' | 'reject' | 'removeTool' | 'setCover' | 'updateTool' | 'fetchImage'
  *           | 'shareNews' | 'setNews' | 'fetchNews',
  *     idToken: '<Google 登入的 ID Token>'   // 人用
  *     apiKey:  '<Agent 金鑰>'               // Agent 用，二擇一
@@ -19,11 +19,12 @@
 const SHEETS = {
   members:     ['email', 'name', 'role', 'note'],
   tools:       ['id', 'tab', 'category', 'name', 'owner', 'desc', 'clientUrl', 'repoUrl', 'docUrl', 'tags', 'version',
-                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt'],
+                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors'],
   updates:     ['toolId', 'date', 'version', 'summary', 'by', 'createdAt'],
   submissions: ['id', 'kind', 'status', 'source', 'toolId', 'toolName', 'tab', 'category', 'name', 'owner', 'desc',
                 'clientUrl', 'repoUrl', 'docUrl', 'newClientUrl', 'newDocUrl', 'tags', 'version', 'date', 'summary',
-                'coverFileId', 'coverSeed', 'coverTouched', 'submitter', 'createdAt', 'reviewer', 'reviewedAt', 'reviewNote'],
+                'coverFileId', 'coverSeed', 'coverTouched', 'submitter', 'createdAt', 'reviewer', 'reviewedAt', 'reviewNote',
+                'authors'],
   agents:      ['name', 'keyHash', 'ownerEmail', 'enabled', 'note', 'createdAt'],
   news:        ['id', 'url', 'title', 'titleZh', 'source', 'topic', 'excerpt', 'excerptZh', 'image', 'publishedAt',
                 'kind', 'by', 'note', 'status', 'pinned', 'createdAt'],
@@ -36,6 +37,7 @@ const MAX_SUBS = 300;              // list 回傳的提交上限
 const AGENT_HOURLY_LIMIT = 30;     // 每把 Agent 金鑰每小時的呼叫上限
 const VERIFY_PER_MIN = 30;         // 全站每分鐘最多向 Google 驗證幾張新的登入憑證（防止有人灌假憑證耗光對外連線配額）
 const NOT_MEMBER_MAX = 5;          // 白名單外的同一個 Email，10 分鐘內最多查幾次名單
+const MAX_AUTHORS = 10;            // 每個工具最多幾位作者（作者登入後可以編輯工具資訊）
 const MAX_COVER_CHARS = 400000;    // 封面 data URI 長度上限（約 300KB）
 const IMG_HOSTS = ['opengraph.githubassets.com', 'repository-images.githubusercontent.com', 'raw.githubusercontent.com',
                    'user-images.githubusercontent.com', 'private-user-images.githubusercontent.com',
@@ -108,6 +110,7 @@ const ACTIONS = {
   removeTool: { fn: removeTool_, admin: true },
   setCover:   { fn: setCover_, admin: true },
   setDesc:    { fn: setDesc_ },
+  updateTool: { fn: updateTool_, agent: true },
   fetchImage: { fn: fetchImage_ },
   github:     { fn: github_ },
   shareNews:  { fn: shareNews_, agent: true },
@@ -186,22 +189,26 @@ function agentAuth_(key) {
 /* ============================== 動作 ============================== */
 
 function list_(req, who) {
+  const names = {};
+  readTable_('members').forEach(m => { names[norm_(m.email)] = m.name || String(m.email).split('@')[0]; });
   const byTool = {};
   readTable_('updates').forEach(u => {
     (byTool[u.toolId] = byTool[u.toolId] || []).push({ date: u.date, version: u.version, summary: u.summary, createdAt: u.createdAt });
   });
-  const tools = readTable_('tools').map(t => ({
+  const rawTools = readTable_('tools');
+  const tools = rawTools.map(t => ({
     id: t.id, tab: t.tab, category: t.category, name: t.name, owner: t.owner, desc: t.desc,
     clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, tags: splitTags_(t.tags), version: t.version,
     coverUrl: coverUrl_(t.coverFileId), coverSeed: Number(t.coverSeed) || 0, createdAt: t.createdAt, updatedAt: t.updatedAt,
+    authorNames: splitTags_(t.authors).map(a => names[norm_(a)] || a.split('@')[0]),
     canEdit: canEditTool_(t, who),
     updates: (byTool[t.id] || [])
       .sort((a, b) => cmp_(b.date, a.date) || cmp_(b.createdAt, a.createdAt))
       .slice(0, MAX_UPDATES_PER_TOOL)
   }));
+  // 作者 Email 只給能編輯的人（編輯表單要用），其他人只看到名字
+  tools.forEach((t, i) => { if (t.canEdit) t.authors = splitTags_(rawTools[i].authors); });
   const me = { email: who.email, name: who.name, role: who.role };
-  const names = {};
-  readTable_('members').forEach(m => { names[norm_(m.email)] = m.name || String(m.email).split('@')[0]; });
   const news = listNews_(who, names);
   if (who.kind === 'agent') return { tools, subs: [], news, me };
 
@@ -213,7 +220,7 @@ function list_(req, who) {
       id: s.id, kind: s.kind, status: s.status, source: s.source, toolId: s.toolId, toolName: s.toolName,
       tab: s.tab, category: s.category, name: s.name, owner: s.owner, desc: s.desc,
       clientUrl: s.clientUrl, repoUrl: s.repoUrl, docUrl: s.docUrl, newClientUrl: s.newClientUrl, newDocUrl: s.newDocUrl,
-      tags: splitTags_(s.tags), version: s.version, date: s.date, summary: s.summary,
+      tags: splitTags_(s.tags), authors: splitTags_(s.authors), version: s.version, date: s.date, summary: s.summary,
       coverUrl: coverUrl_(s.coverFileId), coverTouched: bool_(s.coverTouched),
       submitter: who.role === 'admin' ? s.submitter : '', submitterName: names[norm_(s.submitter)] || '成員',
       createdAt: s.createdAt, reviewedAt: s.reviewedAt, reviewNote: s.reviewNote
@@ -236,7 +243,7 @@ function submit_(req, who) {
         id, kind: d.kind, status: 'pending', source: who.kind === 'agent' ? 'agent:' + who.agent : 'web',
         toolId: d.toolId, toolName: d.toolName, tab: d.tab, category: d.category, name: d.name, owner: d.owner, desc: d.desc,
         clientUrl: d.clientUrl, repoUrl: d.repoUrl, docUrl: d.docUrl, newClientUrl: d.newClientUrl, newDocUrl: d.newDocUrl,
-        tags: d.tags.join(', '), version: d.version, date: d.date, summary: d.summary,
+        tags: d.tags.join(', '), authors: d.authors.join(', '), version: d.version, date: d.date, summary: d.summary,
         coverFileId, coverSeed: d.coverSeed, coverTouched: d.coverTouched ? 'TRUE' : 'FALSE',
         submitter: who.email, createdAt: nowIso_()
       }]);
@@ -275,7 +282,8 @@ function approve_(req, who) {
       appendRows_('tools', [{
         id: toolId, tab: sub.tab, category: sub.category, name: sub.name, owner: sub.owner, desc: sub.desc,
         clientUrl: sub.clientUrl, repoUrl: sub.repoUrl, docUrl: sub.docUrl, tags: sub.tags, version: sub.version,
-        coverFileId: sub.coverFileId, coverSeed: sub.coverSeed, submitter: sub.submitter, createdAt: now, updatedAt: now
+        coverFileId: sub.coverFileId, coverSeed: sub.coverSeed, submitter: sub.submitter, createdAt: now, updatedAt: now,
+        authors: sub.authors
       }]);
     }
     appendRows_('updates', [{ toolId, date: sub.date || today_(), version: sub.version, summary: sub.summary, by: sub.submitter, createdAt: now }]);
@@ -333,9 +341,53 @@ function setCover_(req) {
   return { coverUrl: coverUrl_(fileId) };
 }
 
-/** 擁有者（上架時的提交者）與管理者可以直接改工具簡介，不用走審核 */
+/**
+ * 擁有者（上架時的提交者）、作者與管理者可以直接改工具資訊，不用走審核。
+ * Agent 金鑰只能改記在它擁有者名下的工具（例如批次匯入後補上作者）。
+ */
 function canEditTool_(tool, who) {
-  return who.kind === 'user' && (who.role === 'admin' || (!!tool.submitter && norm_(tool.submitter) === who.email));
+  const mine = !!tool.submitter && norm_(tool.submitter) === who.email;
+  if (who.kind === 'agent') return mine;
+  return who.role === 'admin' || mine || splitTags_(tool.authors).some(a => norm_(a) === who.email);
+}
+
+/** 編輯工具資訊：只改有帶的欄位。版本與更新紀錄仍走「回報更新」 */
+function updateTool_(req, who) {
+  const d = req.data || {};
+  const patch = {}, bad = [];
+  const has = k => Object.prototype.hasOwnProperty.call(d, k);
+  const text = (k, max, label) => {
+    if (!has(k)) return;
+    const v = str_(d[k], max);
+    if (v) patch[k] = v; else bad.push(label + '不能是空的');
+  };
+  const url = (k, required) => {
+    if (!has(k)) return;
+    const v = str_(d[k], 500);
+    if (v && !/^https?:\/\/\S+$/i.test(v)) bad.push(k + ' 需以 http:// 或 https:// 開頭');
+    else if (!v && required) bad.push(k + ' 必填');
+    else patch[k] = v;
+  };
+  if (has('tab')) { if (TABS.includes(d.tab)) patch.tab = d.tab; else bad.push('tab 必須是 ' + TABS.join('/')); }
+  if (has('category')) { if (CATS.includes(d.category)) patch.category = d.category; else bad.push('category 必須是 ' + CATS.join('/')); }
+  text('name', 60, '工具名稱');
+  text('owner', 60, '負責人');
+  text('desc', 300, '工具簡介');
+  url('clientUrl', true);
+  url('repoUrl', false);
+  url('docUrl', false);
+  if (has('tags')) patch.tags = parseTags_(d.tags).join(', ');
+  if (has('authors')) patch.authors = parseAuthors_(d.authors, bad).join(', ');
+  if (bad.length) throw err_('invalid', '欄位有誤：' + bad.join('；'));
+  if (!Object.keys(patch).length) throw err_('invalid', '沒有要修改的欄位');
+  return withLock_(() => {
+    const tool = readTable_('tools').find(t => t.id === req.id);
+    if (!tool) throw err_('not_found', '找不到這個工具');
+    if (!canEditTool_(tool, who)) throw err_('forbidden', '只有工具擁有者、作者或管理者可以編輯');
+    patch.updatedAt = nowIso_();
+    updateRow_('tools', tool._row, patch);
+    return { id: tool.id, updated: Object.keys(patch) };
+  });
 }
 
 function setDesc_(req, who) {
@@ -344,7 +396,7 @@ function setDesc_(req, who) {
   return withLock_(() => {
     const tool = readTable_('tools').find(t => t.id === req.id);
     if (!tool) throw err_('not_found', '找不到這個工具');
-    if (!canEditTool_(tool, who)) throw err_('forbidden', '只有工具擁有者或管理者可以編輯簡介');
+    if (!canEditTool_(tool, who)) throw err_('forbidden', '只有工具擁有者、作者或管理者可以編輯簡介');
     updateRow_('tools', tool._row, { desc });
     return { id: tool.id, desc };
   });
@@ -669,7 +721,7 @@ function validate_(d) {
   const bad = [];
   const out = {
     kind, toolId: '', toolName: '', tab: '', category: '', name: '', owner: '', desc: '', clientUrl: '', repoUrl: '', docUrl: '',
-    newClientUrl: '', newDocUrl: '', tags: [],
+    newClientUrl: '', newDocUrl: '', tags: [], authors: [],
     version: str_(d.version, 20),
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(d.date || '')) ? String(d.date) : today_(),
     summary: str_(d.summary, 500),
@@ -692,8 +744,8 @@ function validate_(d) {
     out.clientUrl = url('clientUrl', true);
     out.repoUrl = url('repoUrl', false);
     out.docUrl = url('docUrl', false);
-    const tags = Array.isArray(d.tags) ? d.tags : String(d.tags || '').split(/[,，、]/);
-    out.tags = tags.map(s => str_(s, 20)).filter(Boolean).slice(0, 8);
+    out.tags = parseTags_(d.tags);
+    out.authors = parseAuthors_(d.authors, bad);
   } else {
     out.toolId = str_(d.toolId, 40) || (bad.push('toolId 必填'), '');
     out.newClientUrl = url('newClientUrl', false);
@@ -701,6 +753,21 @@ function validate_(d) {
   }
   if (!out.summary) bad.push('summary 必填');
   if (bad.length) throw err_('invalid', '欄位有誤：' + bad.join('；'));
+  return out;
+}
+
+function parseTags_(v) {
+  const tags = Array.isArray(v) ? v : String(v || '').split(/[,，、]/);
+  return tags.map(s => str_(s, 20)).filter(Boolean).slice(0, 8);
+}
+
+/** 作者 Email 清單：可用逗號、頓號、分號或空白分隔，重複的只留一個 */
+function parseAuthors_(v, bad) {
+  const list = (Array.isArray(v) ? v : String(v || '').split(/[,，、;；\s]+/)).map(norm_).filter(Boolean);
+  const out = [...new Set(list)];
+  const wrong = out.filter(a => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a));
+  if (wrong.length) bad.push('作者 Email 格式不對：' + wrong.join('、'));
+  if (out.length > MAX_AUTHORS) bad.push('作者最多 ' + MAX_AUTHORS + ' 位');
   return out;
 }
 
@@ -749,7 +816,18 @@ function tz_() { return TZ_ || (TZ_ = ss_().getSpreadsheetTimeZone()); }
 function sheet_(name) {
   const sh = ss_().getSheetByName(name);
   if (!sh) throw err_('server', '找不到工作表「' + name + '」，請先在試算表選單執行「初始化」');
+  ensureCols_(sh, name);
   return sh;
+}
+
+/** 新版程式在欄位最後加了新欄（例如 authors）時，寫入前自動補上欄位與標題，不用先跑「初始化」 */
+function ensureCols_(sh, name) {
+  const cols = SHEETS[name], have = sh.getMaxColumns();
+  if (have < cols.length) sh.insertColumnsAfter(have, cols.length - have);
+  if (sh.getLastColumn() < cols.length) {
+    const from = Math.max(sh.getLastColumn(), 0) + 1;
+    sh.getRange(1, from, 1, cols.length - from + 1).setValues([cols.slice(from - 1)]).setFontWeight('bold');
+  }
 }
 
 /**
@@ -772,7 +850,8 @@ function readTable_(name, optional) {
   let rows = [];
   if (n > 0) {
     const tz = tz_();
-    rows = sh.getRange(2, 1, n, cols.length).getValues()
+    // 工作表還沒補上新欄位時，只讀現有的欄，缺的當成空白
+    rows = sh.getRange(2, 1, n, Math.min(cols.length, sh.getMaxColumns())).getValues()
       .map((r, i) => {
         const o = { _row: i + 2 };
         cols.forEach((c, j) => { o[c] = fromCell_(r[j], tz); });

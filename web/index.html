@@ -511,6 +511,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
       <div class="field"><span class="lbl">工具分類<span class="req">*</span></span><div class="radio-row" id="catRadios"></div></div>
       <div class="field"><label for="f-name">工具名稱<span class="req">*</span></label><input type="text" id="f-name" name="name" maxlength="60" autocomplete="off"></div>
       <div class="field"><label for="f-owner" id="ownerLabel">開發成員<span class="req">*</span></label><input type="text" id="f-owner" name="owner" maxlength="60"><div class="hint" id="ownerHint"></div></div>
+      <div class="field"><label for="f-authors">作者 Email</label><input type="text" id="f-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com" autocomplete="off"><div class="hint">列在這裡的人登入後可以編輯這個工具的資訊，多位以逗號分隔。</div></div>
       <div class="field"><label for="f-desc">工具簡介<span class="req">*</span></label><textarea id="f-desc" name="desc" maxlength="300" placeholder="這個工具幫美術做什麼？一到三句即可。"></textarea></div>
       <div class="field"><label for="f-client">客戶端網址<span class="req">*</span></label><input type="url" id="f-client" name="clientUrl" maxlength="500" placeholder="https://"><div class="hint">成員點「開啟工具」會前往的網址：網頁工具、下載頁或安裝說明頁。</div></div>
       <div class="field"><label for="f-doc">使用說明連結</label><input type="url" id="f-doc" name="docUrl" maxlength="500" placeholder="https://"></div>
@@ -547,6 +548,25 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
     <div class="field"><label for="f-summary" id="summaryLabel">首發說明<span class="req">*</span></label><textarea id="f-summary" name="summary" maxlength="500" placeholder="新增了什麼、修了什麼、使用者需要注意什麼。"></textarea><div class="hint">會顯示在資訊卡的最近更新。</div></div>
     <div class="form-foot"><span class="note">送出後由管理者審核，通過即上架。</span><button class="btn primary" type="submit" id="submitBtn">送出審核</button></div>
     <div class="form-msg" id="formMsg" role="status"></div>
+  </form>
+</dialog>
+
+<!-- edit tool dialog -->
+<dialog id="editDlg" aria-labelledby="editTitle">
+  <div class="dlg-head"><h2 id="editTitle">編輯工具資訊</h2><button class="x" type="button" data-close aria-label="關閉">×</button></div>
+  <form class="dlg-body" id="editForm" novalidate>
+    <div class="field"><span class="lbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="eTabRadios"></div></div>
+    <div class="field"><span class="lbl">工具分類<span class="req">*</span></span><div class="radio-row" id="eCatRadios"></div></div>
+    <div class="field"><label for="e-name">工具名稱<span class="req">*</span></label><input type="text" id="e-name" name="name" maxlength="60" autocomplete="off"></div>
+    <div class="field"><label for="e-owner" id="eOwnerLabel">開發成員<span class="req">*</span></label><input type="text" id="e-owner" name="owner" maxlength="60"></div>
+    <div class="field"><label for="e-authors">作者 Email</label><input type="text" id="e-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com" autocomplete="off"><div class="hint">列在這裡的人登入後可以編輯這個工具，多位以逗號分隔。</div></div>
+    <div class="field"><label for="e-desc">工具簡介<span class="req">*</span></label><textarea id="e-desc" name="desc" maxlength="300"></textarea></div>
+    <div class="field"><label for="e-client">客戶端網址<span class="req">*</span></label><input type="url" id="e-client" name="clientUrl" maxlength="500" placeholder="https://"></div>
+    <div class="field"><label for="e-repo">GitHub／Repo 連結</label><input type="url" id="e-repo" name="repoUrl" maxlength="500" placeholder="https://"></div>
+    <div class="field"><label for="e-doc">使用說明連結</label><input type="url" id="e-doc" name="docUrl" maxlength="500" placeholder="https://"></div>
+    <div class="field"><label for="e-tags">標籤</label><input type="text" id="e-tags" name="tags" maxlength="200"><div class="hint">以逗號分隔，最多 8 個。</div></div>
+    <div class="form-foot"><span class="note">儲存後直接生效，不經審核。版本更新請用「回報更新」。</span><button class="btn primary" type="submit" id="editBtn">儲存</button></div>
+    <div class="form-msg" id="editMsg" role="status"></div>
   </form>
 </dialog>
 
@@ -911,6 +931,7 @@ function renderDetail(){
     ${cover(t,true)}
     <h3 id="detailTitle">${esc(t.name)}</h3>
     <div class="owner">${esc(TABS[t.tab]?.ownerLabel||'負責人')}：${esc(t.owner||'未填')}</div>
+    ${(t.authorNames||[]).length?`<div class="owner">作者：${esc(t.authorNames.join('、'))}</div>`:''}
     ${descHTML(t)}
     ${(t.tags||[]).length?`<div class="tags">${t.tags.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
     <div class="link-list">${links}
@@ -922,7 +943,8 @@ function renderDetail(){
     <h4 class="sec-title">更新紀錄</h4>
     ${ups.length?`<ol class="timeline">${ups.map(u=>`<li><div class="h-meta">${u.version?`<b>${esc(u.version)}</b>`:''}${esc(fmtDate(u.date))}</div><p>${esc(u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
     <div class="sheet-foot">
-      <button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
+      <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
+      ${t.canEdit?`<button class="btn" type="button" data-edittool="${esc(t.id)}">編輯工具資訊</button>`:''}</span>
       ${S.admin?`<span style="display:flex;gap:14px;align-items:center"><label class="link-btn" for="adminCover">更換封面</label>${coverSrc(t)?`<button class="link-btn" type="button" data-clearcover="${esc(t.id)}">改用漸層</button>`:''}<button class="link-btn danger" type="button" data-remove="${esc(t.id)}">下架</button></span>`:''}
     </div>`;
   const ta = $('#descInput');
@@ -1073,6 +1095,7 @@ function queueItem(s, withActions){
     <div class="q-top"><b>${title}</b><span class="status ${esc(s.status)}">${esc(st)}</span></div>
     <div class="q-meta">${where?where+'｜':''}${s.version?esc(s.version)+'｜':''}提交者 ${esc(s.submitterName||'成員')}${via}｜${esc(fmtDate(s.createdAt))}</div>
     ${s.kind!=='update'&&s.desc?`<p class="q-body">${esc(s.desc)}</p>`:''}
+    ${(s.authors||[]).length?`<p class="q-body"><span class="muted">作者：</span>${esc(s.authors.join('、'))}</p>`:''}
     <p class="q-body"><span class="muted">更新大意：</span>${esc(s.summary)}</p>
     ${links?`<div class="q-links">${links}</div>`:''}
     ${s.status==='rejected'&&s.reviewNote?`<p class="q-body" style="color:var(--bad)">退回原因：${esc(s.reviewNote)}</p>`:''}
@@ -1197,7 +1220,7 @@ function collect(){
   if (kind==='new'){
     Object.assign(data,{ tab:form.tab.value, category:form.category.value, name:v('name'), owner:v('owner'), desc:v('desc'),
       clientUrl:v('clientUrl'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
-      tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8) });
+      tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8), authors:splitAuthors(v('authors')) });
     if (!TABS[data.tab]) errs.push([$('#tabRadios'),'請選擇所屬頁籤。']);
     if (!CATS[data.category]) errs.push([$('#catRadios'),'請選擇美術設定或美術後製。']);
     if (!data.name) errs.push([$('#f-name'),'請填寫工具名稱。']);
@@ -1206,6 +1229,8 @@ function collect(){
     if (!urlOk(data.clientUrl,true)) errs.push([$('#f-client'), data.clientUrl?'網址需以 https:// 或 http:// 開頭。':'客戶端網址是必填，這是成員開啟工具的入口。']);
     if (!urlOk(data.repoUrl,false)) errs.push([$('#f-repo'),'網址需以 https:// 或 http:// 開頭。']);
     if (!urlOk(data.docUrl,false)) errs.push([$('#f-doc'),'網址需以 https:// 或 http:// 開頭。']);
+    const badA = data.authors.filter(a=>!EMAIL_RE.test(a));
+    if (badA.length) errs.push([$('#f-authors'),'Email 格式不對：'+badA.join('、')]);
   } else {
     data.toolId = v('toolId'); data.newClientUrl = v('newClientUrl'); data.newDocUrl = v('newDocUrl');
     if (!urlOk(data.newDocUrl,false)) errs.push([$('#f-newdoc'),'網址需以 https:// 或 http:// 開頭。']);
@@ -1238,6 +1263,66 @@ form.addEventListener('change', e => {
   if (e.target.name==='tab') syncOwner();
   if (e.target.name==='toolId'){ const t=S.tools.find(x=>x.id===e.target.value); F.seed=t?(t.coverSeed||0):F.seed; F.coverData=''; F.touched=false; setStatus($('#ghRelStatus'),'',''); }
   if (['kind','category','toolId'].includes(e.target.name)) renderCoverForm();
+});
+
+/* ---------- 編輯工具資訊：擁有者、作者、管理者可用，後端回傳 canEdit ---------- */
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const splitAuthors = s => [...new Set(String(s||'').split(/[,，、;；\s]+/).map(x=>x.trim().toLowerCase()).filter(Boolean))];
+const eform = $('#editForm');
+let editId = null;
+function syncEditOwner(){ $('#eOwnerLabel').innerHTML = esc((TABS[eform.tab.value]||TABS.rd4).ownerLabel)+'<span class="req">*</span>'; }
+function openEdit(id){
+  const t = S.tools.find(x=>x.id===id); if (!t || !t.canEdit) return;
+  editId = id;
+  $('#eTabRadios').innerHTML = Object.entries(TABS).map(([k,x])=>`<label><input type="radio" name="tab" value="${k}"> ${esc(x.code)} ${esc(x.name)}</label>`).join('');
+  $('#eCatRadios').innerHTML = Object.entries(CATS).map(([k,c])=>`<label><input type="radio" name="category" value="${k}"><span style="width:9px;height:9px;border-radius:50%;background:${c.color}"></span> ${esc(c.label)}</label>`).join('');
+  eform.querySelectorAll('.err').forEach(e=>e.remove());
+  $('#editMsg').textContent = '';
+  eform.tab.value = t.tab; eform.category.value = catOf(t);
+  const set = (n, v) => { eform.elements[n].value = v || ''; };
+  set('name', t.name); set('owner', t.owner); set('desc', t.desc); set('clientUrl', t.clientUrl);
+  set('repoUrl', t.repoUrl); set('docUrl', t.docUrl); set('tags', (t.tags||[]).join(', ')); set('authors', (t.authors||[]).join(', '));
+  syncEditOwner();
+  $('#editBtn').disabled = S.dbState!=='on';
+  if ($('#detailDlg').open) $('#detailDlg').close();
+  $('#editDlg').showModal();
+  $('#e-name').focus();
+}
+eform.addEventListener('change', e => { if (e.target.name==='tab') syncEditOwner(); });
+eform.addEventListener('submit', async e => {
+  e.preventDefault();
+  eform.querySelectorAll('.err').forEach(x=>x.remove());
+  const v = n => (eform.elements[n]?.value || '').trim();
+  const urlOk = (u, required) => u ? !!safeUrl(u) : !required;
+  const data = { tab:eform.tab.value, category:eform.category.value, name:v('name'), owner:v('owner'), desc:v('desc'),
+    clientUrl:v('clientUrl'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
+    tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8), authors:splitAuthors(v('authors')) };
+  const errs = [];
+  if (!TABS[data.tab]) errs.push([$('#eTabRadios'),'請選擇所屬頁籤。']);
+  if (!CATS[data.category]) errs.push([$('#eCatRadios'),'請選擇美術設定或美術後製。']);
+  if (!data.name) errs.push([$('#e-name'),'請填寫工具名稱。']);
+  if (!data.owner) errs.push([$('#e-owner'),'請填寫負責人或來源。']);
+  if (!data.desc) errs.push([$('#e-desc'),'請用一到三句話說明工具用途。']);
+  if (!urlOk(data.clientUrl,true)) errs.push([$('#e-client'), data.clientUrl?'網址需以 https:// 或 http:// 開頭。':'客戶端網址是必填。']);
+  if (!urlOk(data.repoUrl,false)) errs.push([$('#e-repo'),'網址需以 https:// 或 http:// 開頭。']);
+  if (!urlOk(data.docUrl,false)) errs.push([$('#e-doc'),'網址需以 https:// 或 http:// 開頭。']);
+  const badA = data.authors.filter(a=>!EMAIL_RE.test(a));
+  if (badA.length) errs.push([$('#e-authors'),'Email 格式不對：'+badA.join('、')]);
+  errs.forEach(([el,m])=>setErr(el,m));
+  if (errs.length){ const f = errs[0][0]; (f.matches('input,textarea') ? f : f.querySelector('input'))?.focus(); return; }
+  const btn = $('#editBtn'); btn.disabled = true; $('#editMsg').style.color=''; $('#editMsg').textContent='儲存中…';
+  try {
+    await api('updateTool', { id: editId, data });
+    const t = S.tools.find(x=>x.id===editId);
+    if (t) Object.assign(t, data);
+    $('#editDlg').close();
+    toast('工具資訊已更新。'); render();
+    if (A.token) refresh(true);
+  } catch(err){
+    $('#editMsg').style.color='var(--bad)';
+    $('#editMsg').textContent = AUTH_CODES.includes(err.code) ? '' : '儲存失敗：' + err.message;
+    btn.disabled = false;
+  }
 });
 
 /* ---------- GitHub 自動填入（公開 repo，直接呼叫 GitHub API） ---------- */
@@ -1427,7 +1512,7 @@ function setTab(k){ S.tab=k; S.cat='all'; history.replaceState(null,'','#'+k); r
 document.addEventListener('click', e => {
   if (e.target.closest('a')) return;
   const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
-    + '[data-descedit],[data-descsave],[data-desccancel],'
+    + '[data-descedit],[data-descsave],[data-desccancel],[data-edittool],'
     + '[data-ntopic],[data-nmore],[data-npin],[data-nhide],[data-nshare],[data-nfetch],[data-ncopy],[data-nshowhidden]');
   if (!t) return;
   const d = t.dataset;
@@ -1451,6 +1536,7 @@ document.addEventListener('click', e => {
   else if (t.hasAttribute('data-desccancel')){ S.descEdit = null; renderDetail(); }
   else if (d.chip){ S.cat=d.chip; renderChips(); renderGrid(); }
   else if (d.report) openSubmit({kind:'update', toolId:d.report});
+  else if (d.edittool) openEdit(d.edittool);
   else if (d.remove) removeTool(d.remove);
   else if (d.ntopic){ S.nTopic=d.ntopic; renderNews(); }
   else if (d.nmore){ S.nOpen[d.nmore]=true; renderNews(); }

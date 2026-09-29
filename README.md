@@ -96,6 +96,8 @@ Apps Script 右上角 **部署 → 新增部署作業**：
 
 - **提交新工具**：右上角「提交工具」。有 GitHub repo 的話，先貼網址再按 **從 GitHub 自動填入**，
   會帶入名稱、開發者、簡介、首頁、標籤、最新 Release 的版本與說明，以及封面圖。空白欄位才會被填，不會蓋掉你已經打的字。
+- **編輯工具資訊**：工具的提交者、作者（提交時填的「作者 Email」）與管理者，在工具詳情會看到「編輯工具資訊」，
+  可以改名稱、頁籤、分類、開發成員、作者、簡介、網址、標籤，儲存後直接生效。
 - **回報更新**：打開工具詳情 →「回報更新」。工具有 GitHub repo 時，可以按 **從 GitHub 最新 Release 帶入**。
 - **審核**：管理者右上角「審核佇列」，核准或填原因退回。
 - 頁面不會自動同步：開頁時抓一次，自己提交、審核、分享後也會自動更新；想看別人剛做的變更就按右上角「重新整理」。
@@ -147,6 +149,7 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
     "repoUrl": "https://github.com/…",
     "docUrl": "",
     "tags": ["Photoshop", "批次"],
+    "authors": ["someone@gmail.com"], // 作者 Email（選填），登入後可以編輯這個工具
     "version": "v1.0.0",
     "date": "2026-09-23",
     "summary": "首次上架"
@@ -157,6 +160,19 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
     "kind": "update", "toolId": "t…", "version": "v1.1.0", "summary": "新增批次重新命名"
 }}
 ```
+
+```jsonc
+// 編輯工具資訊（直接生效，不經審核）。只改有帶的欄位；Agent 金鑰只能改記在擁有者名下的工具
+{ "action": "updateTool", "apiKey": "acd_…", "id": "t…", "data": {
+    "authors": ["someone@gmail.com"]  // 也可以帶 tab、category、name、owner、desc、clientUrl、repoUrl、docUrl、tags
+}}
+```
+
+一次上架一整批工具：把工具寫成 JSON 陣列（欄位同上面的 `submit`），執行
+`ACD_API_KEY=acd_… node examples/push-tools.mjs tools.json`。
+核准後補上作者：寫一份「開發成員名稱 → Email」對照表（例如 `{ "RD4_小明": "a@gmail.com" }`），執行
+`ACD_API_KEY=acd_… node examples/set-authors.mjs authors.json`。
+這兩份清單常含內部連結與 Email，不要放進這個公開 repo。
 
 ```jsonc
 // 分享一篇文章到「每週美術技術精選」（直接上架，不經審核）
