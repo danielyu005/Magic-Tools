@@ -220,7 +220,9 @@ function list_(req, who) {
       id: s.id, kind: s.kind, status: s.status, source: s.source, toolId: s.toolId, toolName: s.toolName,
       tab: s.tab, category: s.category, name: s.name, owner: s.owner, desc: s.desc,
       clientUrl: s.clientUrl, repoUrl: s.repoUrl, docUrl: s.docUrl, newClientUrl: s.newClientUrl, newDocUrl: s.newDocUrl,
-      tags: splitTags_(s.tags), authors: splitTags_(s.authors), version: s.version, date: s.date, summary: s.summary,
+      tags: splitTags_(s.tags), authors: splitTags_(s.authors),
+      authorNames: splitTags_(s.authors).map(a => names[norm_(a)] || a.split('@')[0]),
+      version: s.version, date: s.date, summary: s.summary,
       coverUrl: coverUrl_(s.coverFileId), coverTouched: bool_(s.coverTouched),
       submitter: who.role === 'admin' ? s.submitter : '', submitterName: names[norm_(s.submitter)] || '成員',
       createdAt: s.createdAt, reviewedAt: s.reviewedAt, reviewNote: s.reviewNote

@@ -1087,6 +1087,12 @@ function subSummary(s){
     .map(([l,u])=>{const x=safeUrl(u); return x?`${l}：<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${esc(x)}</a>`:''}).filter(Boolean).join('<br>');
   return {title, where, links};
 }
+/* 作者顯示名字，滑過看 Email；後端還沒更新時只有 Email 就直接顯示 */
+function authorsText(s){
+  const em = s.authors||[], nm = s.authorNames||[];
+  if (!em.length) return '<span class="muted">未填</span>';
+  return em.map((e,i)=>`<span title="${esc(e)}">${esc(nm[i]||e)}</span>`).join('、');
+}
 function queueItem(s, withActions){
   const {title, where, links} = subSummary(s);
   const st = {pending:'待審核',approved:'已上架',rejected:'已退回'}[s.status] || s.status;
@@ -1095,7 +1101,7 @@ function queueItem(s, withActions){
     <div class="q-top"><b>${title}</b><span class="status ${esc(s.status)}">${esc(st)}</span></div>
     <div class="q-meta">${where?where+'｜':''}${s.version?esc(s.version)+'｜':''}提交者 ${esc(s.submitterName||'成員')}${via}｜${esc(fmtDate(s.createdAt))}</div>
     ${s.kind!=='update'&&s.desc?`<p class="q-body">${esc(s.desc)}</p>`:''}
-    ${(s.authors||[]).length?`<p class="q-body"><span class="muted">作者：</span>${esc(s.authors.join('、'))}</p>`:''}
+    ${s.kind!=='update'?`<p class="q-body"><span class="muted">${esc(TABS[s.tab]?.ownerLabel||'開發成員')}：</span>${esc(s.owner||'未填')}　<span class="muted">作者：</span>${authorsText(s)}</p>`:''}
     <p class="q-body"><span class="muted">更新大意：</span>${esc(s.summary)}</p>
     ${links?`<div class="q-links">${links}</div>`:''}
     ${s.status==='rejected'&&s.reviewNote?`<p class="q-body" style="color:var(--bad)">退回原因：${esc(s.reviewNote)}</p>`:''}
