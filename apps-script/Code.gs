@@ -34,6 +34,8 @@ const CATS = ['setting', 'post'];
 const MAX_UPDATES_PER_TOOL = 20;   // list 回傳的每個工具更新紀錄上限
 const MAX_SUBS = 300;              // list 回傳的提交上限
 const AGENT_HOURLY_LIMIT = 30;     // 每把 Agent 金鑰每小時的呼叫上限
+const VERIFY_PER_MIN = 30;         // 全站每分鐘最多向 Google 驗證幾張新的登入憑證（防止有人灌假憑證耗光對外連線配額）
+const NOT_MEMBER_MAX = 5;          // 白名單外的同一個 Email，10 分鐘內最多查幾次名單
 const MAX_COVER_CHARS = 400000;    // 封面 data URI 長度上限（約 300KB）
 const IMG_HOSTS = ['opengraph.githubassets.com', 'repository-images.githubusercontent.com', 'raw.githubusercontent.com',
                    'user-images.githubusercontent.com', 'private-user-images.githubusercontent.com',
@@ -119,6 +121,15 @@ function auth_(req) {
   const key = 'tok:' + sha_(req.idToken);
   let email = cache.get(key);
   if (!email) {
+    // 先在本地檢查格式、對象、期限，亂造的憑證不用浪費一次對外連線去問 Google（簽章仍由 Google 驗）
+    const c = jwtClaims_(req.idToken), now0 = Date.now() / 1000;
+    if (!c || c.aud !== clientId || !['accounts.google.com', 'https://accounts.google.com'].includes(c.iss) || !c.email)
+      throw err_('auth_invalid', '登入憑證無效，請重新登入');
+    if (Number(c.exp) < now0) throw err_('auth_invalid', '登入已過期，請重新登入');
+    // 全站每分鐘最多驗證這麼多張新憑證；超過時已登入的人（有快取）不受影響，只有新登入要稍等
+    const vk = 'verify:' + Math.floor(Date.now() / 60000), vn = Number(cache.get(vk) || 0) + 1;
+    if (vn > VERIFY_PER_MIN) throw err_('busy', '目前登入的人太多，請一分鐘後再試');
+    cache.put(vk, String(vn), 120);
     const res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(req.idToken),
       { muteHttpExceptions: true });
     if (res.getResponseCode() !== 200) throw err_('auth_invalid', '登入已過期，請重新登入');
@@ -131,9 +142,26 @@ function auth_(req) {
     const ttl = Math.min(3600, Math.floor(Number(t.exp) - now)); // 保留到憑證到期；白名單每次都會重新比對
     if (ttl > 30) cache.put(key, email, ttl);
   }
+  // 白名單外的同一個 Email 短時間內一直重試，就直接擋掉，不再查名單。
+  // 鍵裡帶著快取世代，管理者一改試算表（例如把他加進白名單）就重新計算
+  const nk = 'nm:' + tableGen_() + ':' + sha_(email).slice(0, 16), tries = Number(cache.get(nk) || 0);
+  if (tries >= NOT_MEMBER_MAX) throw err_('not_member', email + ' 還不在白名單，請聯絡管理者加入。（嘗試太多次，請 10 分鐘後再試）');
   const m = readTable_('members').find(x => norm_(x.email) === email);
-  if (!m) throw err_('not_member', email + ' 還不在白名單，請聯絡管理者加入。');
+  if (!m) {
+    cache.put(nk, String(tries + 1), 600);
+    throw err_('not_member', email + ' 還不在白名單，請聯絡管理者加入。');
+  }
   return { kind: 'user', email, name: m.name || email.split('@')[0], role: norm_(m.role) === 'admin' ? 'admin' : 'member' };
+}
+
+/** 解開 JWT 的內容（不驗簽章），格式不對就回 null */
+function jwtClaims_(t) {
+  const p = String(t).split('.');
+  if (p.length !== 3 || t.length > 4096) return null;
+  try {
+    const b = p[1] + '==='.slice((p[1].length + 3) % 4);
+    return JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(b)).getDataAsString());
+  } catch (x) { return null; }
 }
 
 function agentAuth_(key) {
@@ -362,9 +390,8 @@ function github_(req) {
 /* ============================== 每週美術技術精選 ============================== */
 
 function listNews_(who, names) {
-  if (!hasSheet_('news')) return []; // 更新 Code.gs 後還沒跑「初始化」時，其他功能照常
   const admin = who.role === 'admin';
-  return readTable_('news')
+  return readTable_('news', true) // 更新 Code.gs 後還沒跑「初始化」時，其他功能照常
     .filter(n => admin || n.status !== 'hidden')
     .sort((a, b) => (bool_(b.pinned) - bool_(a.pinned)) || cmp_(b.publishedAt, a.publishedAt))
     .slice(0, MAX_NEWS)
@@ -576,7 +603,6 @@ function ensureNewsSheets_() {
   }
 }
 
-function hasSheet_(name) { return !!ss_().getSheetByName(name); }
 function cdata_(s) { return String(s || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1'); }
 function unescapeHtml_(s) { return /&lt;\/?[a-z]/i.test(s) ? decode_(s) : String(s || ''); } // 有些 feed 把 HTML 再跳脫一次
 function firstImg_(html) { const m = String(html || '').match(/<img[^>]+src=["']([^"']+)["']/i); return m ? decode_(m[1]) : ''; }
@@ -702,17 +728,83 @@ function sheet_(name) {
   return sh;
 }
 
-function readTable_(name) {
-  const sh = sheet_(name), cols = SHEETS[name], n = sh.getLastRow() - 1;
-  if (n <= 0) return [];
-  const tz = tz_();
-  return sh.getRange(2, 1, n, cols.length).getValues()
-    .map((r, i) => {
-      const o = { _row: i + 2 };
-      cols.forEach((c, j) => { o[c] = fromCell_(r[j], tz); });
-      return o;
-    })
-    .filter(o => cols.some(c => o[c] !== ''));
+/**
+ * 讀一張工作表。先看快取，沒有才讀試算表（Apps Script 打開試算表常要好幾秒）。
+ * optional：工作表不存在時回傳空陣列（更新 Code.gs 後還沒跑「初始化」時用）。
+ * 在 withLock_ 裡一律直接讀試算表，寫入時用的列號才不會是舊的。
+ */
+function readTable_(name, optional) {
+  if (!LOCK_DEPTH_) {
+    const hit = tableCacheGet_(name);
+    if (hit) return hit;
+  }
+  const gen = tableGen_();
+  const sh = ss_().getSheetByName(name);
+  if (!sh) {
+    if (optional) return [];
+    throw err_('server', '找不到工作表「' + name + '」，請先在試算表選單執行「初始化」');
+  }
+  const cols = SHEETS[name], n = sh.getLastRow() - 1;
+  let rows = [];
+  if (n > 0) {
+    const tz = tz_();
+    rows = sh.getRange(2, 1, n, cols.length).getValues()
+      .map((r, i) => {
+        const o = { _row: i + 2 };
+        cols.forEach((c, j) => { o[c] = fromCell_(r[j], tz); });
+        return o;
+      })
+      .filter(o => cols.some(c => o[c] !== ''));
+  }
+  tableCachePut_(name, rows, gen);
+  return rows;
+}
+
+/* 工作表快取：存在 CacheService，一張表切成多段（每段上限 100KB）。
+   任何寫入、或有人在試算表手動編輯（onSheetChange 觸發器）都會換一個新的「世代」，舊快取就全部作廢 */
+const TABLE_TTL = 1800;            // 秒；觸發器沒裝時，手動改試算表最久這麼久後生效
+const TABLE_CHUNK = 25000;         // 每段字元數（中文一字 3 bytes，25000 字不會超過 100KB）
+let GEN_ = null;
+function tableGen_() {
+  if (GEN_ === null) GEN_ = CacheService.getScriptCache().get('tgen') || '';
+  return GEN_;
+}
+function clearTableCache_() {
+  GEN_ = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  CacheService.getScriptCache().put('tgen', GEN_, 21600);
+}
+function tableCacheGet_(name) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const meta = JSON.parse(cache.get('t:' + name) || 'null');
+    if (!meta || meta.gen !== tableGen_()) return null;
+    const keys = [];
+    for (let i = 0; i < meta.n; i++) keys.push('t:' + name + ':' + meta.gen + ':' + i);
+    const parts = cache.getAll(keys);
+    if (keys.some(k => parts[k] === undefined)) return null;
+    return JSON.parse(keys.map(k => parts[k]).join(''));
+  } catch (x) { return null; }
+}
+function tableCachePut_(name, rows, gen) {
+  try {
+    const cache = CacheService.getScriptCache();
+    // 讀試算表的這段時間如果有人寫入，讀到的可能是舊資料，就不要放進快取
+    GEN_ = null;
+    if (tableGen_() !== gen) return;
+    const s = JSON.stringify(rows), parts = {};
+    let n = 0;
+    for (let i = 0; i < s.length; i += TABLE_CHUNK) parts['t:' + name + ':' + gen + ':' + n++] = s.slice(i, i + TABLE_CHUNK);
+    parts['t:' + name] = JSON.stringify({ gen, n });
+    cache.putAll(parts, TABLE_TTL);
+  } catch (x) { console.warn('table cache put failed', name, x); }
+}
+
+/** 試算表被手動編輯時清快取。由「初始化」安裝的可安裝觸發器呼叫（onEdit 是保留名稱，所以另外取名） */
+function onSheetChange() { clearTableCache_(); }
+
+function installCacheTrigger_() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'onSheetChange').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('onSheetChange').forSpreadsheet(ss_()).onChange().create();
 }
 
 function appendRows_(name, objs) {
@@ -721,6 +813,7 @@ function appendRows_(name, objs) {
   sh.getRange(sh.getLastRow() + 1, 1, objs.length, cols.length)
     .setNumberFormat('@')
     .setValues(objs.map(o => cols.map(c => toCell_(o[c]))));
+  written_();
 }
 
 function updateRow_(name, row, patch) {
@@ -729,11 +822,21 @@ function updateRow_(name, row, patch) {
   const vals = range.getValues()[0];
   cols.forEach((c, j) => { if (c in patch) vals[j] = toCell_(patch[c]); });
   range.setNumberFormat('@').setValues([vals]);
+  written_();
 }
 
 function deleteRows_(name, rows) {
+  if (!rows.length) return;
   const sh = sheet_(name);
   rows.slice().sort((a, b) => b - a).forEach(r => sh.deleteRow(r));
+  written_();
+}
+
+// 先把寫入真正送進試算表（Apps Script 預設會等執行結束才送），再作廢快取；
+// 反過來的話，別的請求可能剛好在這個空檔讀到舊資料又放回快取
+function written_() {
+  SpreadsheetApp.flush();
+  clearTableCache_();
 }
 
 function fromCell_(v, tz) {
@@ -758,10 +861,12 @@ function pendingSub_(id) {
   return sub;
 }
 
+let LOCK_DEPTH_ = 0;
 function withLock_(fn) {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(20000)) throw err_('busy', '系統忙碌中，請稍後再試');
-  try { return fn(); } finally { lock.releaseLock(); }
+  LOCK_DEPTH_++;
+  try { return fn(); } finally { LOCK_DEPTH_--; lock.releaseLock(); }
 }
 
 function err_(code, message) { const e = new Error(message); e.code = code; return e; }
@@ -817,6 +922,8 @@ function setup() {
   if (me && !readTable_('members').some(m => norm_(m.email) === me)) {
     appendRows_('members', [{ email: me, name: '', role: 'admin', note: 'setup 自動加入' }]);
   }
+  installCacheTrigger_(); // 手動編輯試算表（例如增刪白名單）後，網頁馬上看到新資料
+  clearTableCache_();
   try { SpreadsheetApp.getUi().alert('初始化完成。\n\n下一步：選單「設定 Google Client ID」，然後部署為網頁應用程式。\n產業趨勢的最新資訊：選單「最新資訊：開啟每日自動抓取」。'); } catch (x) {}
 }
 
