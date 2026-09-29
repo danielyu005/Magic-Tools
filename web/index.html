@@ -254,6 +254,8 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .gate-msg{margin-top:14px;font-size:13.5px;color:var(--bad);word-break:break-all}
 .gate-msg.wait{color:var(--muted)}
 .who .sync{font-size:12px;opacity:.75}
+.who #syncNow{font-size:12px}
+.who #syncNow:disabled{opacity:.5;cursor:default}
 .who .sync:not(:empty)::after{content:"・";margin-left:8px}
 .who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .who[hidden]{display:none}
@@ -446,7 +448,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
       <p class="sub">找到團隊正在用的美術工具，一鍵開啟，順便看看最近又改了什麼。</p>
     </div>
     <div class="head-actions">
-      <span class="who" id="who" hidden><span class="sync" id="syncState" aria-live="polite"></span><span id="whoName"></span><button class="link-btn" type="button" id="signOut">登出</button></span>
+      <span class="who" id="who" hidden><span class="sync" id="syncState" aria-live="polite"></span><button class="link-btn" type="button" id="syncNow" title="從後端抓最新的工具與文章">重新整理</button><span id="whoName"></span><button class="link-btn" type="button" id="signOut">登出</button></span>
       <button class="btn" id="openQueue" type="button">提交狀態 <span class="count-pill" id="queueCount" hidden>0</span></button>
       <button class="btn primary" id="openSubmit" type="button"><svg><use href="#i-plus"/></svg>提交工具</button>
     </div>
@@ -583,7 +585,6 @@ const CATS = { setting:{label:'美術設定', color:'var(--set)'}, post:{label:'
 const TOPICS = { vfx:{label:'特效', color:'var(--tp-vfx)'}, '3d':{label:'3D', color:'var(--tp-3d)'}, shader:{label:'Shader', color:'var(--tp-shader)'},
   tool:{label:'美術工具', color:'var(--tp-tool)'}, spine:{label:'Spine', color:'var(--tp-spine)'} };
 const FRESH_DAYS = 14;
-const POLL_MS = 60000;
 const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
 const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat:'all', q:'',
@@ -609,7 +610,7 @@ const store = { get(k){ try { return localStorage.getItem(k); } catch { return n
 
 /* ---------- auth (Google Identity Services) ---------- */
 const TOKEN_KEY = 'acd.idToken';
-const A = { token:'', exp:0, gsiReady:false, refreshT:0, pollT:0 };
+const A = { token:'', exp:0, gsiReady:false, refreshT:0 };
 const AUTH_CODES = ['auth_required','auth_invalid','auth_expired','not_member'];
 function jwtPayload(t){ try { return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))) || {}; } catch { return {}; } }
 function jwtExp(t){ return (jwtPayload(t).exp||0)*1000; }
@@ -633,6 +634,7 @@ function renderSync(){
   const el = $('#syncState'); if (!el) return;
   const hm = t => { const d = new Date(t); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   el.textContent = S.syncing ? '同步中…' : (S.syncedAt ? '已同步 ' + hm(S.syncedAt) : '');
+  $('#syncNow').disabled = !!S.syncing;
 }
 function setToken(t){
   A.token = t; A.exp = jwtExp(t); store.set(TOKEN_KEY, t);
@@ -669,7 +671,7 @@ function signOut(msg, keepCache){
   A.token = ''; A.exp = 0; store.del(TOKEN_KEY);
   if (!keepCache) store.del(CACHE_KEY);
   S.syncedAt = 0;
-  clearTimeout(A.refreshT); clearInterval(A.pollT);
+  clearTimeout(A.refreshT);
   S.loaded = false; S.tools = []; S.subs = []; S.news = []; S.me = ''; S.admin = false;
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
   try { google.accounts.id.disableAutoSelect(); } catch {}
@@ -681,13 +683,10 @@ function start(){
   msg.textContent = '登入中…'; msg.classList.add('wait');
   // Apps Script 閒置後的第一次呼叫要冷啟動，常常要十幾秒，先告訴使用者不是當掉
   const slowT = setTimeout(() => { if (!$('#gate').hidden && msg.textContent === '登入中…') msg.textContent = '登入中…第一次連線可能要 10～30 秒，請稍候。'; }, 5000);
-  refresh().then(() => {
-    clearTimeout(slowT); msg.classList.remove('wait');
-    clearInterval(A.pollT);
-    A.pollT = setInterval(() => { if (!document.hidden && A.token) refresh(); }, POLL_MS);
-  });
+  // 不定時自動同步（Apps Script 同時執行數有限，成員一多就會互相排隊）；要看最新資料就按「重新整理」
+  refresh().then(() => { clearTimeout(slowT); msg.classList.remove('wait'); });
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && A.token && S.loaded) refresh(); });
+$('#syncNow').addEventListener('click', () => { if (A.token) refresh(); });
 $('#signOut').addEventListener('click', () => signOut('已登出。'));
 
 /* ---------- API ---------- */
