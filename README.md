@@ -102,14 +102,14 @@ Apps Script 右上角 **部署 → 新增部署作業**：
 
 ### 產業趨勢：每週美術技術精選
 
-產業趨勢頁籤最上方會列出 **特效／3D／Shader／美術工具／Spine** 的文章與教學，依「本週／上週／更早」分組，可以按主題篩選。
+產業趨勢頁籤最上方會列出 **特效／3D／Shader／美術工具／Spine／AI 圖像生成／AI 輔助工具** 的文章與教學，依「本週／上週／更早」分組，可以按主題篩選。
 
 - **自動收集**：後端每天早上 8 點讀 `feeds` 工作表裡的 RSS 來源（Real-Time VFX、Graphics Programming weekly、80 Level、
   Unreal、Unity、Blender、Spine 官方教學影片等），依關鍵字分類，節錄摘要，並用 Google 翻譯翻成繁中。
   - 第一次使用：試算表選單 **工具陳列窗 → 初始化／修復工作表**（建立 `news`、`feeds` 並放入預設來源），
     再點 **最新資訊：開啟每日自動抓取**（會要求一次新的授權，用來建立排程）。
-  - 增刪來源直接改 `feeds` 工作表：`topic` 填 `vfx`／`3d`／`shader`／`tool`／`spine` 表示整個來源都歸這類；
-    填 `auto` 表示依關鍵字分類、跟這五類無關的文章不收。`mode` 一般填 `rss`；`digest` 用於一期多篇的週報，會拆成一篇一篇。
+  - 增刪來源直接改 `feeds` 工作表：`topic` 填 `vfx`／`3d`／`shader`／`tool`／`spine`／`aiimg`／`ai` 表示整個來源都歸這類；
+    填 `auto` 表示依關鍵字分類、跟這些主題都無關的文章不收。`mode` 一般填 `rss`；`digest` 用於一期多篇的週報，會拆成一篇一篇。
     `enabled` 改成 `FALSE` 即停用。
   - 文章抓取時只收 120 天內的，超過 180 天會自動清掉（設為精選的保留）。
 - **分享文章**：任何成員按「分享文章」貼網址即可，標題、摘要、縮圖由後端從網頁讀取。分享後直接出現，不經審核。
@@ -163,7 +163,7 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
 // 例如讓 Claude 排程 Agent 每週搜尋 Spine／特效加速技巧，寫好中文摘要後送進來
 { "action": "shareNews", "apiKey": "acd_…", "data": {
     "url": "https://…",          // 必填
-    "topic": "spine",            // vfx | 3d | shader | tool | spine，省略則自動判斷
+    "topic": "spine",            // vfx | 3d | shader | tool | spine | aiimg | ai，省略則自動判斷
     "title": "",                 // 省略就從網頁 og:title 讀
     "excerpt": "",               // 摘要，省略就從網頁 og:description 讀；已是中文就不翻譯
     "note": "一句話推薦"

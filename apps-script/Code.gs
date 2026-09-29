@@ -42,17 +42,22 @@ const IMG_HOSTS = ['opengraph.githubassets.com', 'repository-images.githubuserco
                    'avatars.githubusercontent.com', 'github.com'];
 
 /* 產業趨勢「每週美術技術精選」 */
-const NEWS_TOPICS = ['vfx', '3d', 'shader', 'tool', 'spine'];
+const NEWS_TOPICS = ['vfx', '3d', 'shader', 'tool', 'spine', 'aiimg', 'ai'];
 const NEWS_MAX_AGE_DAYS = 120;     // 抓取時只收這麼新的文章（Spine 教學影片幾個月才一支）
 const NEWS_KEEP_DAYS = 180;        // 超過就從試算表清掉（置頂的保留）；要比 NEWS_MAX_AGE_DAYS 長，清掉的才不會又被抓回來
 const NEWS_PER_FEED = 12;          // 每個來源每次最多收幾篇
 const NEWS_TRANSLATE_MAX = 40;     // 每次抓取最多翻譯幾篇（LanguageApp 有每日額度）
 const MAX_NEWS = 150;              // list 回傳的文章上限
-// 分類關鍵字，依序比對，先中先贏。標題優先，其次來源自己的分類，最後才看內文（內文只認前三類，避免誤判）
+// 分類關鍵字，依序比對，先中先贏。標題優先，其次來源自己的分類，最後才看內文（內文只認第三欄是 true 的規則，避免誤判）
+// AI 放最前面：「Blender MCP」「Spine 2D MCP」這類要歸 AI 輔助工具，不要被 3D、Spine 先搶走
 const NEWS_RULES = [
-  ['spine',  /esoteric ?software|\bspine ?(2d|pro|tips|editor|runtimes?|4\.\d|animation)|skeletal animation|live2d|dragonbones|骨骼動畫|骨骼动画/i],
-  ['vfx',    /\bvfx\b|visual effects?|real-?time ?fx|\bparticles?\b|niagara|shuriken|embergen|effekseer|flipbook|特效|粒子/i],
-  ['shader', /shaders?\b|\bhlsl\b|\bglsl\b|\bwgsl\b|material (editor|function)s?|\bnpr\b|\btoon\b|cel[- ]?shad|ray ?trac|path ?trac|global illumination|著色器|渲染管線/i],
+  ['ai',     /\bmcp\b|model context protocol/i, true],
+  ['ai',     /\bllms?\b|chatgpt|\bclaude\b|\bgemini\b|copilot|\bcodex\b|agentic|vibe[- ]?cod|語言模型|MCP ?伺服器/i],
+  ['aiimg',  /stable diffusion|\bsdxl\b|comfy ?ui|midjourney|\bflux(\.1| ?kontext| ?dev| ?pro| ?schnell)\b|black forest labs|dall-?e|firefly|text-to-(image|video|3d)|image-to-(video|3d)|image generat|video generat|generative fill|controlnet|\blora\b|runway ?(gen|ml)|\bsora\b|\bkling\b|\bveo ?\d?\b|\bai[- ](image|video|art|render)|ai ?(繪圖|生圖|影像|繪畫)|圖像生成|影像生成|文生圖|圖生影片|生成影片/i],
+  ['ai',     /generative ai|\bgen ?ai\b|\bai[- ](powered|assisted|driven|tools?|agents?|assistants?|coding)\b|生成式 ?ai|ai ?(工具|助手|輔助|代理)/i],
+  ['spine',  /esoteric ?software|\bspine ?(2d|pro|tips|editor|runtimes?|4\.\d|animation)|skeletal animation|live2d|dragonbones|骨骼動畫|骨骼动画/i, true],
+  ['vfx',    /\bvfx\b|visual effects?|real-?time ?fx|\bparticles?\b|niagara|shuriken|embergen|effekseer|flipbook|特效|粒子/i, true],
+  ['shader', /shaders?\b|\bhlsl\b|\bglsl\b|\bwgsl\b|material (editor|function)s?|\bnpr\b|\btoon\b|cel[- ]?shad|ray ?trac|path ?trac|global illumination|著色器|渲染管線/i, true],
   ['tool',   /plug-?ins?\b|add-?ons?\b|\btools?\b|\bscripts?\b|pipeline|workflow|automat|\bbatch\b|photoshop|krita|aseprite|procedural|工具|插件|外掛|自動化/i],
   ['3d',     /blender|\bmaya\b|3ds ?max|zbrush|substance|houdini|sculpt|retopo|modell?ing|photogrammetry|gaussian splat|marvelous designer|\b3d\b|建模|雕刻/i]
 ];
@@ -475,8 +480,8 @@ function fetchNews_() {
         const k = urlKey_(it.url);
         if (seen[k]) return;
         const topic = NEWS_TOPICS.includes(f.topic) ? f.topic
-          : (classify_(it.title) || classify_(it.cats) || classify_(it.text, 3));
-        if (!topic) return; // auto 來源：跟五個主題都無關的新聞不收
+          : (classify_(it.title) || classify_(it.cats) || classify_(it.text, true));
+        if (!topic) return; // auto 來源：跟所有主題都無關的新聞不收
         seen[k] = true;
         fresh.push({
           id: newId_('n'), url: it.url, title: clip_(it.title, 200), source: it.source || f.name, topic,
@@ -571,10 +576,10 @@ function pageMeta_(url) {
   return out;
 }
 
-function classify_(text, onlyFirst) {
+function classify_(text, bodyOnly) {
   const s = String(text || '');
   if (!s) return '';
-  const hit = (onlyFirst ? NEWS_RULES.slice(0, onlyFirst) : NEWS_RULES).find(r => r[1].test(s));
+  const hit = NEWS_RULES.find(r => (!bodyOnly || r[2]) && r[1].test(s));
   return hit ? hit[0] : '';
 }
 

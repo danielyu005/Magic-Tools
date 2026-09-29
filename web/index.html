@@ -283,11 +283,11 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- 每週美術技術精選（產業趨勢頁籤） ---------- */
-:root{--tp-vfx:#C4410C;--tp-3d:#0B7A8C;--tp-shader:#6A45D9;--tp-tool:#2B8A3E;--tp-spine:#A8580A}
+:root{--tp-vfx:#C4410C;--tp-3d:#0B7A8C;--tp-shader:#6A45D9;--tp-tool:#2B8A3E;--tp-spine:#A8580A;--tp-aiimg:#C0266D;--tp-ai:#2F5BD3}
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){--tp-vfx:#FF9F5A;--tp-3d:#4FD1E0;--tp-shader:#B8A1FF;--tp-tool:#74D98A;--tp-spine:#FFC47A}
+  :root:not([data-theme="light"]){--tp-vfx:#FF9F5A;--tp-3d:#4FD1E0;--tp-shader:#B8A1FF;--tp-tool:#74D98A;--tp-spine:#FFC47A;--tp-aiimg:#FF8CC0;--tp-ai:#8FB0FF}
 }
-:root[data-theme="dark"]{--tp-vfx:#FF9F5A;--tp-3d:#4FD1E0;--tp-shader:#B8A1FF;--tp-tool:#74D98A;--tp-spine:#FFC47A}
+:root[data-theme="dark"]{--tp-vfx:#FF9F5A;--tp-3d:#4FD1E0;--tp-shader:#B8A1FF;--tp-tool:#74D98A;--tp-spine:#FFC47A;--tp-aiimg:#FF8CC0;--tp-ai:#8FB0FF}
 .news{margin:22px 0 36px}
 .news-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}
 .news-head h2,.sec-h{font-size:20px;margin:0}
@@ -583,7 +583,8 @@ const TABS = {
 };
 const CATS = { setting:{label:'美術設定', color:'var(--set)'}, post:{label:'美術後製', color:'var(--post)'} };
 const TOPICS = { vfx:{label:'特效', color:'var(--tp-vfx)'}, '3d':{label:'3D', color:'var(--tp-3d)'}, shader:{label:'Shader', color:'var(--tp-shader)'},
-  tool:{label:'美術工具', color:'var(--tp-tool)'}, spine:{label:'Spine', color:'var(--tp-spine)'} };
+  tool:{label:'美術工具', color:'var(--tp-tool)'}, spine:{label:'Spine', color:'var(--tp-spine)'},
+  aiimg:{label:'AI 圖像生成', color:'var(--tp-aiimg)'}, ai:{label:'AI 輔助工具', color:'var(--tp-ai)'} };
 const FRESH_DAYS = 14;
 const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
