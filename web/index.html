@@ -849,7 +849,8 @@ async function remoteCover(url){ const { dataUrl } = await api('fetchImage', { u
 /* ---------- render ---------- */
 function renderTabs(){
   $('#tabs').innerHTML = Object.entries(TABS).map(([k,t]) => {
-    const n = S.tools.filter(x=>x.tab===k).length;
+    let n = S.tools.filter(x=>x.tab===k).length;
+    if (k==='trend') n += S.news.filter(x => TOPICS[x.topic] && safeUrl(x.url) && !x.hidden).length; // 產業趨勢頁籤也算每週精選的文章
     return `<button class="tab" role="tab" type="button" data-tab="${k}" aria-selected="${S.tab===k}" id="tab-${k}">
       <span class="ico">${esc(t.ico)}</span><span><span class="code">${esc(t.code)}</span><span class="name">${esc(t.name)}</span></span><span class="n">${S.loaded?n:''}</span></button>`;
   }).join('');
