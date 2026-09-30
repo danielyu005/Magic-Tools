@@ -717,8 +717,9 @@ $('#signOut').addEventListener('click', () => signOut('已登出。'));
 
 /* ---------- API ---------- */
 function apiErr(code, message){ const e = new Error(message); e.code = code; return e; }
-// 只讀取、重送也不會重複寫入的動作；Apps Script 偶爾回錯誤頁時自動重試一次
-const RETRY_SAFE = ['list', 'me', 'github', 'fetchImage'];
+// 只讀取、或只覆寫欄位（重送結果相同）的動作；Apps Script 偶爾回錯誤頁（如 HTTP 404）時稍等後自動重試
+const RETRY_SAFE = ['list', 'me', 'github', 'fetchImage', 'updateTool', 'setDesc'];
+const RETRY_WAIT = [1500, 3000];
 async function api(action, payload={}){
   if (!A.token || A.exp < Date.now() + 30e3){ signOut('登入已過期，請重新登入。', true); throw apiErr('auth_expired','登入已過期'); }
   let r, j;
@@ -729,7 +730,10 @@ async function api(action, payload={}){
     } catch { throw apiErr('network', '連不上後端，請確認網路連線或 config.js 的 API_URL。'); }
     try { j = await r.json(); break; }
     catch {
-      if (attempt === 0 && RETRY_SAFE.includes(action)) continue;
+      if (attempt < RETRY_WAIT.length && RETRY_SAFE.includes(action)){
+        await new Promise(res => setTimeout(res, RETRY_WAIT[attempt]));
+        continue;
+      }
       throw apiErr('server', `後端暫時沒有正常回應（HTTP ${r.status}），Google Apps Script 偶爾會這樣，請稍後再試一次。`
         + (action === 'submit' ? '（送出前請先到「提交狀態」確認是否已經送出，避免重複）' : ''));
     }
