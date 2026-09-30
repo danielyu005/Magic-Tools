@@ -1,5 +1,5 @@
 /**
- * ACD 工具陳列窗 — Apps Script 後端
+ * ART工具陳列窗 — Apps Script 後端
  *
  * 資料放在綁定的 Google 試算表（工作表：members / tools / updates / submissions / agents / news / feeds），
  * 封面圖放在 Google Drive 的一個資料夾。前端與 Agent 都用 POST 呼叫這個 Web App：
@@ -1027,7 +1027,7 @@ function setup() {
   });
   const props = PropertiesService.getScriptProperties();
   if (!props.getProperty('COVER_FOLDER_ID')) {
-    props.setProperty('COVER_FOLDER_ID', DriveApp.createFolder('ACD 工具陳列窗 封面').getId());
+    props.setProperty('COVER_FOLDER_ID', DriveApp.createFolder('ART工具陳列窗 封面').getId());
   }
   ensureNewsSheets_(); // 第一次會放入預設的文章來源，之後可以直接在 feeds 工作表增刪
   const me = norm_(Session.getEffectiveUser().getEmail());

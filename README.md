@@ -1,4 +1,4 @@
-# ACD 工具陳列窗
+# ART工具陳列窗
 
 團隊美術工具的陳列櫃：瀏覽、一鍵開啟、提交新工具與版本更新，由管理者審核上架。
 
@@ -27,12 +27,12 @@ Agent／GitHub Action ── API Key ──┘
 
 ### 1. 建立試算表與後端
 
-1. 開一份新的 Google 試算表，命名例如「ACD 工具陳列窗 資料」。
+1. 開一份新的 Google 試算表，命名例如「ART工具陳列窗 資料」。
 2. 選單 **擴充功能 → Apps Script**，把 `apps-script/Code.gs` 的內容整份貼上，儲存。
 3. （選用）Apps Script 左側 **專案設定** → 勾選「在編輯器中顯示 appsscript.json」，把 `apps-script/appsscript.json` 貼進去。
 4. 回到試算表並重新整理，選單列會出現 **工具陳列窗**。點 **工具陳列窗 → 初始化／修復工作表**，依指示授權。
    - 會建立 `members / tools / updates / submissions / agents / news / feeds` 七個工作表
-   - 會在你的 Drive 建立「ACD 工具陳列窗 封面」資料夾
+   - 會在你的 Drive 建立「ART工具陳列窗 封面」資料夾
    - 會把你自己加進 `members` 並設為 `admin`
 
 ### 2. 建立 Google 登入用的 Client ID

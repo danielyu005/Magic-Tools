@@ -1,5 +1,5 @@
 # 放到「工具的 repo」裡：.github/workflows/report-release.yml
-# 每次發佈 GitHub Release，就自動把版本更新送進 ACD 工具陳列窗的審核佇列。
+# 每次發佈 GitHub Release，就自動把版本更新送進 ART工具陳列窗的審核佇列。
 #
 # 需要在該 repo 的 Settings → Secrets and variables → Actions 設定：
 #   Secrets:   ACD_API_KEY   —— 管理者在試算表選單「建立 Agent 金鑰」產生的金鑰
