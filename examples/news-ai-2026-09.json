@@ -60,7 +60,8 @@
     "source": "Adobe Community",
     "publishedAt": "2026-09-18",
     "excerpt": "Firefly 九月更新：影片可自動辨識主體並整段去背，不必逐格遮罩；GPT Image 2 在網頁版與 Boards 支援的長寬比從 3 種增加到 10 種；Kling 3.0 Omni 可在影片生成與 Boards 中使用參考圖；圖像與影片模型的提示詞長度上限提高。另外也調整了 Firefly AI 助理的語氣，減少自誇式回覆。",
-    "note": "影片自動去背對做宣傳素材、合成很實用"
+    "note": "影片自動去背對做宣傳素材、合成很實用",
+    "image": "https://uploads-us-west-2.insided.com/adobedme-en/attachment/1440x640/70813dcd-e369-4ea5-8e26-b86cc5d06002_thumb.png"
   },
   {
     "url": "https://beeble.ai/research/switchx-2-0",

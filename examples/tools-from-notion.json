@@ -1,0 +1,113 @@
+[
+  {
+    "tab": "rd4", "category": "post",
+    "name": "Sprite Forge｜連續圖產生工具",
+    "owner": "RD4_余冠旻",
+    "desc": "快速產生與整理角色或特效所需的連續圖素材，減少重複製作與整理。已有可直接開啟的網頁工具，後續持續補強 GIF 讀取等製作流程。",
+    "clientUrl": "https://sprite-forge.netlify.app/",
+    "tags": ["Claude", "動態", "序列圖"],
+    "date": "2026-05-19"
+  },
+  {
+    "tab": "rd4", "category": "post",
+    "name": "Atlas Forge 圖集優化：裁切 · 去空白",
+    "owner": "RD4_余冠旻",
+    "desc": "圖集容量再優化，裁切並移除空白間隔。",
+    "clientUrl": "https://atlasforgeee.netlify.app/",
+    "tags": ["特效", "圖集"],
+    "date": "2026-09-21"
+  },
+  {
+    "tab": "rd4", "category": "setting",
+    "name": "高彩厚塗",
+    "owner": "RD4_張雅棋",
+    "desc": "生成各種厚塗風格的素材，繪製手法穩定。",
+    "clientUrl": "https://www.magnific.com/app/spaces/a2338758-ec45-40fb-bff1-26565fa053e9",
+    "tags": ["Magnific", "產圖", "厚塗"],
+    "date": "2026-09-21"
+  },
+  {
+    "tab": "rd4", "category": "setting",
+    "name": "溫和低彩厚塗",
+    "owner": "RD4_張雅棋",
+    "desc": "生成各種厚塗風格的素材，繪製手法穩定。",
+    "clientUrl": "https://www.magnific.com/app/spaces/a234d610-fd7d-46cf-84b6-fbbb627fd654",
+    "tags": ["Magnific", "產圖", "厚塗"],
+    "date": "2026-09-21"
+  },
+  {
+    "tab": "rd4", "category": "post",
+    "name": "新平台工具分享：音樂＋影片生成",
+    "owner": "RD4_陳廣澤",
+    "desc": "測試 AI 音樂與影片生成平台（VidMuse、Deevid）是否能補強影音製作流程，可從圖片＋音樂生成影片。",
+    "clientUrl": "https://vidmuse.ai/zh-TW",
+    "docUrl": "https://deevid.ai/zh-TW/ai-music-generator",
+    "tags": ["VidMuse", "Deevid", "Seedance 2.0", "外部工具"],
+    "date": "2026-05-19"
+  },
+  {
+    "tab": "other", "category": "setting",
+    "name": "一鍵產老虎機",
+    "owner": "商用研4小愷",
+    "desc": "快速建立老虎機概念或 Prototype，縮短從想法到可展示畫面的時間。把多個重複製作步驟集中成單一快速入口，適合前期提案與驗證。",
+    "clientUrl": "https://github.com/capcomkai/slot-art-toolkit",
+    "repoUrl": "https://github.com/capcomkai/slot-art-toolkit",
+    "tags": ["Claude", "產圖", "Prototype"],
+    "date": "2026-05-19"
+  },
+  {
+    "tab": "other", "category": "post",
+    "name": "Cocos Asset Node Finder",
+    "owner": "徐英智",
+    "desc": "快速定位 Cocos 專案中的 Asset 與對應 Node，降低查找與除錯成本。",
+    "clientUrl": "https://drive.google.com/file/d/1kMYnuUn3Cr_i3jvJpJV1FGj88884j__l/view",
+    "docUrl": "https://drive.google.com/drive/folders/1IwyXnTr7YYFwD40amQD_taqkKxsirEj2",
+    "tags": ["Cocos", "製程加速"],
+    "date": "2026-09-16"
+  },
+  {
+    "tab": "other", "category": "setting",
+    "name": "Genspark＋Obsidian 工作流",
+    "owner": "RD8_潘奕彰",
+    "desc": "串聯 Genspark 與 Obsidian，協助 AI 資料蒐集、整理與知識沉澱，將分散的研究資料整理成可持續累積與查找的工作流程。",
+    "clientUrl": "https://shimmering-pavlova-70a44b.netlify.app/",
+    "tags": ["Genspark", "Obsidian", "AI流程"],
+    "date": "2026-05-19"
+  },
+  {
+    "tab": "other", "category": "setting",
+    "name": "字型樣式大師",
+    "owner": "RD8_潘奕彰",
+    "desc": "一分鐘產一套字型，縮短字型製作時間。",
+    "clientUrl": "https://chatgpt.com/g/g-6a38f169aa748191816eebd420a9b310-zi-xing-yang-shi-da-shi",
+    "tags": ["GPTs", "字型", "產圖"],
+    "date": "2026-09-21"
+  },
+  {
+    "tab": "other", "category": "setting",
+    "name": "茶杯頭風格產生器(Slot)",
+    "owner": "RD8_潘奕彰",
+    "desc": "生成茶杯頭風格的素材。",
+    "clientUrl": "https://www.magnific.com/app/tools/flow/IhJHtvENY2",
+    "tags": ["Magnific", "產圖", "風格"],
+    "date": "2026-09-21"
+  },
+  {
+    "tab": "other", "category": "setting",
+    "name": "皇室戰爭風格產生器",
+    "owner": "RD8_潘奕彰",
+    "desc": "生成皇室戰爭風格的素材。",
+    "clientUrl": "https://www.magnific.com/app/tools/flow/51zgKxeWOs",
+    "tags": ["Magnific", "產圖", "風格"],
+    "date": "2026-09-21"
+  },
+  {
+    "tab": "other", "category": "setting",
+    "name": "皮克斯風格產生器",
+    "owner": "RD8_潘奕彰",
+    "desc": "生成皮克斯風格的素材，萬物可皮克斯。",
+    "clientUrl": "https://www.magnific.com/app/tools/flow/Vp5iMMUe94",
+    "tags": ["Magnific", "產圖", "風格"],
+    "date": "2026-09-21"
+  }
+]

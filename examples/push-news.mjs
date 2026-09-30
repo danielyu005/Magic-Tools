@@ -26,7 +26,7 @@ for (const data of items) {
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'shareNews', apiKey, data })
     }).then(r => r.json());
-    if (res.ok) { added++; console.log('✓', res.data.topic.padEnd(6), data.title || data.url); }
+    if (res.ok) { added++; console.log('✓', String(res.data?.topic || data.topic || '').padEnd(6), data.title || data.url); }
     else if (res.error?.code === 'duplicate') { skipped++; console.log('·', '略過（已存在）', data.url); }
     else { failed++; console.log('✗', res.error?.message, data.url); }
   } catch (e) {

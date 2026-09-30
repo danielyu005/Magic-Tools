@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://threads.com/t/DdxpXmqE8KR",
+    "topic": "aiimg",
+    "title": "Higgsfield + Seedance 2.5 生成的 VFX 鏡頭在 Threads 爆紅",
+    "source": "Threads @duetai56",
+    "publishedAt": "2026-09-27",
+    "excerpt": "創作者 Sheldon 發布一段以 Higgsfield 搭配 Seedance 2.5 生成的影片，標題直言「VFX 美術會討厭這個」，兩天內累積約 1,500 個讚。留言區正反意見兩極，也反映出 AI 影片生成在特效鏡頭上的表現，已經進入業界必須正視的階段。",
+    "note": "觀察 Seedance 2.5 目前能做到的特效鏡頭水準"
+  },
+  {
+    "url": "https://threads.com/t/Dd2vMUqAf7J",
+    "topic": "aiimg",
+    "title": "Kling 4.0 Flash 實測：水體與特效表現進步，破壞效果仍弱",
+    "source": "Threads @62song",
+    "publishedAt": "2026-09-29",
+    "excerpt": "韓國創作者 AREA 62 實測 Kling 4.0 Flash：水體表現與 VFX 特效明顯變好，但破壞類效果改善有限；過去動態模糊常出現的瑕疵似乎減少了，而自動加上背景音樂的習慣則跟 Seedance 類似。貼文附上測試用的圖片與提示詞。",
+    "note": "有附提示詞的第一手實測，可作為選模型時的參考"
+  },
+  {
+    "url": "https://threads.com/t/Dd2imbngKHM",
+    "topic": "aiimg",
+    "title": "Qwen Image 2.1 開源釋出，附 ComfyUI 工作流",
+    "source": "Threads @barbuprimeia",
+    "publishedAt": "2026-09-29",
+    "excerpt": "貼文指出 Qwen Image 2.1 已開源釋出權重，可在本機執行，並宣稱在官方評比表上勝過 Nano Banana 2。作者同時分享可直接執行的 ComfyUI 工作流，支援最多 4 張角色與場景參考圖。評比數據出自官方表格，實際表現仍需自行測試。",
+    "note": "可在本機跑的開源圖像模型，適合評估內部部署"
+  }
+]
