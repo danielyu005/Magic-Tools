@@ -13,3 +13,6 @@ node_modules/
 # 暫存
 *.log
 *.tmp
+
+# 含個人信箱，不公開
+examples/notion-authors.json
