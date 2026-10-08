@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ECEEF6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0F16" media="(prefers-color-scheme: dark)">
 <title>ART工具陳列窗</title>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
+<link rel="preconnect" href="https://accounts.google.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -21,9 +26,10 @@
   --font:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --display:"Bricolage Grotesque","Noto Sans TC","PingFang TC",system-ui,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
-  box-sizing:border-box;
+  box-sizing:border-box; color-scheme:light dark;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
+:root[data-theme="light"]{color-scheme:light}
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#111419; --paper:#1A1E26; --sunk:#151920; --ink:#E7EAF0; --muted:#98A0AE; --line:#2A303B; --line-strong:#3A4250;
@@ -34,25 +40,31 @@
   }
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --bg:#111419; --paper:#1A1E26; --sunk:#151920; --ink:#E7EAF0; --muted:#98A0AE; --line:#2A303B; --line-strong:#3A4250;
   --set:#8EA8F5; --set-soft:#1E2744; --set-dot:rgba(142,168,245,.22);
   --post:#EE93B7; --post-soft:#3A2130; --post-dot:rgba(238,147,183,.2);
   --ok:#6FD0A0; --ok-soft:#173327; --warn:#E9B458; --warn-soft:#3A2E14; --bad:#F08A82; --bad-soft:#3D1D1B;
   --btn-ink:#111419; --sh-1:0 1px 2px rgba(0,0,0,.3); --sh-2:0 14px 34px rgba(0,0,0,.45);
 }
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-tap-highlight-color:transparent}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 button,input,select,textarea{font:inherit;color:inherit}
+a,button,label,input,select,textarea,[role="button"]{touch-action:manipulation}
 :focus-visible{outline:2px solid var(--set);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:16px;top:-60px;z-index:100;background:var(--ink);color:var(--btn-ink);padding:8px 16px;border-radius:99px;text-decoration:none;font-weight:500}
+.skip:focus-visible{top:calc(12px + env(safe-area-inset-top,0px))}
+#panel:focus{outline:none}
 .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
 
 /* ---------- header ---------- */
 header.top{padding:40px 0 8px}
 .head-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,5.4vw,52px);line-height:1;margin:0;letter-spacing:-.02em}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,5.4vw,52px);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
 .sub{color:var(--muted);margin:10px 0 0;max-width:44ch}
 .head-actions{display:flex;gap:10px;flex-wrap:wrap}
 .btn{border:1px solid var(--line-strong);background:var(--paper);border-radius:999px;padding:9px 18px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:transform .15s var(--ease),box-shadow .15s var(--ease),border-color .15s,background .15s}
@@ -65,7 +77,7 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,5.4vw,52px);l
 .btn.ghost:hover{background:var(--sunk);border-color:transparent}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .btn svg{width:16px;height:16px;flex-shrink:0}
-.count-pill{display:inline-block;min-width:20px;padding:0 6px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:700;text-align:center;line-height:20px}
+.count-pill{display:inline-block;min-width:20px;padding:0 6px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:700;text-align:center;line-height:20px;font-variant-numeric:tabular-nums}
 
 /* ---------- source switcher ---------- */
 nav.tabs{display:flex;gap:6px;margin:30px 0 0;padding:6px;background:var(--paper);border-radius:18px;box-shadow:var(--sh-1);overflow-x:auto;scrollbar-width:none}
@@ -74,7 +86,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .tab .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--sunk);font-family:var(--display);font-weight:800;font-size:14px;transition:background .2s}
 .tab .code{display:block;font-family:var(--display);font-weight:700;font-size:16px;line-height:1.2}
 .tab .name{display:block;font-size:12.5px;color:var(--muted)}
-.tab .n{margin-left:auto;font-family:var(--display);font-weight:700;font-size:13px;color:var(--muted);padding-left:6px}
+.tab .n{margin-left:auto;font-family:var(--display);font-weight:700;font-size:13px;color:var(--muted);padding-left:6px;font-variant-numeric:tabular-nums}
 .tab:not([aria-selected="true"]):hover{background:var(--sunk)}
 .tab[aria-selected="true"]{background:var(--ink);color:var(--btn-ink)}
 .tab[aria-selected="true"] .name,.tab[aria-selected="true"] .n{color:inherit;opacity:.7}
@@ -87,9 +99,15 @@ nav.tabs::-webkit-scrollbar{display:none}
 .tile.feature{grid-row:span 2;display:grid;grid-template-columns:minmax(200px,1fr) 1.1fr;gap:18px;align-items:start;cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
 .tile.feature:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
 .tile.feature .cover{border-radius:16px}
-.tile.feature h3{margin:2px 0 4px;font-size:21px;line-height:1.3}
+.tile.feature h3{margin:2px 0 4px;font-size:21px;line-height:1.3;text-wrap:balance}
+/* 整張卡片可點：標題裡的按鈕用 ::after 撐滿卡片，卡片裡其他連結疊在上面 */
+.card-link{appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.card-link::after{content:"";position:absolute;inset:0;border-radius:20px;z-index:1}
+.card-link:focus-visible{outline:none}
+.card:has(.card-link:focus-visible),.tile.feature:has(.card-link:focus-visible){outline:2px solid var(--set);outline-offset:2px}
+.card-actions,.tile.feature .btn{position:relative;z-index:2}
 .tile.feature .f-sum{margin:8px 0 12px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.big-num{font-family:var(--display);font-weight:800;font-size:38px;line-height:1;letter-spacing:-.02em}
+.big-num{font-family:var(--display);font-weight:800;font-size:38px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .big-num small{font-size:14px;font-weight:500;color:var(--muted);margin-left:4px;font-family:var(--font)}
 .split-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--sunk);margin:12px 0 8px}
 .split-bar i{display:block;height:100%}
@@ -107,7 +125,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .chip .dot{width:9px;height:9px;border-radius:50%}
 .chip:hover{border-color:var(--ink)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink);border-color:var(--ink)}
-.chip .muted{color:inherit;opacity:.6}
+.chip .muted{color:inherit;opacity:.6;font-variant-numeric:tabular-nums}
 .search-wrap{position:relative;flex:0 1 300px}
 .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
 .search{width:100%;border:1px solid var(--line-strong);background:var(--paper);border-radius:999px;padding:8px 14px 8px 38px}
@@ -135,7 +153,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .fresh{font-size:12px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:99px;padding:2px 9px;display:inline-flex;align-items:center;gap:5px}
 .fresh::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .card-body{padding:0 6px;display:flex;flex-direction:column;gap:6px;flex:1}
-.card h3{margin:0;font-size:17px;line-height:1.35;font-weight:700;word-break:break-word}
+.card h3{margin:0;font-size:17px;line-height:1.35;font-weight:700;word-break:break-word;text-wrap:balance}
 .owner{font-size:13px;color:var(--muted)}
 .update-line{font-size:13.5px;color:var(--ink);background:var(--sunk);border-radius:10px;padding:8px 10px;margin-top:2px}
 .update-line .ver{font-family:var(--display);font-weight:700;margin-right:6px}
@@ -160,7 +178,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .step p{margin:0;color:var(--muted);font-size:14px}
 
 /* ---------- dialogs ---------- */
-dialog{border:none;border-radius:22px;padding:0;background:var(--paper);color:var(--ink);width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 30px 80px rgba(0,0,0,.28)}
+dialog{border:none;border-radius:22px;padding:0;background:var(--paper);color:var(--ink);width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 30px 80px rgba(0,0,0,.28);overscroll-behavior:contain;scroll-padding-top:80px}
 dialog::backdrop{background:rgba(15,20,30,.42);backdrop-filter:blur(3px)}
 dialog[open]{animation:pop .22s var(--ease)}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
@@ -175,7 +193,7 @@ dialog.sheet{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(480px,1
 dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
 .sheet .cover{border-radius:18px;margin-bottom:16px}
-.sheet h3{font-size:24px;margin:0 0 2px;line-height:1.3}
+.sheet .d-title{font-size:24px;margin:0 0 2px;line-height:1.3;text-wrap:balance}
 .sheet .desc{margin:0;white-space:pre-wrap}
 .desc-wrap{margin:12px 0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .desc-edit{margin:12px 0}
@@ -214,7 +232,8 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .sec-title{font-size:15px;margin:22px 0 4px}
 .sheet-foot{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:10px}
 .link-btn{background:none;border:none;padding:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px}
-.link-btn.danger{color:var(--bad)}
+.link-btn:hover{color:var(--ink);text-decoration-thickness:2px}
+.link-btn.danger,.link-btn.danger:hover{color:var(--bad)}
 
 /* form */
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk);border-radius:14px;padding:4px;margin-bottom:18px}
@@ -229,6 +248,7 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .field input[type=text],.field input[type=url],.field input[type=date],.field select,.field textarea{width:100%;border:1px solid var(--line);background:var(--sunk);border-radius:12px;padding:10px 12px;transition:border-color .15s,background .15s}
 .field input:focus,.field select:focus,.field textarea:focus{background:var(--paper);border-color:var(--set);outline:none;box-shadow:0 0 0 3px var(--set-soft)}
 .field textarea{min-height:84px;resize:vertical}
+.field select option,.field select optgroup{background-color:var(--paper);color:var(--ink)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .radio-row{display:flex;gap:8px;flex-wrap:wrap}
 .radio-row label{border:1px solid var(--line);background:var(--sunk);border-radius:12px;padding:8px 13px;cursor:pointer;display:flex;gap:7px;align-items:center;font-size:14px;transition:border-color .15s,background .15s}
@@ -262,7 +282,8 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .who #syncNow{font-size:12px}
 .who #syncNow:disabled{opacity:.5;cursor:default}
 .who .sync:not(:empty)::after{content:"・";margin-left:8px}
-.who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-width:0;max-width:100%}
+#whoName{min-width:0;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .who[hidden]{display:none}
 @media (max-width:560px){.cover-field{grid-template-columns:1fr}}
 .form-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;padding-top:16px;border-top:1px solid var(--line)}
@@ -314,7 +335,7 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .n-topic,.n-pin{font-weight:700;font-size:12px;border-radius:99px;padding:1px 9px}
 .n-topic{color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
 .n-pin{color:var(--warn);background:var(--warn-soft)}
-.n-card h4{margin:0;font-size:16px;line-height:1.4;word-break:break-word}
+.n-card h4{margin:0;font-size:16px;line-height:1.4;word-break:break-word;text-wrap:balance}
 .n-card h4 a{text-decoration:none}
 .n-card h4 a:hover{text-decoration:underline}
 .n-orig{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -339,6 +360,7 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
   .tab .ico{display:none}
   dialog.sheet{margin:auto 0 0;height:auto;max-height:88dvh;width:100vw;max-width:100vw;border-radius:22px 22px 0 0}
   dialog.sheet[open]{animation:slideUp .28s var(--ease)}
+  dialog.sheet .dlg-body{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
   @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
@@ -436,6 +458,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 </style>
 </head>
 <body>
+<a class="skip" href="#panel">跳到主要內容</a>
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></symbol>
@@ -449,19 +472,19 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 <header class="top wrap">
   <div class="head-row">
     <div>
-      <h1>ART工具陳列窗</h1>
+      <h1 translate="no">ART工具陳列窗</h1>
       <p class="sub">找到團隊正在用的美術工具，一鍵開啟，順便看看最近又改了什麼。</p>
     </div>
     <div class="head-actions">
       <span class="who" id="who" hidden><span class="sync" id="syncState" aria-live="polite"></span><button class="link-btn" type="button" id="syncNow" title="從後端抓最新的工具與文章">重新整理</button><span id="whoName"></span><button class="link-btn" type="button" id="signOut">登出</button></span>
       <button class="btn" id="openQueue" type="button">提交狀態 <span class="count-pill" id="queueCount" hidden>0</span></button>
-      <button class="btn primary" id="openSubmit" type="button"><svg><use href="#i-plus"/></svg>提交工具</button>
+      <button class="btn primary" id="openSubmit" type="button"><svg aria-hidden="true"><use href="#i-plus"/></svg>提交工具</button>
     </div>
   </div>
   <nav class="tabs" role="tablist" id="tabs" aria-label="工具來源"></nav>
 </header>
 
-<main class="wrap" id="panel" role="tabpanel">
+<main class="wrap" id="panel" role="tabpanel" tabindex="-1">
   <div id="banner"></div>
   <section class="news" id="news" hidden aria-labelledby="newsTitle">
     <div class="news-head">
@@ -471,11 +494,11 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
     <div class="chips" id="newsChips" role="group" aria-label="文章主題"></div>
     <div id="newsList"></div>
   </section>
-  <h2 class="sec-h" id="toolsHead" hidden>熱門趨勢工具</h2>
+  <h2 class="sec-h sr-only" id="toolsHead">內部成員工具</h2>
   <section class="overview" id="overview" aria-label="本頁籤概況"></section>
   <div class="toolbar">
     <div class="chips" id="chips" role="group" aria-label="工具分類"></div>
-    <label class="search-wrap"><svg><use href="#i-search"/></svg><input class="search" id="search" type="search" placeholder="搜尋名稱、負責人、標籤" aria-label="搜尋工具"></label>
+    <label class="search-wrap"><svg aria-hidden="true"><use href="#i-search"/></svg><input class="search" id="search" name="q" type="search" autocomplete="off" placeholder="搜尋名稱、負責人、標籤…" aria-label="搜尋工具"></label>
   </div>
   <div id="grid"></div>
 
@@ -505,16 +528,16 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
     </div>
     <div id="newFields">
       <div class="field"><label for="f-repo">GitHub／Repo 連結</label>
-        <div class="with-btn"><input type="url" id="f-repo" name="repoUrl" maxlength="500" placeholder="https://github.com/owner/repo"><button class="btn small" type="button" id="ghFill">從 GitHub 自動填入</button></div>
+        <div class="with-btn"><input type="url" id="f-repo" name="repoUrl" maxlength="500" autocomplete="off" placeholder="例如 https://github.com/owner/repo…"><button class="btn small" type="button" id="ghFill">從 GitHub 自動填入</button></div>
         <div class="gh-status" id="ghStatus">貼上 GitHub repo 網址，按按鈕就會帶入名稱、簡介、標籤、最新版本與封面。</div></div>
-      <div class="field"><span class="lbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="tabRadios"></div></div>
-      <div class="field"><span class="lbl">工具分類<span class="req">*</span></span><div class="radio-row" id="catRadios"></div></div>
+      <div class="field"><span class="lbl" id="tabRadiosLbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="tabRadios" role="radiogroup" aria-labelledby="tabRadiosLbl"></div></div>
+      <div class="field"><span class="lbl" id="catRadiosLbl">工具分類<span class="req">*</span></span><div class="radio-row" id="catRadios" role="radiogroup" aria-labelledby="catRadiosLbl"></div></div>
       <div class="field"><label for="f-name">工具名稱<span class="req">*</span></label><input type="text" id="f-name" name="name" maxlength="60" autocomplete="off"></div>
-      <div class="field"><label for="f-owner" id="ownerLabel">開發成員<span class="req">*</span></label><input type="text" id="f-owner" name="owner" maxlength="60"><div class="hint" id="ownerHint"></div></div>
-      <div class="field"><label for="f-authors">作者 Email</label><input type="text" id="f-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com" autocomplete="off"><div class="hint">列在這裡的人登入後可以編輯這個工具的資訊，多位以逗號分隔。</div></div>
+      <div class="field"><label for="f-owner" id="ownerLabel">開發成員<span class="req">*</span></label><input type="text" id="f-owner" name="owner" maxlength="60" autocomplete="off"><div class="hint" id="ownerHint"></div></div>
+      <div class="field"><label for="f-authors">作者 Email</label><input type="text" id="f-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com…" autocomplete="off" inputmode="email" spellcheck="false"><div class="hint">列在這裡的人登入後可以編輯這個工具的資訊，多位以逗號分隔。</div></div>
       <div class="field"><label for="f-desc">工具簡介<span class="req">*</span></label><textarea id="f-desc" name="desc" maxlength="300" placeholder="這個工具幫美術做什麼？一到三句即可。"></textarea></div>
-      <div class="field"><label for="f-client">客戶端網址<span class="req">*</span></label><input type="url" id="f-client" name="clientUrl" maxlength="500" placeholder="https://"><div class="hint">成員點「開啟工具」會前往的網址：網頁工具、下載頁或安裝說明頁。</div></div>
-      <div class="field"><label for="f-doc">使用說明連結</label><input type="url" id="f-doc" name="docUrl" maxlength="500" placeholder="https://"></div>
+      <div class="field"><label for="f-client">客戶端網址<span class="req">*</span></label><input type="url" id="f-client" name="clientUrl" maxlength="500" autocomplete="off" placeholder="例如 https://tool.example.com…"><div class="hint">成員點「開啟工具」會前往的網址：網頁工具、下載頁或安裝說明頁。</div></div>
+      <div class="field"><label for="f-doc">使用說明連結</label><input type="url" id="f-doc" name="docUrl" maxlength="500" autocomplete="off" placeholder="例如 https://wiki.example.com/tool…"></div>
       <div class="field"><label for="f-tags">標籤</label><input type="text" id="f-tags" name="tags" maxlength="200" placeholder="例如：Photoshop, 批次, 貼圖"><div class="hint">以逗號分隔，方便搜尋。</div></div>
     </div>
     <div id="updFields" hidden>
@@ -530,7 +553,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
         <div class="cover-drop" id="coverDrop"><div id="coverPreview"></div></div>
         <div class="cover-ops">
           <div class="row">
-            <label class="btn small" for="f-cover" tabindex="0">上傳圖片</label>
+            <label class="btn small" for="f-cover" tabindex="0" role="button">上傳圖片</label>
             <input type="file" id="f-cover" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
             <button class="btn small" type="button" id="coverShuffle">換一組配色</button>
             <button class="btn small ghost" type="button" id="coverClear" hidden>改用漸層封面</button>
@@ -555,15 +578,15 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 <dialog id="editDlg" aria-labelledby="editTitle">
   <div class="dlg-head"><h2 id="editTitle">編輯工具資訊</h2><button class="x" type="button" data-close aria-label="關閉">×</button></div>
   <form class="dlg-body" id="editForm" novalidate>
-    <div class="field"><span class="lbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="eTabRadios"></div></div>
-    <div class="field"><span class="lbl">工具分類<span class="req">*</span></span><div class="radio-row" id="eCatRadios"></div></div>
+    <div class="field"><span class="lbl" id="eTabRadiosLbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="eTabRadios" role="radiogroup" aria-labelledby="eTabRadiosLbl"></div></div>
+    <div class="field"><span class="lbl" id="eCatRadiosLbl">工具分類<span class="req">*</span></span><div class="radio-row" id="eCatRadios" role="radiogroup" aria-labelledby="eCatRadiosLbl"></div></div>
     <div class="field"><label for="e-name">工具名稱<span class="req">*</span></label><input type="text" id="e-name" name="name" maxlength="60" autocomplete="off"></div>
-    <div class="field"><label for="e-owner" id="eOwnerLabel">開發成員<span class="req">*</span></label><input type="text" id="e-owner" name="owner" maxlength="60"></div>
-    <div class="field"><label for="e-authors">作者 Email</label><input type="text" id="e-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com" autocomplete="off"><div class="hint">列在這裡的人登入後可以編輯這個工具，多位以逗號分隔。</div></div>
+    <div class="field"><label for="e-owner" id="eOwnerLabel">開發成員<span class="req">*</span></label><input type="text" id="e-owner" name="owner" maxlength="60" autocomplete="off"></div>
+    <div class="field"><label for="e-authors">作者 Email</label><input type="text" id="e-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com…" autocomplete="off" inputmode="email" spellcheck="false"><div class="hint">列在這裡的人登入後可以編輯這個工具，多位以逗號分隔。</div></div>
     <div class="field"><label for="e-desc">工具簡介<span class="req">*</span></label><textarea id="e-desc" name="desc" maxlength="300"></textarea></div>
-    <div class="field"><label for="e-client">客戶端網址<span class="req">*</span></label><input type="url" id="e-client" name="clientUrl" maxlength="500" placeholder="https://"></div>
-    <div class="field"><label for="e-repo">GitHub／Repo 連結</label><input type="url" id="e-repo" name="repoUrl" maxlength="500" placeholder="https://"></div>
-    <div class="field"><label for="e-doc">使用說明連結</label><input type="url" id="e-doc" name="docUrl" maxlength="500" placeholder="https://"></div>
+    <div class="field"><label for="e-client">客戶端網址<span class="req">*</span></label><input type="url" id="e-client" name="clientUrl" maxlength="500" autocomplete="off" placeholder="例如 https://tool.example.com…"></div>
+    <div class="field"><label for="e-repo">GitHub／Repo 連結</label><input type="url" id="e-repo" name="repoUrl" maxlength="500" autocomplete="off" placeholder="例如 https://github.com/owner/repo…"></div>
+    <div class="field"><label for="e-doc">使用說明連結</label><input type="url" id="e-doc" name="docUrl" maxlength="500" autocomplete="off" placeholder="例如 https://wiki.example.com/tool…"></div>
     <div class="field"><label for="e-tags">標籤</label><input type="text" id="e-tags" name="tags" maxlength="200"><div class="hint">以逗號分隔，最多 8 個。</div></div>
     <div class="form-foot"><span class="note">儲存後直接生效，不經審核。版本更新請用「回報更新」。</span><button class="btn primary" type="submit" id="editBtn">儲存</button></div>
     <div class="form-msg" id="editMsg" role="status"></div>
@@ -578,8 +601,8 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 <dialog id="shareDlg" aria-labelledby="shareTitle">
   <div class="dlg-head"><h2 id="shareTitle">分享文章</h2><button class="x" type="button" data-close aria-label="關閉">×</button></div>
   <form class="dlg-body" id="shareForm" novalidate>
-    <div class="field"><label for="s-url">文章網址<span class="req">*</span></label><input type="url" id="s-url" name="url" maxlength="500" placeholder="https://"><div class="hint">標題、摘要和縮圖會自動從網頁讀取，英文內容會翻成中文。</div></div>
-    <div class="field"><span class="lbl">主題</span><div class="radio-row" id="topicRadios"></div></div>
+    <div class="field"><label for="s-url">文章網址<span class="req">*</span></label><input type="url" id="s-url" name="url" maxlength="500" autocomplete="off" placeholder="例如 https://80.lv/articles/…"><div class="hint">標題、摘要和縮圖會自動從網頁讀取，英文內容會翻成中文。</div></div>
+    <div class="field"><span class="lbl" id="topicRadiosLbl">主題</span><div class="radio-row" id="topicRadios" role="radiogroup" aria-labelledby="topicRadiosLbl"></div></div>
     <div class="field"><label for="s-title">標題</label><input type="text" id="s-title" name="title" maxlength="200" placeholder="留空就自動讀取"></div>
     <div class="field"><label for="s-note">推薦一句話</label><textarea id="s-note" name="note" maxlength="200" placeholder="例如：用 Houdini 批次輸出爆炸序列圖，技能特效可以參考。"></textarea></div>
     <div class="form-foot"><span class="note">分享後會直接出現在產業趨勢頁籤。</span><button class="btn primary" type="submit" id="shareBtn">分享</button></div>
@@ -591,7 +614,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 
 <div class="gate" id="gate">
   <div class="tile gate-card">
-    <h1>ART工具陳列窗</h1>
+    <h1 translate="no">ART工具陳列窗</h1>
     <p id="gateText">請用 Google 帳號登入，白名單內的成員才能使用。</p>
     <div class="gsi" id="gsiBtn"></div>
     <div class="gate-msg" id="gateMsg" role="alert"></div>
@@ -613,18 +636,32 @@ const TOPICS = { vfx:{label:'特效', color:'var(--tp-vfx)'}, '3d':{label:'3D', 
 const FRESH_DAYS = 14;
 const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
-const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat:'all', q:'',
+// 頁籤放在 hash，分類、搜尋字、文章主題放在 query string，方便分享目前畫面的連結
+const QS = new URLSearchParams(location.search);
+const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat: Object.hasOwn(CATS, QS.get('cat')) ? QS.get('cat') : 'all', q: QS.get('q') || '',
   tools:[], subs:[], news:[], loaded:false, me:'', meName:'', admin:false, dbState:'loading', lastErr:'', detailId:null, descEdit:null, descDraft:'',
-  nTopic:'all', nOpen:{}, nHidden:false };
+  nTopic: Object.hasOwn(TOPICS, QS.get('topic')) ? QS.get('topic') : 'all', nOpen:{}, nHidden:false };
+function syncUrl(){
+  const p = new URLSearchParams();
+  if (S.cat !== 'all') p.set('cat', S.cat);
+  if (S.q.trim()) p.set('q', S.q.trim());
+  if (S.nTopic !== 'all') p.set('topic', S.nTopic);
+  const qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + '#' + S.tab);
+}
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl = u => { try { const x = new URL(u); return (x.protocol==='https:'||x.protocol==='http:') ? x.href : ''; } catch { return ''; } };
 const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const today = () => ymd(new Date());
-const fmtDate = s => s ? String(s).slice(0,10).replace(/-/g,'/') : '';
+const DATE_FMT = new Intl.DateTimeFormat('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit' });
+const TIME_FMT = new Intl.DateTimeFormat('zh-TW', { hour:'2-digit', minute:'2-digit', hourCycle:'h23' });
+const REL_FMT = new Intl.RelativeTimeFormat('zh-TW', { numeric:'auto' });
+// 後端日期取前 10 碼（YYYY-MM-DD）當成當地日期，避免被時區換算成前一天
+const fmtDate = s => { if (!s) return ''; const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? DATE_FMT.format(new Date(+m[1], m[2]-1, +m[3])) : String(s).slice(0,10); };
 const daysAgo = s => { const t = Date.parse(s); return isNaN(t) ? 1e9 : (Date.now()-t)/864e5; };
-const relDate = s => { const d = Math.floor(daysAgo(s)); if (d>=1e8) return ''; if (d<=0) return '今天'; if (d===1) return '昨天'; if (d<30) return d+' 天前'; return fmtDate(s); };
+const relDate = s => { const d = Math.floor(daysAgo(s)); if (d>=1e8) return ''; if (d<30) return REL_FMT.format(-Math.max(0, d), 'day'); return fmtDate(s); };
 const host = u => { try { return new URL(u).host; } catch { return ''; } };
 const icon = id => `<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const catOf = t => t.category in CATS ? t.category : 'setting';
@@ -671,8 +708,7 @@ function loadCache(token){
 }
 function renderSync(){
   const el = $('#syncState'); if (!el) return;
-  const hm = t => { const d = new Date(t); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-  el.textContent = S.syncing ? '同步中…' : isDirty() ? '有變更尚未同步' : (S.syncedAt ? '已同步 ' + hm(S.syncedAt) : '');
+  el.textContent = S.syncing ? '同步中…' : isDirty() ? '有變更尚未同步' : (S.syncedAt ? '已同步 ' + TIME_FMT.format(S.syncedAt) : '');
   $('#syncNow').disabled = !!S.syncing;
 }
 function setToken(t){
@@ -851,8 +887,8 @@ function renderTabs(){
   $('#tabs').innerHTML = Object.entries(TABS).map(([k,t]) => {
     let n = S.tools.filter(x=>x.tab===k).length;
     if (k==='trend') n += S.news.filter(x => TOPICS[x.topic] && safeUrl(x.url) && !x.hidden).length; // 產業趨勢頁籤也算每週精選的文章
-    return `<button class="tab" role="tab" type="button" data-tab="${k}" aria-selected="${S.tab===k}" id="tab-${k}">
-      <span class="ico">${esc(t.ico)}</span><span><span class="code">${esc(t.code)}</span><span class="name">${esc(t.name)}</span></span><span class="n">${S.loaded?n:''}</span></button>`;
+    return `<button class="tab" role="tab" type="button" data-tab="${k}" aria-selected="${S.tab===k}" tabindex="${S.tab===k?0:-1}" aria-controls="panel" id="tab-${k}">
+      <span class="ico" aria-hidden="true">${esc(t.ico)}</span><span><span class="code" translate="no">${esc(t.code)}</span><span class="name">${esc(t.name)}</span></span><span class="n">${S.loaded?n:''}</span></button>`;
   }).join('');
   $('#panel').setAttribute('aria-labelledby','tab-'+S.tab);
 }
@@ -866,11 +902,11 @@ function renderOverview(){
   const fresh = inTab.filter(isFresh).length;
   const nSet = inTab.filter(t=>catOf(t)==='setting').length, nPost = inTab.length - nSet;
   el.innerHTML = `
-    <article class="tile feature" data-detail="${esc(top.id)}" tabindex="0" aria-label="查看 ${esc(top.name)}">
+    <article class="tile feature">
       ${cover(top,false)}
       <div>
         <p class="t-label">最新動態${l?'・'+esc(relDate(l.date)):''}</p>
-        <h3>${esc(top.name)}</h3>
+        <h3><button class="card-link" type="button" data-detail="${esc(top.id)}" translate="no">${esc(top.name)}</button></h3>
         <div class="owner">${esc(TABS[top.tab]?.ownerLabel||'')}：${esc(top.owner||'未填')}</div>
         ${l?`<p class="f-sum">${l.version?`<b>${esc(l.version)}</b>　`:''}${esc(l.summary)}</p>`:''}
         ${safeUrl(top.clientUrl)?`<a class="btn primary small" href="${esc(safeUrl(top.clientUrl))}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟工具</a>`:''}
@@ -894,16 +930,17 @@ function renderBanner(){
 function renderWho(){
   $('#who').hidden = !S.me;
   $('#whoName').textContent = S.me ? `${S.meName || S.me}${S.admin ? '（管理者）' : ''}` : '';
+  $('#whoName').title = S.me;
 }
 function cardHTML(t){
   const l = latest(t), client = safeUrl(t.clientUrl), repo = safeUrl(t.repoUrl), doc = safeUrl(t.docUrl);
-  return `<article class="card" data-detail="${esc(t.id)}" tabindex="0" aria-label="查看 ${esc(t.name)}">
+  return `<article class="card">
     ${cover(t,true)}
     <div class="card-body">
-      <h3>${esc(t.name)}</h3>
+      <h3><button class="card-link" type="button" data-detail="${esc(t.id)}" translate="no">${esc(t.name)}</button></h3>
       <div class="owner">${esc(t.owner||'未填')}</div>
       ${t.desc?`<p class="c-desc">${esc(t.desc)}</p>`:''}
-      ${l?`<div class="update-line"><span class="d">${l.version?`<span class="ver">${esc(l.version)}</span>`:''}${esc(relDate(l.date))}更新</span><span class="s">${esc(l.summary)}</span></div>`:''}
+      ${l?`<div class="update-line"><span class="d">${l.version?`<span class="ver" translate="no">${esc(l.version)}</span>`:''}${esc(relDate(l.date))}更新</span><span class="s">${esc(l.summary)}</span></div>`:''}
     </div>
     <div class="card-actions">
       ${client?`<a class="btn primary small" href="${esc(client)}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟</a>`:''}
@@ -969,7 +1006,7 @@ function renderDetail(){
   $('#detailCrumb').textContent = `${TABS[t.tab]?.code||''}・${CATS[catOf(t)].label}`;
   $('#detailBody').innerHTML = `
     ${cover(t,true)}
-    <h3 id="detailTitle">${esc(t.name)}</h3>
+    <h2 class="d-title" id="detailTitle" translate="no">${esc(t.name)}</h2>
     <div class="owner">${esc(TABS[t.tab]?.ownerLabel||'負責人')}：${esc(t.owner||'未填')}</div>
     ${(t.authorNames||[]).length?`<div class="owner">作者：${esc(t.authorNames.join('、'))}</div>`:''}
     ${descHTML(t)}
@@ -980,12 +1017,12 @@ function renderDetail(){
         <button type="button" class="open-c" data-openclaude="${esc(t.id)}">在 Claude 開啟 ↗</button>
       </div>
     </div>
-    <h4 class="sec-title">更新紀錄</h4>
-    ${ups.length?`<ol class="timeline">${ups.map(u=>`<li><div class="h-meta">${u.version?`<b>${esc(u.version)}</b>`:''}${esc(fmtDate(u.date))}${u.via?`　（經由 ${esc(u.via)}）｜${esc(fmtDate(u.createdAt))}`:''}</div><p>${esc(u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
+    <h3 class="sec-title">更新紀錄</h3>
+    ${ups.length?`<ol class="timeline">${ups.map(u=>`<li><div class="h-meta">${u.version?`<b translate="no">${esc(u.version)}</b>`:''}${esc(fmtDate(u.date))}${u.via?`　（經由 ${esc(u.via)}）｜${esc(fmtDate(u.createdAt))}`:''}</div><p>${esc(u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
     <div class="sheet-foot">
       <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
       ${t.canEdit?`<button class="btn" type="button" data-edittool="${esc(t.id)}">編輯工具資訊</button>`:''}</span>
-      ${S.admin?`<span style="display:flex;gap:14px;align-items:center"><label class="link-btn" for="adminCover">更換封面</label>${coverSrc(t)?`<button class="link-btn" type="button" data-clearcover="${esc(t.id)}">改用漸層</button>`:''}<button class="link-btn danger" type="button" data-remove="${esc(t.id)}">下架</button></span>`:''}
+      ${S.admin?`<span style="display:flex;gap:14px;align-items:center"><button class="link-btn" type="button" data-pickcover>更換封面</button>${coverSrc(t)?`<button class="link-btn" type="button" data-clearcover="${esc(t.id)}">改用漸層</button>`:''}<button class="link-btn danger" type="button" data-remove="${esc(t.id)}">下架</button></span>`:''}
     </div>`;
   const ta = $('#descInput');
   if (ta && typing){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
@@ -1016,7 +1053,8 @@ function newsCard(n){
 }
 function renderNews(){
   const on = S.tab==='trend' && S.loaded;
-  $('#news').hidden = !on; $('#toolsHead').hidden = !on;
+  // 工具區標題：產業趨勢頁籤上看得到（跟文章區分開），其他頁籤只給報讀器，讓標題層級連續
+  $('#news').hidden = !on; $('#toolsHead').textContent = TABS[S.tab].name; $('#toolsHead').classList.toggle('sr-only', !on);
   if (!on) return;
   const all = visibleNews(), nHid = S.news.filter(n=>n.hidden).length;
   $('#newsActions').innerHTML = `
@@ -1570,10 +1608,28 @@ shareForm.addEventListener('submit', async e => {
 });
 
 /* ---------- events ---------- */
-function setTab(k){ S.tab=k; S.cat='all'; history.replaceState(null,'','#'+k); render(); }
+function setTab(k){ S.tab=k; S.cat='all'; syncUrl(); render(); }
+/* 表單填到一半時，關閉對話框或離開頁面前先確認 */
+function dlgDirty(d){
+  if (d.id === 'detailDlg') return !!S.descEdit && S.descDraft !== (S.tools.find(x=>x.id===S.descEdit)?.desc || '');
+  return d.dataset.dirty === '1';
+}
+function tryClose(d){
+  if (dlgDirty(d) && !confirm('有尚未送出的內容，確定要關閉嗎？填寫的內容會遺失。')) return;
+  d.close();
+}
+['#submitForm','#editForm','#shareForm'].forEach(sel => {
+  const f = $(sel), d = f.closest('dialog');
+  const mark = e => { if (e.isTrusted) d.dataset.dirty = '1'; };
+  f.addEventListener('input', mark); f.addEventListener('change', mark);
+  d.addEventListener('close', () => { delete d.dataset.dirty; });
+});
+window.addEventListener('beforeunload', e => {
+  if ([...document.querySelectorAll('dialog[open]')].some(dlgDirty)){ e.preventDefault(); e.returnValue = ''; }
+});
 document.addEventListener('click', e => {
   if (e.target.closest('a')) return;
-  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
+  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-pickcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
     + '[data-descedit],[data-descsave],[data-desccancel],[data-edittool],'
     + '[data-ntopic],[data-nmore],[data-npin],[data-nhide],[data-nshare],[data-nfetch],[data-ncopy],[data-nshowhidden]');
   if (!t) return;
@@ -1590,17 +1646,18 @@ document.addEventListener('click', e => {
   }
   else if (d.forclaude){ const tool=S.tools.find(x=>x.id===d.forclaude); if (tool) copyText(claudeMd(tool)).then(ok => toast(ok ? '已複製，貼到 Claude 對話就能使用。' : '複製失敗，請改用「在 Claude 開啟」。')); }
   else if (d.clearcover) setToolCover(d.clearcover, '');
+  else if (t.hasAttribute('data-pickcover')) $('#adminCover').click();
   else if (d.descedit){
     S.descEdit = d.descedit; S.descDraft = S.tools.find(x=>x.id===d.descedit)?.desc || ''; renderDetail();
     const ta = $('#descInput'); if (ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
   }
   else if (d.descsave) saveDesc(d.descsave, t);
   else if (t.hasAttribute('data-desccancel')){ S.descEdit = null; renderDetail(); }
-  else if (d.chip){ S.cat=d.chip; renderChips(); renderGrid(); }
+  else if (d.chip){ S.cat=d.chip; syncUrl(); renderChips(); renderGrid(); }
   else if (d.report) openSubmit({kind:'update', toolId:d.report});
   else if (d.edittool) openEdit(d.edittool);
   else if (d.remove) removeTool(d.remove);
-  else if (d.ntopic){ S.nTopic=d.ntopic; renderNews(); }
+  else if (d.ntopic){ S.nTopic=d.ntopic; syncUrl(); renderNews(); }
   else if (d.nmore){ S.nOpen[d.nmore]=true; renderNews(); }
   else if (d.npin){ t.disabled=true; setNews(d.npin, { pinned: !S.news.find(n=>n.id===d.npin)?.pinned }); }
   else if (d.nhide){ t.disabled=true; setNews(d.nhide, { hidden: !S.news.find(n=>n.id===d.nhide)?.hidden }); }
@@ -1609,18 +1666,20 @@ document.addEventListener('click', e => {
   else if (t.hasAttribute('data-nshowhidden')){ S.nHidden=!S.nHidden; renderNews(); }
   else if (t.hasAttribute('data-ncopy')) copyText(weeklyMd()).then(ok => toast(ok ? '已複製本週摘要（Markdown），可以貼到群組或 Claude。' : '複製失敗，請再試一次。'));
   else if (d.approve){ t.disabled=true; approve(d.approve); }
-  else if (d.reject){ t.disabled=true; reject(d.reject); }
-  else if (t.hasAttribute('data-close')) t.closest('dialog').close();
+  else if (d.reject){
+    const s = S.subs.find(x=>x.id===d.reject);
+    if (!confirm(`確定要退回「${s?.kind==='update' ? (S.tools.find(x=>x.id===s.toolId)?.name || s.toolName || '這筆更新') : (s?.name || '這筆提交')}」？退回後無法復原。`)) return;
+    t.disabled=true; reject(d.reject);
+  }
+  else if (t.hasAttribute('data-close')) tryClose(t.closest('dialog'));
   else if (t.hasAttribute('data-submit-here')) openSubmit();
   else if (d.detail) openDetail(d.detail);
 });
-document.addEventListener('keydown', e => {
-  if ((e.key==='Enter'||e.key===' ') && e.target.matches('[data-detail]')){ e.preventDefault(); openDetail(e.target.dataset.detail); }
-});
 $('#tabs').addEventListener('keydown', e => {
-  if (!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+  if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+  e.preventDefault();
   const keys = Object.keys(TABS); let i = keys.indexOf(S.tab);
-  i = (i + (e.key==='ArrowRight'?1:-1) + keys.length) % keys.length;
+  i = e.key==='Home' ? 0 : e.key==='End' ? keys.length-1 : (i + (e.key==='ArrowRight'?1:-1) + keys.length) % keys.length;
   setTab(keys[i]); $('#tab-'+S.tab).focus();
 });
 let searchT = 0;
@@ -1633,14 +1692,16 @@ $('#detailBody').addEventListener('keydown', e => {
   if (e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); S.descEdit = null; renderDetail(); }
   else if (e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); $('[data-descsave]')?.click(); }
 });
-$('#search').addEventListener('input', e => { S.q = e.target.value; clearTimeout(searchT); searchT = setTimeout(renderGrid, 120); });
+$('#search').value = S.q;
+$('#search').addEventListener('input', e => { S.q = e.target.value; clearTimeout(searchT); searchT = setTimeout(() => { syncUrl(); renderGrid(); }, 120); });
 $('#openSubmit').addEventListener('click', () => openSubmit());
 $('#openQueue').addEventListener('click', () => { renderQueue(); $('#queueDlg').showModal(); });
 /* 點遮罩關閉：按下和放開都要在遮罩上。在面板裡拖選文字、放開時滑出面板，click 會落在 dialog 本身，不能算 */
 document.querySelectorAll('dialog').forEach(d => {
   let downOnBackdrop = false;
   d.addEventListener('pointerdown', e => { downOnBackdrop = e.target===d; });
-  d.addEventListener('click', e => { if (e.target===d && downOnBackdrop) d.close(); downOnBackdrop = false; });
+  d.addEventListener('click', e => { if (e.target===d && downOnBackdrop) tryClose(d); downOnBackdrop = false; });
+  d.addEventListener('cancel', e => { if (dlgDirty(d)){ e.preventDefault(); tryClose(d); } }); // Esc
 });
 
 /* ---------- boot ---------- */
