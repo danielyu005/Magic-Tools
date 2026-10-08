@@ -2,7 +2,7 @@
 //
 //   ACD_API_KEY=acd_… node examples/push-tools.mjs tools.json
 //
-// JSON 是陣列，每筆：{ tab, category, name, owner, desc, clientUrl, repoUrl?, docUrl?, tags?, authors?, version?, date?, summary? }
+// JSON 是陣列，每筆：{ tab, category, name, owner, desc, clientUrl?, accessPath?, repoUrl?, docUrl?, tags?, authors?, version?, date?, summary? }
 // authors 是作者 Email 陣列，列在裡面的人登入後可以編輯這個工具。
 // 陳列窗上已有同名工具的會直接略過（審核中的提交 Agent 看不到，重跑前先確認佇列）。
 // ACD_API_URL 沒設時讀 web/config.js 的 API_URL。

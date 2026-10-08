@@ -210,6 +210,10 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .link-na .lt{display:flex;flex-direction:column}
 .link-na small{font-size:12px}
 .link-list a.main{background:var(--ink);color:var(--btn-ink)}
+.path-row{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 14px;border-radius:14px;background:var(--glass-soft);border:1px solid var(--glass-border)}
+.path-row>svg{width:18px;height:18px;flex-shrink:0}
+.path-row .lt{display:flex;flex-direction:column;min-width:0;flex:1}
+.path-row code{font-family:ui-monospace,Consolas,"Cascadia Mono",monospace;font-size:12.5px;word-break:break-all;user-select:all;opacity:.8}
 .claude-row{display:flex;align-items:stretch;border-radius:14px;background:linear-gradient(135deg,rgba(217,119,87,.14),rgba(217,119,87,.06));border:1px solid rgba(217,119,87,.35);overflow:hidden}
 .claude-row button{flex:1;display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;background:none;cursor:pointer;text-align:left;min-width:0}
 .claude-row button:hover{background:rgba(217,119,87,.10)}
@@ -466,6 +470,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
   <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
   <symbol id="i-spark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 6.3L20 7l-4.4 4.9L20 17l-6.1-1.3L12 22l-1.9-6.3L4 17l4.4-5.1L4 7l6.1 1.3z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
 </svg>
 
@@ -504,7 +509,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
 
   <section class="howto" aria-labelledby="howtoTitle">
     <h2 id="howtoTitle">怎麼把工具放上來</h2>
-    <div class="step"><span class="num">1</span><div><b>填寫工具資訊卡</b><p>選頁籤與分類，附上客戶端網址和一句更新大意；有 Repo 就一起貼。</p></div></div>
+    <div class="step"><span class="num">1</span><div><b>填寫工具資訊卡</b><p>選頁籤與分類，寫一句更新大意；有客戶端網址、共用電腦上的存取路徑或 Repo 就一起貼。</p></div></div>
     <div class="step"><span class="num">2</span><div><b>管理者審核</b><p>確認連結能開、分類正確後上架；需要調整會附上原因退回。</p></div></div>
     <div class="step"><span class="num">3</span><div><b>改版時回報更新</b><p>在工具詳情按「回報更新」，新版本會出現在資訊卡最上方。</p></div></div>
     <div class="step"><span class="num">4</span><div><b>追蹤提交狀態</b><p>右上角「提交狀態」隨時看到待審、已上架或被退回。</p></div></div>
@@ -536,7 +541,8 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
       <div class="field"><label for="f-owner" id="ownerLabel">開發成員<span class="req">*</span></label><input type="text" id="f-owner" name="owner" maxlength="60" autocomplete="off"><div class="hint" id="ownerHint"></div></div>
       <div class="field"><label for="f-authors">作者 Email</label><input type="text" id="f-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com…" autocomplete="off" inputmode="email" spellcheck="false"><div class="hint">列在這裡的人登入後可以編輯這個工具的資訊，多位以逗號分隔。</div></div>
       <div class="field"><label for="f-desc">工具簡介<span class="req">*</span></label><textarea id="f-desc" name="desc" maxlength="300" placeholder="這個工具幫美術做什麼？一到三句即可。"></textarea></div>
-      <div class="field"><label for="f-client">客戶端網址<span class="req">*</span></label><input type="url" id="f-client" name="clientUrl" maxlength="500" autocomplete="off" placeholder="例如 https://tool.example.com…"><div class="hint">成員點「開啟工具」會前往的網址：網頁工具、下載頁或安裝說明頁。</div></div>
+      <div class="field"><label for="f-client">客戶端網址</label><input type="url" id="f-client" name="clientUrl" maxlength="500" autocomplete="off" placeholder="例如 https://tool.example.com…"><div class="hint">成員點「開啟工具」會前往的網址：網頁工具、下載頁或安裝說明頁。沒有網址（例如工具放在共用電腦上）可以留空，改填下面的存取路徑。</div></div>
+      <div class="field"><label for="f-path">存取路徑</label><input type="text" id="f-path" name="accessPath" maxlength="300" autocomplete="off" spellcheck="false" translate="no" placeholder="例如 \\ART-PC01\Tools\PSD批次…"><div class="hint">工具放在共用電腦或網路磁碟上時填這裡，成員可以一鍵複製路徑，貼到檔案總管開啟。</div></div>
       <div class="field"><label for="f-doc">使用說明連結</label><input type="url" id="f-doc" name="docUrl" maxlength="500" autocomplete="off" placeholder="例如 https://wiki.example.com/tool…"></div>
       <div class="field"><label for="f-tags">標籤</label><input type="text" id="f-tags" name="tags" maxlength="200" placeholder="例如：Photoshop, 批次, 貼圖"><div class="hint">以逗號分隔，方便搜尋。</div></div>
     </div>
@@ -546,6 +552,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
         <button class="btn small" type="button" id="ghRelFill" hidden style="margin-top:6px">從 GitHub 最新 Release 帶入</button></div>
       <div class="field"><label for="f-newclient">新的客戶端網址</label><input type="url" id="f-newclient" name="newClientUrl" maxlength="500" placeholder="網址沒變就留空"></div>
       <div class="field"><label for="f-newdoc">新的使用說明連結</label><input type="url" id="f-newdoc" name="newDocUrl" maxlength="500" placeholder="沒有要補或更換就留空"></div>
+      <div class="field"><label for="f-newpath">新的存取路徑</label><input type="text" id="f-newpath" name="newAccessPath" maxlength="300" autocomplete="off" spellcheck="false" translate="no" placeholder="路徑沒變就留空"></div>
     </div>
     <div class="field">
       <span class="lbl" id="coverLabel">封面</span>
@@ -584,7 +591,8 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
     <div class="field"><label for="e-owner" id="eOwnerLabel">開發成員<span class="req">*</span></label><input type="text" id="e-owner" name="owner" maxlength="60" autocomplete="off"></div>
     <div class="field"><label for="e-authors">作者 Email</label><input type="text" id="e-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com…" autocomplete="off" inputmode="email" spellcheck="false"><div class="hint">列在這裡的人登入後可以編輯這個工具，多位以逗號分隔。</div></div>
     <div class="field"><label for="e-desc">工具簡介<span class="req">*</span></label><textarea id="e-desc" name="desc" maxlength="300"></textarea></div>
-    <div class="field"><label for="e-client">客戶端網址<span class="req">*</span></label><input type="url" id="e-client" name="clientUrl" maxlength="500" autocomplete="off" placeholder="例如 https://tool.example.com…"></div>
+    <div class="field"><label for="e-client">客戶端網址</label><input type="url" id="e-client" name="clientUrl" maxlength="500" autocomplete="off" placeholder="例如 https://tool.example.com…"></div>
+    <div class="field"><label for="e-path">存取路徑</label><input type="text" id="e-path" name="accessPath" maxlength="300" autocomplete="off" spellcheck="false" translate="no" placeholder="例如 \\ART-PC01\Tools\PSD批次…"><div class="hint">共用電腦或網路磁碟上的位置，沒有就留空。</div></div>
     <div class="field"><label for="e-repo">GitHub／Repo 連結</label><input type="url" id="e-repo" name="repoUrl" maxlength="500" autocomplete="off" placeholder="例如 https://github.com/owner/repo…"></div>
     <div class="field"><label for="e-doc">使用說明連結</label><input type="url" id="e-doc" name="docUrl" maxlength="500" autocomplete="off" placeholder="例如 https://wiki.example.com/tool…"></div>
     <div class="field"><label for="e-tags">標籤</label><input type="text" id="e-tags" name="tags" maxlength="200"><div class="hint">以逗號分隔，最多 8 個。</div></div>
@@ -909,7 +917,8 @@ function renderOverview(){
         <h3><button class="card-link" type="button" data-detail="${esc(top.id)}" translate="no">${esc(top.name)}</button></h3>
         <div class="owner">${esc(TABS[top.tab]?.ownerLabel||'')}：${esc(top.owner||'未填')}</div>
         ${l?`<p class="f-sum">${l.version?`<b>${esc(l.version)}</b>　`:''}${esc(l.summary)}</p>`:''}
-        ${safeUrl(top.clientUrl)?`<a class="btn primary small" href="${esc(safeUrl(top.clientUrl))}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟工具</a>`:''}
+        ${safeUrl(top.clientUrl)?`<a class="btn primary small" href="${esc(safeUrl(top.clientUrl))}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟工具</a>`
+          : top.accessPath?`<button class="btn primary small" type="button" data-copypath="${esc(top.id)}">${icon('folder')}複製路徑</button>`:''}
       </div>
     </article>
     <div class="tile"><p class="t-label">收錄工具</p><div class="big-num">${inTab.length}<small>個</small></div>
@@ -943,7 +952,8 @@ function cardHTML(t){
       ${l?`<div class="update-line"><span class="d">${l.version?`<span class="ver" translate="no">${esc(l.version)}</span>`:''}${esc(relDate(l.date))}更新</span><span class="s">${esc(l.summary)}</span></div>`:''}
     </div>
     <div class="card-actions">
-      ${client?`<a class="btn primary small" href="${esc(client)}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟</a>`:''}
+      ${client?`<a class="btn primary small" href="${esc(client)}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟</a>`
+        : t.accessPath?`<button class="btn primary small" type="button" data-copypath="${esc(t.id)}">${icon('folder')}複製路徑</button>`:''}
       <span class="spacer"></span>
       ${repo?`<a class="icon-btn" href="${esc(repo)}" target="_blank" rel="noopener noreferrer" title="Repo" aria-label="Repo">${icon('code')}</a>`:''}
       ${doc?`<a class="icon-btn" href="${esc(doc)}" target="_blank" rel="noopener noreferrer" title="使用說明" aria-label="使用說明">${icon('book')}</a>`:''}
@@ -1002,7 +1012,9 @@ function renderDetail(){
   const typing = document.activeElement?.id === 'descInput';
   const ups = Array.isArray(t.updates) ? t.updates : [];
   const links = [['main','open','開啟工具',t.clientUrl],['','code','Repo',t.repoUrl],['','book','使用說明',t.docUrl]]
-    .map(([cls,ic,label,u])=>{const x=safeUrl(u); if (x) return `<a class="${cls}" href="${esc(x)}" target="_blank" rel="noopener noreferrer">${icon(ic)}<span class="lt"><span>${label}</span><small>${esc(host(x))}</small></span></a>`; return label==='使用說明' ? `<div class="link-na">${icon(ic)}<span class="lt"><span>${label}</span><small>尚未提供，可在「回報更新」時補上</small></span></div>` : '';}).join('');
+    .map(([cls,ic,label,u])=>{const x=safeUrl(u); if (x) return `<a class="${cls}" href="${esc(x)}" target="_blank" rel="noopener noreferrer">${icon(ic)}<span class="lt"><span>${label}</span><small>${esc(host(x))}</small></span></a>`; return label==='使用說明' ? `<div class="link-na">${icon(ic)}<span class="lt"><span>${label}</span><small>尚未提供，可在「回報更新」時補上</small></span></div>`
+      : label==='開啟工具' && !t.accessPath ? `<div class="link-na">${icon(ic)}<span class="lt"><span>${label}</span><small>沒有線上網址，存取方式請看上方簡介或洽負責人</small></span></div>` : '';}).join('');
+  const pathRow = t.accessPath ? `<div class="path-row">${icon('folder')}<span class="lt"><span>存取路徑</span><code translate="no">${esc(t.accessPath)}</code></span><button class="btn small" type="button" data-copypath="${esc(t.id)}">複製路徑</button></div>` : '';
   $('#detailCrumb').textContent = `${TABS[t.tab]?.code||''}・${CATS[catOf(t)].label}`;
   $('#detailBody').innerHTML = `
     ${cover(t,true)}
@@ -1011,7 +1023,7 @@ function renderDetail(){
     ${(t.authorNames||[]).length?`<div class="owner">作者：${esc(t.authorNames.join('、'))}</div>`:''}
     ${descHTML(t)}
     ${(t.tags||[]).length?`<div class="tags">${t.tags.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
-    <div class="link-list">${links}
+    <div class="link-list">${pathRow}${links}
       <div class="claude-row">
         <button type="button" data-forclaude="${esc(t.id)}">${icon('spark').replace('<svg','<svg class="spark"')}<span class="lt"><span>For Claude</span><small>複製工具資訊，貼給 Claude 當背景</small></span></button>
         <button type="button" class="open-c" data-openclaude="${esc(t.id)}">在 Claude 開啟 ↗</button>
@@ -1133,6 +1145,7 @@ function claudeMd(t){
   if ((t.tags||[]).length) L.push(`- 標籤：${t.tags.join('、')}`);
   L.push('', '## 簡介', t.desc||'（未填）', '', '## 連結');
   if (safeUrl(t.clientUrl)) L.push(`- 客戶端：${safeUrl(t.clientUrl)}`);
+  if (t.accessPath) L.push(`- 存取路徑：${t.accessPath}`);
   if (safeUrl(t.repoUrl)) L.push(`- Repo：${safeUrl(t.repoUrl)}`);
   if (safeUrl(t.docUrl)) L.push(`- 使用說明：${safeUrl(t.docUrl)}`);
   if (ups.length){ L.push('', '## 近期更新'); ups.forEach(u => L.push(`- ${u.version?u.version+' ':''}(${fmtDate(u.date)})：${u.summary}`)); }
@@ -1143,6 +1156,7 @@ function claudeMdShort(t){
   return [`我想了解一個團隊美術工具「${t.name}」（${CATS[catOf(t)].label}，${TABS[t.tab]?.code||''}）。`,
     t.desc ? `簡介：${String(t.desc).slice(0,200)}` : '',
     safeUrl(t.clientUrl) ? `客戶端：${safeUrl(t.clientUrl)}` : '',
+    t.accessPath ? `存取路徑：${t.accessPath}` : '',
     safeUrl(t.repoUrl) ? `Repo：${safeUrl(t.repoUrl)}` : '',
     l ? `最新更新 ${l.version||''}：${String(l.summary).slice(0,200)}` : '',
     '請先閱讀以上資訊，接著我會問你怎麼使用它。'].filter(Boolean).join('\n');
@@ -1162,7 +1176,9 @@ function subSummary(s){
   const title = s.kind==='update' ? `更新：${esc(tool?.name || s.toolName || '已下架的工具')}` : esc(s.name);
   const where = s.kind==='update' ? '' : `${esc(TABS[s.tab]?.code||'')}・${esc(CATS[s.category]?.label||'')}`;
   const links = [['客戶端',s.kind==='update'?s.newClientUrl:s.clientUrl],['Repo',s.repoUrl],['說明',s.kind==='update'?s.newDocUrl:s.docUrl]]
-    .map(([l,u])=>{const x=safeUrl(u); return x?`${l}：<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${esc(x)}</a>`:''}).filter(Boolean).join('<br>');
+    .map(([l,u])=>{const x=safeUrl(u); return x?`${l}：<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${esc(x)}</a>`:''})
+    .concat([s.kind==='update'?s.newAccessPath:s.accessPath].map(p => p ? `存取路徑：<code translate="no">${esc(p)}</code>` : ''))
+    .filter(Boolean).join('<br>');
   return {title, where, links};
 }
 /* 作者顯示名字，滑過看 Email；後端還沒更新時只有 Email 就直接顯示 */
@@ -1303,20 +1319,20 @@ function collect(){
   const data = { kind, version:v('version'), date:v('date')||today(), summary:v('summary') };
   if (kind==='new'){
     Object.assign(data,{ tab:form.tab.value, category:form.category.value, name:v('name'), owner:v('owner'), desc:v('desc'),
-      clientUrl:v('clientUrl'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
+      clientUrl:v('clientUrl'), accessPath:v('accessPath'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
       tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8), authors:splitAuthors(v('authors')) });
     if (!TABS[data.tab]) errs.push([$('#tabRadios'),'請選擇所屬頁籤。']);
     if (!CATS[data.category]) errs.push([$('#catRadios'),'請選擇美術設定或美術後製。']);
     if (!data.name) errs.push([$('#f-name'),'請填寫工具名稱。']);
     if (!data.owner) errs.push([$('#f-owner'),'請填寫負責人或來源。']);
     if (!data.desc) errs.push([$('#f-desc'),'請用一到三句話說明工具用途。']);
-    if (!urlOk(data.clientUrl,true)) errs.push([$('#f-client'), data.clientUrl?'網址需以 https:// 或 http:// 開頭。':'客戶端網址是必填，這是成員開啟工具的入口。']);
+    if (!urlOk(data.clientUrl,false)) errs.push([$('#f-client'),'網址需以 https:// 或 http:// 開頭；共用電腦上的位置請改填存取路徑。']);
     if (!urlOk(data.repoUrl,false)) errs.push([$('#f-repo'),'網址需以 https:// 或 http:// 開頭。']);
     if (!urlOk(data.docUrl,false)) errs.push([$('#f-doc'),'網址需以 https:// 或 http:// 開頭。']);
     const badA = data.authors.filter(a=>!EMAIL_RE.test(a));
     if (badA.length) errs.push([$('#f-authors'),'Email 格式不對：'+badA.join('、')]);
   } else {
-    data.toolId = v('toolId'); data.newClientUrl = v('newClientUrl'); data.newDocUrl = v('newDocUrl');
+    data.toolId = v('toolId'); data.newClientUrl = v('newClientUrl'); data.newDocUrl = v('newDocUrl'); data.newAccessPath = v('newAccessPath');
     if (!urlOk(data.newDocUrl,false)) errs.push([$('#f-newdoc'),'網址需以 https:// 或 http:// 開頭。']);
     if (!S.tools.find(t=>t.id===data.toolId)) errs.push([$('#f-tool'),'請選擇要更新的工具。']);
     if (!urlOk(data.newClientUrl,false)) errs.push([$('#f-newclient'),'網址需以 https:// 或 http:// 開頭。']);
@@ -1365,7 +1381,7 @@ function openEdit(id){
   $('#editMsg').textContent = '';
   eform.tab.value = t.tab; eform.category.value = catOf(t);
   const set = (n, v) => { eform.elements[n].value = v || ''; };
-  set('name', t.name); set('owner', t.owner); set('desc', t.desc); set('clientUrl', t.clientUrl);
+  set('name', t.name); set('owner', t.owner); set('desc', t.desc); set('clientUrl', t.clientUrl); set('accessPath', t.accessPath);
   set('repoUrl', t.repoUrl); set('docUrl', t.docUrl); set('tags', (t.tags||[]).join(', ')); set('authors', (t.authors||[]).join(', '));
   syncEditOwner();
   $('#editBtn').disabled = S.dbState!=='on';
@@ -1380,7 +1396,7 @@ eform.addEventListener('submit', async e => {
   const v = n => (eform.elements[n]?.value || '').trim();
   const urlOk = (u, required) => u ? !!safeUrl(u) : !required;
   const data = { tab:eform.tab.value, category:eform.category.value, name:v('name'), owner:v('owner'), desc:v('desc'),
-    clientUrl:v('clientUrl'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
+    clientUrl:v('clientUrl'), accessPath:v('accessPath'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
     tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8), authors:splitAuthors(v('authors')) };
   const errs = [];
   if (!TABS[data.tab]) errs.push([$('#eTabRadios'),'請選擇所屬頁籤。']);
@@ -1388,7 +1404,7 @@ eform.addEventListener('submit', async e => {
   if (!data.name) errs.push([$('#e-name'),'請填寫工具名稱。']);
   if (!data.owner) errs.push([$('#e-owner'),'請填寫負責人或來源。']);
   if (!data.desc) errs.push([$('#e-desc'),'請用一到三句話說明工具用途。']);
-  if (!urlOk(data.clientUrl,true)) errs.push([$('#e-client'), data.clientUrl?'網址需以 https:// 或 http:// 開頭。':'客戶端網址是必填。']);
+  if (!urlOk(data.clientUrl,false)) errs.push([$('#e-client'),'網址需以 https:// 或 http:// 開頭；共用電腦上的位置請改填存取路徑。']);
   if (!urlOk(data.repoUrl,false)) errs.push([$('#e-repo'),'網址需以 https:// 或 http:// 開頭。']);
   if (!urlOk(data.docUrl,false)) errs.push([$('#e-doc'),'網址需以 https:// 或 http:// 開頭。']);
   const badA = data.authors.filter(a=>!EMAIL_RE.test(a));
@@ -1629,7 +1645,7 @@ window.addEventListener('beforeunload', e => {
 });
 document.addEventListener('click', e => {
   if (e.target.closest('a')) return;
-  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-pickcover],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
+  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-pickcover],[data-copypath],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
     + '[data-descedit],[data-descsave],[data-desccancel],[data-edittool],'
     + '[data-ntopic],[data-nmore],[data-npin],[data-nhide],[data-nshare],[data-nfetch],[data-ncopy],[data-nshowhidden]');
   if (!t) return;
@@ -1647,6 +1663,7 @@ document.addEventListener('click', e => {
   else if (d.forclaude){ const tool=S.tools.find(x=>x.id===d.forclaude); if (tool) copyText(claudeMd(tool)).then(ok => toast(ok ? '已複製，貼到 Claude 對話就能使用。' : '複製失敗，請改用「在 Claude 開啟」。')); }
   else if (d.clearcover) setToolCover(d.clearcover, '');
   else if (t.hasAttribute('data-pickcover')) $('#adminCover').click();
+  else if (d.copypath){ const p = S.tools.find(x=>x.id===d.copypath)?.accessPath; if (p) copyText(p).then(ok => toast(ok ? '已複製路徑，貼到檔案總管的網址列就能開啟。' : '複製失敗，請在工具詳情裡手動選取路徑。')); }
   else if (d.descedit){
     S.descEdit = d.descedit; S.descDraft = S.tools.find(x=>x.id===d.descedit)?.desc || ''; renderDetail();
     const ta = $('#descInput'); if (ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }

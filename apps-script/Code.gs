@@ -19,12 +19,12 @@
 const SHEETS = {
   members:     ['email', 'name', 'role', 'note'],
   tools:       ['id', 'tab', 'category', 'name', 'owner', 'desc', 'clientUrl', 'repoUrl', 'docUrl', 'tags', 'version',
-                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors'],
+                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors', 'accessPath'],
   updates:     ['toolId', 'date', 'version', 'summary', 'by', 'createdAt'],
   submissions: ['id', 'kind', 'status', 'source', 'toolId', 'toolName', 'tab', 'category', 'name', 'owner', 'desc',
                 'clientUrl', 'repoUrl', 'docUrl', 'newClientUrl', 'newDocUrl', 'tags', 'version', 'date', 'summary',
                 'coverFileId', 'coverSeed', 'coverTouched', 'submitter', 'createdAt', 'reviewer', 'reviewedAt', 'reviewNote',
-                'authors'],
+                'authors', 'accessPath', 'newAccessPath'],
   agents:      ['name', 'keyHash', 'ownerEmail', 'enabled', 'note', 'createdAt'],
   news:        ['id', 'url', 'title', 'titleZh', 'source', 'topic', 'excerpt', 'excerptZh', 'image', 'publishedAt',
                 'kind', 'by', 'note', 'status', 'pinned', 'createdAt'],
@@ -205,7 +205,7 @@ function list_(req, who) {
   const rawTools = readTable_('tools');
   const tools = rawTools.map(t => ({
     id: t.id, tab: t.tab, category: t.category, name: t.name, owner: t.owner, desc: t.desc,
-    clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, tags: splitTags_(t.tags), version: t.version,
+    clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, accessPath: t.accessPath, tags: splitTags_(t.tags), version: t.version,
     coverUrl: coverUrl_(t.coverFileId), coverSeed: Number(t.coverSeed) || 0, createdAt: t.createdAt, updatedAt: t.updatedAt,
     authorNames: splitTags_(t.authors).map(a => names[norm_(a)] || a.split('@')[0]),
     canEdit: canEditTool_(t, who),
@@ -227,6 +227,7 @@ function list_(req, who) {
       id: s.id, kind: s.kind, status: s.status, source: s.source, toolId: s.toolId, toolName: s.toolName,
       tab: s.tab, category: s.category, name: s.name, owner: s.owner, desc: s.desc,
       clientUrl: s.clientUrl, repoUrl: s.repoUrl, docUrl: s.docUrl, newClientUrl: s.newClientUrl, newDocUrl: s.newDocUrl,
+      accessPath: s.accessPath, newAccessPath: s.newAccessPath,
       tags: splitTags_(s.tags), authors: splitTags_(s.authors),
       authorNames: splitTags_(s.authors).map(a => names[norm_(a)] || a.split('@')[0]),
       version: s.version, date: s.date, summary: s.summary,
@@ -252,6 +253,7 @@ function submit_(req, who) {
         id, kind: d.kind, status: 'pending', source: who.kind === 'agent' ? 'agent:' + who.agent : 'web',
         toolId: d.toolId, toolName: d.toolName, tab: d.tab, category: d.category, name: d.name, owner: d.owner, desc: d.desc,
         clientUrl: d.clientUrl, repoUrl: d.repoUrl, docUrl: d.docUrl, newClientUrl: d.newClientUrl, newDocUrl: d.newDocUrl,
+        accessPath: d.accessPath, newAccessPath: d.newAccessPath,
         tags: d.tags.join(', '), authors: d.authors.join(', '), version: d.version, date: d.date, summary: d.summary,
         coverFileId, coverSeed: d.coverSeed, coverTouched: d.coverTouched ? 'TRUE' : 'FALSE',
         submitter: who.email, createdAt: nowIso_()
@@ -277,6 +279,7 @@ function approve_(req, who) {
       if (sub.version) patch.version = sub.version;
       if (sub.newClientUrl) patch.clientUrl = sub.newClientUrl;
       if (sub.newDocUrl) patch.docUrl = sub.newDocUrl;
+      if (sub.newAccessPath) patch.accessPath = sub.newAccessPath;
       if (bool_(sub.coverTouched)) {
         patch.coverSeed = sub.coverSeed;
         patch.coverFileId = sub.coverFileId;
@@ -292,7 +295,7 @@ function approve_(req, who) {
         id: toolId, tab: sub.tab, category: sub.category, name: sub.name, owner: sub.owner, desc: sub.desc,
         clientUrl: sub.clientUrl, repoUrl: sub.repoUrl, docUrl: sub.docUrl, tags: sub.tags, version: sub.version,
         coverFileId: sub.coverFileId, coverSeed: sub.coverSeed, submitter: sub.submitter, createdAt: now, updatedAt: now,
-        authors: sub.authors
+        authors: sub.authors, accessPath: sub.accessPath
       }]);
     }
     appendRows_('updates', [{ toolId, date: sub.date || today_(), version: sub.version, summary: sub.summary, by: sub.submitter, createdAt: now }]);
@@ -382,9 +385,10 @@ function updateTool_(req, who) {
   text('name', 60, '工具名稱');
   text('owner', 60, '負責人');
   text('desc', 300, '工具簡介');
-  url('clientUrl', true);
+  url('clientUrl', false); // 放在共用電腦上的工具沒有網址，可以留空
   url('repoUrl', false);
   url('docUrl', false);
+  if (has('accessPath')) { const p = accessPath_(d.accessPath, bad); if (p !== null) patch.accessPath = p; }
   if (has('tags')) patch.tags = parseTags_(d.tags).join(', ');
   if (has('authors')) patch.authors = parseAuthors_(d.authors, bad).join(', ');
   if (bad.length) throw err_('invalid', '欄位有誤：' + bad.join('；'));
@@ -730,7 +734,7 @@ function validate_(d) {
   const bad = [];
   const out = {
     kind, toolId: '', toolName: '', tab: '', category: '', name: '', owner: '', desc: '', clientUrl: '', repoUrl: '', docUrl: '',
-    newClientUrl: '', newDocUrl: '', tags: [], authors: [],
+    newClientUrl: '', newDocUrl: '', accessPath: '', newAccessPath: '', tags: [], authors: [],
     version: str_(d.version, 20),
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(d.date || '')) ? String(d.date) : today_(),
     summary: str_(d.summary, 500),
@@ -750,19 +754,29 @@ function validate_(d) {
     out.name = str_(d.name, 60) || (bad.push('name 必填'), '');
     out.owner = str_(d.owner, 60) || (bad.push('owner 必填'), '');
     out.desc = str_(d.desc, 300) || (bad.push('desc 必填'), '');
-    out.clientUrl = url('clientUrl', true);
+    out.clientUrl = url('clientUrl', false); // 放在共用電腦上的工具沒有網址，可以留空
     out.repoUrl = url('repoUrl', false);
     out.docUrl = url('docUrl', false);
+    out.accessPath = accessPath_(d.accessPath, bad) || '';
     out.tags = parseTags_(d.tags);
     out.authors = parseAuthors_(d.authors, bad);
   } else {
     out.toolId = str_(d.toolId, 40) || (bad.push('toolId 必填'), '');
     out.newClientUrl = url('newClientUrl', false);
     out.newDocUrl = url('newDocUrl', false);
+    out.newAccessPath = accessPath_(d.newAccessPath, bad) || '';
   }
   if (!out.summary) bad.push('summary 必填');
   if (bad.length) throw err_('invalid', '欄位有誤：' + bad.join('；'));
   return out;
+}
+
+/** 存取路徑：放在共用電腦或網路磁碟上的工具位置（例如 \\ART-PC01\Tools），只當文字顯示、讓人複製，不會變成連結。格式不對回傳 null */
+function accessPath_(v, bad) {
+  const s = String(v === null || v === undefined ? '' : v).trim();
+  if (/[\r\n]/.test(s)) { bad.push('存取路徑只能有一行'); return null; }
+  if (s.length > 300) { bad.push('存取路徑最多 300 字'); return null; }
+  return s;
 }
 
 function parseTags_(v) {

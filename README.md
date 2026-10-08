@@ -145,7 +145,8 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
     "name": "PSD 批次輸出",
     "owner": "小明",
     "desc": "把 PSD 圖層批次輸出成 PNG。",
-    "clientUrl": "https://…",  // 必填
+    "clientUrl": "https://…",  // 選填，沒有網址（例如放在共用電腦上）就留空
+    "accessPath": "\\\\ART-PC01\\Tools\\PSD批次",  // 選填，共用電腦或網路磁碟上的位置，網頁上會顯示「複製路徑」
     "repoUrl": "https://github.com/…",
     "docUrl": "",
     "tags": ["Photoshop", "批次"],
@@ -164,7 +165,7 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
 ```jsonc
 // 編輯工具資訊（直接生效，不經審核）。只改有帶的欄位；Agent 金鑰只能改記在擁有者名下的工具
 { "action": "updateTool", "apiKey": "acd_…", "id": "t…", "data": {
-    "authors": ["someone@gmail.com"]  // 也可以帶 tab、category、name、owner、desc、clientUrl、repoUrl、docUrl、tags
+    "authors": ["someone@gmail.com"]  // 也可以帶 tab、category、name、owner、desc、clientUrl、accessPath、repoUrl、docUrl、tags
 }}
 ```
 
