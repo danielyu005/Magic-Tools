@@ -1097,7 +1097,7 @@ function renderDetail(){
     <h3 class="sec-title">更新紀錄</h3>
     ${hist.length?`<ol class="timeline">${hist.map(h => h.edit
       ? `<li class="edit"><div class="h-meta"><span class="h-kind">編輯</span>${esc(fmtAt(h.edit.at))}${h.edit.byName?`・${esc(h.edit.byName)}`:''}</div><p>編輯了工具資訊${(h.edit.fields||[]).length?`：${esc(h.edit.fields.join('、'))}`:''}</p></li>`
-      : `<li><div class="h-meta">${h.u.version?`<b translate="no">${esc(h.u.version)}</b>`:''}${esc(fmtDate(h.u.date))}${h.u.via?`　（經由 ${esc(h.u.via)}）｜${esc(fmtDate(h.u.createdAt))}`:''}</div><p>${esc(h.u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
+      : `<li><div class="h-meta">${h.u.version?`<b translate="no">${esc(h.u.version)}</b>`:''}${esc(fmtDate(h.u.date))}</div><p>${esc(h.u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
     <div class="sheet-foot">
       <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
       ${t.canEdit?`<button class="btn" type="button" data-edittool="${esc(t.id)}">編輯工具資訊</button>`:''}</span>
