@@ -113,6 +113,15 @@ nav.tabs::-webkit-scrollbar{display:none}
 .split-bar i{display:block;height:100%}
 .legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
 .legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
+/* 「近期更新」磚塊：點了捲到下方的近期更新區塊 */
+button.tile{appearance:none;border:0;font:inherit;color:inherit;text-align:left;width:100%;display:block}
+.tile.tile-link{cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.tile.tile-link:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.tile.tile-link:focus-visible{outline:2px solid var(--set);outline-offset:2px}
+.tile .go{display:inline-flex;align-items:center;gap:4px;margin-top:10px;font-size:13px;font-weight:600}
+.recent{scroll-margin-top:20px}
+.recent .sec-h{margin:0}
+.recent > p{margin:4px 0 14px;color:var(--muted);font-size:14px}
 .tile.cta{background:var(--ink);color:var(--btn-ink);display:flex;flex-direction:column;justify-content:space-between;gap:10px}
 .tile.cta p{margin:0;font-size:14px;opacity:.75}
 .tile.cta b{font-size:17px}
@@ -155,6 +164,14 @@ nav.tabs::-webkit-scrollbar{display:none}
 .card-body{padding:0 6px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card h3{margin:0;font-size:17px;line-height:1.35;font-weight:700;word-break:break-word;text-wrap:balance}
 .owner{font-size:13px;color:var(--muted)}
+/* 目前狀態（對應 Notion「目前狀態」）：可展示／Prototype／開發中／待補資料 */
+.stage{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;line-height:1.5;border-radius:99px;padding:1px 9px;white-space:nowrap;color:var(--sc);background:var(--sb);vertical-align:1px}
+.stage::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.stage[data-stage="ready"]{--sc:var(--ok);--sb:var(--ok-soft)}
+.stage[data-stage="prototype"]{--sc:var(--set);--sb:var(--set-soft)}
+.stage[data-stage="dev"]{--sc:var(--warn);--sb:var(--warn-soft)}
+.stage[data-stage="todo"]{--sc:var(--muted);--sb:var(--sunk)}
+.owner .stage{margin-left:8px}
 .update-line{font-size:13.5px;color:var(--ink);background:var(--sunk);border-radius:10px;padding:8px 10px;margin-top:2px}
 .update-line .ver{font-family:var(--display);font-weight:700;margin-right:6px}
 .update-line .d{color:var(--muted);font-size:12.5px;display:block}
@@ -506,6 +523,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
     <label class="search-wrap"><svg aria-hidden="true"><use href="#i-search"/></svg><input class="search" id="search" name="q" type="search" autocomplete="off" placeholder="搜尋名稱、負責人、標籤…" aria-label="搜尋工具"></label>
   </div>
   <div id="grid"></div>
+  <section class="recent" id="recent" aria-labelledby="recentTitle" hidden></section>
 
   <section class="howto" aria-labelledby="howtoTitle">
     <h2 id="howtoTitle">怎麼把工具放上來</h2>
@@ -537,6 +555,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
         <div class="gh-status" id="ghStatus">貼上 GitHub repo 網址，按按鈕就會帶入名稱、簡介、標籤、最新版本與封面。</div></div>
       <div class="field"><span class="lbl" id="tabRadiosLbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="tabRadios" role="radiogroup" aria-labelledby="tabRadiosLbl"></div></div>
       <div class="field"><span class="lbl" id="catRadiosLbl">工具分類<span class="req">*</span></span><div class="radio-row" id="catRadios" role="radiogroup" aria-labelledby="catRadiosLbl"></div></div>
+      <div class="field"><label for="f-stage">目前狀態</label><select id="f-stage" name="stage" data-stage-select="未標示"></select><div class="hint">還在開發的工具也可以先上架，之後用「回報更新」改成可展示。</div></div>
       <div class="field"><label for="f-name">工具名稱<span class="req">*</span></label><input type="text" id="f-name" name="name" maxlength="60" autocomplete="off"></div>
       <div class="field"><label for="f-owner" id="ownerLabel">開發成員<span class="req">*</span></label><input type="text" id="f-owner" name="owner" maxlength="60" autocomplete="off"><div class="hint" id="ownerHint"></div></div>
       <div class="field"><label for="f-authors">作者 Email</label><input type="text" id="f-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com…" autocomplete="off" inputmode="email" spellcheck="false"><div class="hint">列在這裡的人登入後可以編輯這個工具的資訊，多位以逗號分隔。</div></div>
@@ -552,6 +571,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
         <button class="btn small" type="button" id="ghRelFill" hidden style="margin-top:6px">從 GitHub 最新 Release 帶入</button></div>
       <div class="field"><label for="f-newclient">新的客戶端網址</label><input type="url" id="f-newclient" name="newClientUrl" maxlength="500" placeholder="網址沒變就留空"></div>
       <div class="field"><label for="f-newdoc">新的使用說明連結</label><input type="url" id="f-newdoc" name="newDocUrl" maxlength="500" placeholder="沒有要補或更換就留空"></div>
+      <div class="field"><label for="f-newstage">目前狀態改為</label><select id="f-newstage" name="newStage" data-stage-select="不變"></select></div>
       <div class="field"><label for="f-newpath">新的存取路徑</label><input type="text" id="f-newpath" name="newAccessPath" maxlength="300" autocomplete="off" spellcheck="false" translate="no" placeholder="路徑沒變就留空"></div>
     </div>
     <div class="field">
@@ -587,6 +607,7 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
   <form class="dlg-body" id="editForm" novalidate>
     <div class="field"><span class="lbl" id="eTabRadiosLbl">所屬頁籤<span class="req">*</span></span><div class="radio-row" id="eTabRadios" role="radiogroup" aria-labelledby="eTabRadiosLbl"></div></div>
     <div class="field"><span class="lbl" id="eCatRadiosLbl">工具分類<span class="req">*</span></span><div class="radio-row" id="eCatRadios" role="radiogroup" aria-labelledby="eCatRadiosLbl"></div></div>
+    <div class="field"><label for="e-stage">目前狀態</label><select id="e-stage" name="stage" data-stage-select="未標示"></select></div>
     <div class="field"><label for="e-name">工具名稱<span class="req">*</span></label><input type="text" id="e-name" name="name" maxlength="60" autocomplete="off"></div>
     <div class="field"><label for="e-owner" id="eOwnerLabel">開發成員<span class="req">*</span></label><input type="text" id="e-owner" name="owner" maxlength="60" autocomplete="off"></div>
     <div class="field"><label for="e-authors">作者 Email</label><input type="text" id="e-authors" name="authors" maxlength="500" placeholder="例如 someone@gmail.com, lead@gmail.com…" autocomplete="off" inputmode="email" spellcheck="false"><div class="hint">列在這裡的人登入後可以編輯這個工具，多位以逗號分隔。</div></div>
@@ -642,6 +663,7 @@ const TOPICS = { vfx:{label:'特效', color:'var(--tp-vfx)'}, '3d':{label:'3D', 
   tool:{label:'美術工具', color:'var(--tp-tool)'}, spine:{label:'Spine', color:'var(--tp-spine)'},
   aiimg:{label:'AI 圖像生成', color:'var(--tp-aiimg)'}, ai:{label:'AI 輔助工具', color:'var(--tp-ai)'} };
 const FRESH_DAYS = 14;
+const STAGES = { ready:{label:'可展示'}, prototype:{label:'Prototype'}, dev:{label:'開發中'}, todo:{label:'待補資料'} };
 const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
 // 頁籤放在 hash，分類、搜尋字、文章主題放在 query string，方便分享目前畫面的連結
@@ -869,6 +891,8 @@ function coverHTML({key, name, cat, seed, src, fresh}){
   if (src) return `<div class="cover" data-cat="${c}">${badges}<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>`;
   return `<div class="cover" data-cat="${c}" style="${genStyle(key,seed)}">${badges}<i class="b b1"></i><i class="b b2"></i><i class="b b3"></i><span class="grain"></span><span class="c-title">${esc(String(name||'').replace(/^[（(][^）)]*[）)]/,'').trim()||'未命名工具')}</span></div>`;
 }
+const stageOf = t => STAGES[t?.stage] ? t.stage : '';
+const stagePill = k => STAGES[k] ? `<span class="stage" data-stage="${k}">${esc(STAGES[k].label)}</span>` : '';
 const cover = (t, fresh) => coverHTML({key:t.id, name:t.name, cat:t.category, seed:t.coverSeed||0, src:coverSrc(t), fresh:fresh&&isFresh(t)});
 
 /* image (File/Blob) → resized JPEG data URI (16:9 center crop) */
@@ -915,7 +939,7 @@ function renderOverview(){
       <div>
         <p class="t-label">最新動態${l?'・'+esc(relDate(l.date)):''}</p>
         <h3><button class="card-link" type="button" data-detail="${esc(top.id)}" translate="no">${esc(top.name)}</button></h3>
-        <div class="owner">${esc(TABS[top.tab]?.ownerLabel||'')}：${esc(top.owner||'未填')}</div>
+        <div class="owner">${esc(TABS[top.tab]?.ownerLabel||'')}：${esc(top.owner||'未填')}${stagePill(stageOf(top))}</div>
         ${l?`<p class="f-sum">${l.version?`<b>${esc(l.version)}</b>　`:''}${esc(l.summary)}</p>`:''}
         ${safeUrl(top.clientUrl)?`<a class="btn primary small" href="${esc(safeUrl(top.clientUrl))}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟工具</a>`
           : top.accessPath?`<button class="btn primary small" type="button" data-copypath="${esc(top.id)}">${icon('folder')}複製路徑</button>`:''}
@@ -924,7 +948,9 @@ function renderOverview(){
     <div class="tile"><p class="t-label">收錄工具</p><div class="big-num">${inTab.length}<small>個</small></div>
       <div class="split-bar"><i style="width:${nSet/inTab.length*100}%;background:var(--set)"></i><i style="width:${nPost/inTab.length*100}%;background:var(--post)"></i></div>
       <div class="legend"><span style="--c:var(--set)">設定 ${nSet}</span><span style="--c:var(--post)">後製 ${nPost}</span></div></div>
-    <div class="tile"><p class="t-label">近 ${FRESH_DAYS} 天有更新</p><div class="big-num">${fresh}<small>個</small></div><p class="muted" style="margin:10px 0 0;font-size:13px">${fresh?'資訊卡上標示「近期更新」':'最近比較安靜'}</p></div>
+    ${fresh
+      ? `<button class="tile tile-link" type="button" data-gorecent aria-controls="recent"><p class="t-label">近 ${FRESH_DAYS} 天有更新</p><div class="big-num">${fresh}<small>個</small></div><span class="go">查看近期更新 ↓</span></button>`
+      : `<div class="tile"><p class="t-label">近 ${FRESH_DAYS} 天有更新</p><div class="big-num">0<small>個</small></div><p class="muted" style="margin:10px 0 0;font-size:13px">最近比較安靜</p></div>`}
     <div class="tile cta" style="grid-column:span 2"><div><b>你也做了好用的工具？</b><p>填一張資訊卡，讓整個團隊都找得到。</p></div><button class="btn small" type="button" data-submit-here>${icon('plus')}提交到 ${esc(TABS[S.tab].code)}</button></div>`;
 }
 function renderChips(){
@@ -947,7 +973,7 @@ function cardHTML(t){
     ${cover(t,true)}
     <div class="card-body">
       <h3><button class="card-link" type="button" data-detail="${esc(t.id)}" translate="no">${esc(t.name)}</button></h3>
-      <div class="owner">${esc(t.owner||'未填')}</div>
+      <div class="owner">${esc(t.owner||'未填')}${stagePill(stageOf(t))}</div>
       ${t.desc?`<p class="c-desc">${esc(t.desc)}</p>`:''}
       ${l?`<div class="update-line"><span class="d">${l.version?`<span class="ver" translate="no">${esc(l.version)}</span>`:''}${esc(relDate(l.date))}更新</span><span class="s">${esc(l.summary)}</span></div>`:''}
     </div>
@@ -965,7 +991,7 @@ function renderGrid(){
   if (!S.loaded && S.dbState!=='off'){ g.innerHTML = `<div class="empty">正在載入工具清單…</div>`; return; }
   const q = S.q.trim().toLowerCase();
   let list = S.tools.filter(t => t.tab===S.tab && (S.cat==='all' || catOf(t)===S.cat));
-  if (q) list = list.filter(t => [t.name,t.owner,t.desc,(t.tags||[]).join(' ')].join(' ').toLowerCase().includes(q));
+  if (q) list = list.filter(t => [t.name,t.owner,t.desc,(t.tags||[]).join(' '),STAGES[stageOf(t)]?.label||''].join(' ').toLowerCase().includes(q));
   list.sort((a,b) => String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
   if (!list.length){
     const tab = TABS[S.tab], catName = S.cat==='all' ? '' : CATS[S.cat].label;
@@ -975,6 +1001,23 @@ function renderGrid(){
     return;
   }
   g.innerHTML = `<div class="grid">${list.map(cardHTML).join('')}</div>`;
+}
+/* 近期更新：本頁籤近 FRESH_DAYS 天有新增或更新的工具，不受分類與搜尋影響 */
+function renderRecent(){
+  const el = $('#recent');
+  const list = S.loaded ? S.tools.filter(t => t.tab===S.tab && isFresh(t)) : [];
+  if (!list.length){ el.hidden = true; el.innerHTML = ''; return; }
+  list.sort((a,b) => String(latest(b)?.date||'').localeCompare(String(latest(a)?.date||'')));
+  el.hidden = false;
+  el.innerHTML = `<h2 class="sec-h" id="recentTitle" tabindex="-1">近期更新</h2>
+    <p>近 ${FRESH_DAYS} 天新增或更新的 ${list.length} 個工具，最新的在前面。</p>
+    <div class="grid">${list.map(cardHTML).join('')}</div>`;
+}
+function goRecent(){
+  const el = $('#recent'); if (el.hidden) return;
+  const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({behavior: smooth ? 'smooth' : 'auto', block: 'start'});
+  $('#recentTitle')?.focus({preventScroll: true});
 }
 /* 工具簡介：擁有者（上架提交者）與管理者可以直接編輯，後端回傳 canEdit */
 function descHTML(t){
@@ -1019,7 +1062,7 @@ function renderDetail(){
   $('#detailBody').innerHTML = `
     ${cover(t,true)}
     <h2 class="d-title" id="detailTitle" translate="no">${esc(t.name)}</h2>
-    <div class="owner">${esc(TABS[t.tab]?.ownerLabel||'負責人')}：${esc(t.owner||'未填')}</div>
+    <div class="owner">${esc(TABS[t.tab]?.ownerLabel||'負責人')}：${esc(t.owner||'未填')}${stagePill(stageOf(t))}</div>
     ${(t.authorNames||[]).length?`<div class="owner">作者：${esc(t.authorNames.join('、'))}</div>`:''}
     ${descHTML(t)}
     ${(t.tags||[]).length?`<div class="tags">${t.tags.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
@@ -1128,7 +1171,7 @@ function renderQueueCount(){
   $('#openQueue').firstChild.textContent = S.admin ? '審核佇列 ' : '提交狀態 ';
 }
 function render(){
-  renderTabs(); renderBanner(); renderWho(); renderNews(); renderOverview(); renderChips(); renderGrid(); renderQueueCount();
+  renderTabs(); renderBanner(); renderWho(); renderNews(); renderOverview(); renderChips(); renderGrid(); renderRecent(); renderQueueCount();
   if ($('#queueDlg').open) renderQueue();
   if ($('#detailDlg').open) renderDetail();
 }
@@ -1141,6 +1184,7 @@ function claudeMd(t){
     `- 來源：${TABS[t.tab]?.code||''} ${TABS[t.tab]?.name||''}`,
     `- 分類：${CATS[catOf(t)].label}`,
     `- ${TABS[t.tab]?.ownerLabel||'負責人'}：${t.owner||'未填'}`];
+  if (stageOf(t)) L.push(`- 目前狀態：${STAGES[stageOf(t)].label}`);
   if (t.version) L.push(`- 目前版本：${t.version}`);
   if ((t.tags||[]).length) L.push(`- 標籤：${t.tags.join('、')}`);
   L.push('', '## 簡介', t.desc||'（未填）', '', '## 連結');
@@ -1174,7 +1218,8 @@ async function copyText(text){
 function subSummary(s){
   const tool = s.kind==='update' ? S.tools.find(t=>t.id===s.toolId) : null;
   const title = s.kind==='update' ? `更新：${esc(tool?.name || s.toolName || '已下架的工具')}` : esc(s.name);
-  const where = s.kind==='update' ? '' : `${esc(TABS[s.tab]?.code||'')}・${esc(CATS[s.category]?.label||'')}`;
+  const where = s.kind==='update' ? (STAGES[s.newStage] ? `狀態改為 ${esc(STAGES[s.newStage].label)}` : '')
+    : `${esc(TABS[s.tab]?.code||'')}・${esc(CATS[s.category]?.label||'')}${STAGES[s.stage] ? '・'+esc(STAGES[s.stage].label) : ''}`;
   const links = [['客戶端',s.kind==='update'?s.newClientUrl:s.clientUrl],['Repo',s.repoUrl],['說明',s.kind==='update'?s.newDocUrl:s.docUrl]]
     .map(([l,u])=>{const x=safeUrl(u); return x?`${l}：<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${esc(x)}</a>`:''})
     .concat([s.kind==='update'?s.newAccessPath:s.accessPath].map(p => p ? `存取路徑：<code translate="no">${esc(p)}</code>` : ''))
@@ -1225,6 +1270,10 @@ function renderQueue(){
 
 /* ---------- submit form ---------- */
 const form = $('#submitForm');
+// 目前狀態下拉選單：第一項是空白（新工具「未標示」、回報更新「不變」）
+document.querySelectorAll('[data-stage-select]').forEach(sel => {
+  sel.innerHTML = `<option value="">${esc(sel.dataset.stageSelect)}</option>` + Object.entries(STAGES).map(([k,x]) => `<option value="${k}">${esc(x.label)}</option>`).join('');
+});
 const F = { coverData:'', seed:0, touched:false };
 function ghOwnerRepo(u){ const m = String(u||'').trim().match(/^https?:\/\/(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[\/?#]|$)/i); return m ? m[1]+'/'+m[2] : ''; }
 function renderCoverForm(){
@@ -1319,7 +1368,7 @@ function collect(){
   const data = { kind, version:v('version'), date:v('date')||today(), summary:v('summary') };
   if (kind==='new'){
     Object.assign(data,{ tab:form.tab.value, category:form.category.value, name:v('name'), owner:v('owner'), desc:v('desc'),
-      clientUrl:v('clientUrl'), accessPath:v('accessPath'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
+      clientUrl:v('clientUrl'), accessPath:v('accessPath'), repoUrl:v('repoUrl'), docUrl:v('docUrl'), stage:v('stage'),
       tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8), authors:splitAuthors(v('authors')) });
     if (!TABS[data.tab]) errs.push([$('#tabRadios'),'請選擇所屬頁籤。']);
     if (!CATS[data.category]) errs.push([$('#catRadios'),'請選擇美術設定或美術後製。']);
@@ -1332,7 +1381,7 @@ function collect(){
     const badA = data.authors.filter(a=>!EMAIL_RE.test(a));
     if (badA.length) errs.push([$('#f-authors'),'Email 格式不對：'+badA.join('、')]);
   } else {
-    data.toolId = v('toolId'); data.newClientUrl = v('newClientUrl'); data.newDocUrl = v('newDocUrl'); data.newAccessPath = v('newAccessPath');
+    data.toolId = v('toolId'); data.newClientUrl = v('newClientUrl'); data.newDocUrl = v('newDocUrl'); data.newAccessPath = v('newAccessPath'); data.newStage = v('newStage');
     if (!urlOk(data.newDocUrl,false)) errs.push([$('#f-newdoc'),'網址需以 https:// 或 http:// 開頭。']);
     if (!S.tools.find(t=>t.id===data.toolId)) errs.push([$('#f-tool'),'請選擇要更新的工具。']);
     if (!urlOk(data.newClientUrl,false)) errs.push([$('#f-newclient'),'網址需以 https:// 或 http:// 開頭。']);
@@ -1381,7 +1430,7 @@ function openEdit(id){
   $('#editMsg').textContent = '';
   eform.tab.value = t.tab; eform.category.value = catOf(t);
   const set = (n, v) => { eform.elements[n].value = v || ''; };
-  set('name', t.name); set('owner', t.owner); set('desc', t.desc); set('clientUrl', t.clientUrl); set('accessPath', t.accessPath);
+  set('name', t.name); set('owner', t.owner); set('desc', t.desc); set('clientUrl', t.clientUrl); set('accessPath', t.accessPath); set('stage', stageOf(t));
   set('repoUrl', t.repoUrl); set('docUrl', t.docUrl); set('tags', (t.tags||[]).join(', ')); set('authors', (t.authors||[]).join(', '));
   syncEditOwner();
   $('#editBtn').disabled = S.dbState!=='on';
@@ -1396,7 +1445,7 @@ eform.addEventListener('submit', async e => {
   const v = n => (eform.elements[n]?.value || '').trim();
   const urlOk = (u, required) => u ? !!safeUrl(u) : !required;
   const data = { tab:eform.tab.value, category:eform.category.value, name:v('name'), owner:v('owner'), desc:v('desc'),
-    clientUrl:v('clientUrl'), accessPath:v('accessPath'), repoUrl:v('repoUrl'), docUrl:v('docUrl'),
+    clientUrl:v('clientUrl'), accessPath:v('accessPath'), repoUrl:v('repoUrl'), docUrl:v('docUrl'), stage:v('stage'),
     tags:v('tags').split(/[,，、]/).map(s=>s.trim()).filter(Boolean).slice(0,8), authors:splitAuthors(v('authors')) };
   const errs = [];
   if (!TABS[data.tab]) errs.push([$('#eTabRadios'),'請選擇所屬頁籤。']);
@@ -1645,7 +1694,7 @@ window.addEventListener('beforeunload', e => {
 });
 document.addEventListener('click', e => {
   if (e.target.closest('a')) return;
-  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-pickcover],[data-copypath],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],'
+  const t = e.target.closest('[data-tab],[data-chip],[data-openclaude],[data-forclaude],[data-clearcover],[data-pickcover],[data-copypath],[data-report],[data-remove],[data-approve],[data-reject],[data-close],[data-submit-here],[data-detail],[data-gorecent],'
     + '[data-descedit],[data-descsave],[data-desccancel],[data-edittool],'
     + '[data-ntopic],[data-nmore],[data-npin],[data-nhide],[data-nshare],[data-nfetch],[data-ncopy],[data-nshowhidden]');
   if (!t) return;
@@ -1690,6 +1739,7 @@ document.addEventListener('click', e => {
   }
   else if (t.hasAttribute('data-close')) tryClose(t.closest('dialog'));
   else if (t.hasAttribute('data-submit-here')) openSubmit();
+  else if (t.hasAttribute('data-gorecent')) goRecent();
   else if (d.detail) openDetail(d.detail);
 });
 $('#tabs').addEventListener('keydown', e => {

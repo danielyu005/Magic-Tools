@@ -19,12 +19,12 @@
 const SHEETS = {
   members:     ['email', 'name', 'role', 'note'],
   tools:       ['id', 'tab', 'category', 'name', 'owner', 'desc', 'clientUrl', 'repoUrl', 'docUrl', 'tags', 'version',
-                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors', 'accessPath'],
+                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors', 'accessPath', 'stage'],
   updates:     ['toolId', 'date', 'version', 'summary', 'by', 'createdAt'],
   submissions: ['id', 'kind', 'status', 'source', 'toolId', 'toolName', 'tab', 'category', 'name', 'owner', 'desc',
                 'clientUrl', 'repoUrl', 'docUrl', 'newClientUrl', 'newDocUrl', 'tags', 'version', 'date', 'summary',
                 'coverFileId', 'coverSeed', 'coverTouched', 'submitter', 'createdAt', 'reviewer', 'reviewedAt', 'reviewNote',
-                'authors', 'accessPath', 'newAccessPath'],
+                'authors', 'accessPath', 'newAccessPath', 'stage', 'newStage'],
   agents:      ['name', 'keyHash', 'ownerEmail', 'enabled', 'note', 'createdAt'],
   news:        ['id', 'url', 'title', 'titleZh', 'source', 'topic', 'excerpt', 'excerptZh', 'image', 'publishedAt',
                 'kind', 'by', 'note', 'status', 'pinned', 'createdAt'],
@@ -32,6 +32,7 @@ const SHEETS = {
 };
 const TABS = ['rd4', 'other', 'trend'];
 const CATS = ['setting', 'post'];
+const STAGES = ['ready', 'prototype', 'dev', 'todo']; // 目前狀態：可展示／Prototype／開發中／待補資料（對應 Notion「目前狀態」），可留空
 const MAX_UPDATES_PER_TOOL = 20;   // list 回傳的每個工具更新紀錄上限
 const MAX_SUBS = 300;              // list 回傳的提交上限
 const AGENT_HOURLY_LIMIT = 30;     // 每把 Agent 金鑰每小時的呼叫上限
@@ -206,6 +207,7 @@ function list_(req, who) {
   const tools = rawTools.map(t => ({
     id: t.id, tab: t.tab, category: t.category, name: t.name, owner: t.owner, desc: t.desc,
     clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, accessPath: t.accessPath, tags: splitTags_(t.tags), version: t.version,
+    stage: STAGES.includes(t.stage) ? t.stage : '',
     coverUrl: coverUrl_(t.coverFileId), coverSeed: Number(t.coverSeed) || 0, createdAt: t.createdAt, updatedAt: t.updatedAt,
     authorNames: splitTags_(t.authors).map(a => names[norm_(a)] || a.split('@')[0]),
     canEdit: canEditTool_(t, who),
@@ -227,7 +229,7 @@ function list_(req, who) {
       id: s.id, kind: s.kind, status: s.status, source: s.source, toolId: s.toolId, toolName: s.toolName,
       tab: s.tab, category: s.category, name: s.name, owner: s.owner, desc: s.desc,
       clientUrl: s.clientUrl, repoUrl: s.repoUrl, docUrl: s.docUrl, newClientUrl: s.newClientUrl, newDocUrl: s.newDocUrl,
-      accessPath: s.accessPath, newAccessPath: s.newAccessPath,
+      accessPath: s.accessPath, newAccessPath: s.newAccessPath, stage: s.stage, newStage: s.newStage,
       tags: splitTags_(s.tags), authors: splitTags_(s.authors),
       authorNames: splitTags_(s.authors).map(a => names[norm_(a)] || a.split('@')[0]),
       version: s.version, date: s.date, summary: s.summary,
@@ -253,7 +255,7 @@ function submit_(req, who) {
         id, kind: d.kind, status: 'pending', source: who.kind === 'agent' ? 'agent:' + who.agent : 'web',
         toolId: d.toolId, toolName: d.toolName, tab: d.tab, category: d.category, name: d.name, owner: d.owner, desc: d.desc,
         clientUrl: d.clientUrl, repoUrl: d.repoUrl, docUrl: d.docUrl, newClientUrl: d.newClientUrl, newDocUrl: d.newDocUrl,
-        accessPath: d.accessPath, newAccessPath: d.newAccessPath,
+        accessPath: d.accessPath, newAccessPath: d.newAccessPath, stage: d.stage, newStage: d.newStage,
         tags: d.tags.join(', '), authors: d.authors.join(', '), version: d.version, date: d.date, summary: d.summary,
         coverFileId, coverSeed: d.coverSeed, coverTouched: d.coverTouched ? 'TRUE' : 'FALSE',
         submitter: who.email, createdAt: nowIso_()
@@ -280,6 +282,7 @@ function approve_(req, who) {
       if (sub.newClientUrl) patch.clientUrl = sub.newClientUrl;
       if (sub.newDocUrl) patch.docUrl = sub.newDocUrl;
       if (sub.newAccessPath) patch.accessPath = sub.newAccessPath;
+      if (sub.newStage) patch.stage = sub.newStage;
       if (bool_(sub.coverTouched)) {
         patch.coverSeed = sub.coverSeed;
         patch.coverFileId = sub.coverFileId;
@@ -295,7 +298,7 @@ function approve_(req, who) {
         id: toolId, tab: sub.tab, category: sub.category, name: sub.name, owner: sub.owner, desc: sub.desc,
         clientUrl: sub.clientUrl, repoUrl: sub.repoUrl, docUrl: sub.docUrl, tags: sub.tags, version: sub.version,
         coverFileId: sub.coverFileId, coverSeed: sub.coverSeed, submitter: sub.submitter, createdAt: now, updatedAt: now,
-        authors: sub.authors, accessPath: sub.accessPath
+        authors: sub.authors, accessPath: sub.accessPath, stage: sub.stage
       }]);
     }
     appendRows_('updates', [{ toolId, date: sub.date || today_(), version: sub.version, summary: sub.summary, by: sub.submitter, createdAt: now }]);
@@ -389,6 +392,7 @@ function updateTool_(req, who) {
   url('repoUrl', false);
   url('docUrl', false);
   if (has('accessPath')) { const p = accessPath_(d.accessPath, bad); if (p !== null) patch.accessPath = p; }
+  if (has('stage')) { const v = stage_(d.stage, bad); if (v !== null) patch.stage = v; }
   if (has('tags')) patch.tags = parseTags_(d.tags).join(', ');
   if (has('authors')) patch.authors = parseAuthors_(d.authors, bad).join(', ');
   if (bad.length) throw err_('invalid', '欄位有誤：' + bad.join('；'));
@@ -734,7 +738,7 @@ function validate_(d) {
   const bad = [];
   const out = {
     kind, toolId: '', toolName: '', tab: '', category: '', name: '', owner: '', desc: '', clientUrl: '', repoUrl: '', docUrl: '',
-    newClientUrl: '', newDocUrl: '', accessPath: '', newAccessPath: '', tags: [], authors: [],
+    newClientUrl: '', newDocUrl: '', accessPath: '', newAccessPath: '', stage: '', newStage: '', tags: [], authors: [],
     version: str_(d.version, 20),
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(d.date || '')) ? String(d.date) : today_(),
     summary: str_(d.summary, 500),
@@ -758,6 +762,7 @@ function validate_(d) {
     out.repoUrl = url('repoUrl', false);
     out.docUrl = url('docUrl', false);
     out.accessPath = accessPath_(d.accessPath, bad) || '';
+    out.stage = stage_(d.stage, bad) || '';
     out.tags = parseTags_(d.tags);
     out.authors = parseAuthors_(d.authors, bad);
   } else {
@@ -765,6 +770,7 @@ function validate_(d) {
     out.newClientUrl = url('newClientUrl', false);
     out.newDocUrl = url('newDocUrl', false);
     out.newAccessPath = accessPath_(d.newAccessPath, bad) || '';
+    out.newStage = stage_(d.newStage, bad) || '';
   }
   if (!out.summary) bad.push('summary 必填');
   if (bad.length) throw err_('invalid', '欄位有誤：' + bad.join('；'));
@@ -776,6 +782,13 @@ function accessPath_(v, bad) {
   const s = String(v === null || v === undefined ? '' : v).trim();
   if (/[\r\n]/.test(s)) { bad.push('存取路徑只能有一行'); return null; }
   if (s.length > 300) { bad.push('存取路徑最多 300 字'); return null; }
+  return s;
+}
+
+/** 目前狀態：空白表示未標示。格式不對回傳 null */
+function stage_(v, bad) {
+  const s = String(v === null || v === undefined ? '' : v).trim();
+  if (s && !STAGES.includes(s)) { bad.push('stage 必須是 ' + STAGES.join('/') + ' 或留空'); return null; }
   return s;
 }
 
