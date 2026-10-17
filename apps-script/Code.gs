@@ -22,6 +22,7 @@ const SHEETS = {
                 'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors', 'accessPath', 'stage',
                 'editedAt', 'editedBy', 'editFields'],
   updates:     ['toolId', 'date', 'version', 'summary', 'by', 'createdAt'],
+  edits:       ['toolId', 'at', 'by', 'fields'],  // 編輯工具資訊的紀錄，跟版本更新一起列在工具詳情的「更新紀錄」
   submissions: ['id', 'kind', 'status', 'source', 'toolId', 'toolName', 'tab', 'category', 'name', 'owner', 'desc',
                 'clientUrl', 'repoUrl', 'docUrl', 'newClientUrl', 'newDocUrl', 'tags', 'version', 'date', 'summary',
                 'coverFileId', 'coverSeed', 'coverTouched', 'submitter', 'createdAt', 'reviewer', 'reviewedAt', 'reviewNote',
@@ -204,13 +205,22 @@ function list_(req, who) {
       date: u.date, version: u.version, summary: u.summary, createdAt: u.createdAt, via: viaAgent[u.toolId + '|' + u.createdAt] || ''
     });
   });
+  const whoName = by => String(by).startsWith('agent:') ? String(by).slice(6) : (by ? names[norm_(by)] || String(by).split('@')[0] : '');
+  const editsByTool = {};
+  readTable_('edits', true).forEach(e => {
+    (editsByTool[e.toolId] = editsByTool[e.toolId] || []).push({ at: e.at, byName: whoName(e.by), fields: splitTags_(e.fields) });
+  });
   const rawTools = readTable_('tools');
   const tools = rawTools.map(t => ({
     id: t.id, tab: t.tab, category: t.category, name: t.name, owner: t.owner, desc: t.desc,
     clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, accessPath: t.accessPath, tags: splitTags_(t.tags), version: t.version,
     stage: STAGES.includes(t.stage) ? t.stage : '',
     editedAt: t.editedAt, editFields: splitTags_(t.editFields),
-    editedByName: String(t.editedBy).startsWith('agent:') ? String(t.editedBy).slice(6) : (t.editedBy ? names[norm_(t.editedBy)] || String(t.editedBy).split('@')[0] : ''),
+    editedByName: whoName(t.editedBy),
+    // 有 edits 工作表之前的那次編輯只記在工具列上，拿來補成一筆紀錄
+    edits: (editsByTool[t.id] || (t.editedAt ? [{ at: t.editedAt, byName: whoName(t.editedBy), fields: splitTags_(t.editFields) }] : []))
+      .sort((a, b) => cmp_(b.at, a.at))
+      .slice(0, MAX_UPDATES_PER_TOOL),
     coverUrl: coverUrl_(t.coverFileId), coverSeed: Number(t.coverSeed) || 0, createdAt: t.createdAt, updatedAt: t.updatedAt,
     authorNames: splitTags_(t.authors).map(a => names[norm_(a)] || a.split('@')[0]),
     canEdit: canEditTool_(t, who),
@@ -332,6 +342,7 @@ function removeTool_(req) {
     if (!tool) throw err_('not_found', '找不到這個工具');
     cover = tool.coverFileId;
     deleteRows_('updates', readTable_('updates').filter(u => u.toolId === tool.id).map(u => u._row));
+    deleteRows_('edits', readTable_('edits', true).filter(e => e.toolId === tool.id).map(e => e._row));
     deleteRows_('tools', [tool._row]);
   });
   if (cover) trashFile_(cover);
@@ -426,6 +437,7 @@ function recordEdit_(tool, patch, who) {
   patch.editedAt = now;
   patch.editedBy = who.kind === 'agent' ? 'agent:' + who.agent : who.email;
   patch.editFields = [...new Set(changed.map(k => EDIT_LABELS[k]))].join(', ');
+  appendRows_('edits', [{ toolId: tool.id, at: now, by: patch.editedBy, fields: patch.editFields }]);
   return changed;
 }
 
@@ -873,8 +885,16 @@ function ss_() {
 }
 function tz_() { return TZ_ || (TZ_ = ss_().getSpreadsheetTimeZone()); }
 
+const AUTO_SHEETS = ['edits']; // 新版才有的工作表，第一次寫入時自動建立，不用先跑「初始化」
 function sheet_(name) {
-  const sh = ss_().getSheetByName(name);
+  let sh = ss_().getSheetByName(name);
+  if (!sh && AUTO_SHEETS.includes(name)) {
+    const cols = SHEETS[name];
+    sh = ss_().insertSheet(name);
+    sh.getRange(1, 1, 1, cols.length).setValues([cols]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, sh.getMaxRows(), cols.length).setNumberFormat('@');
+  }
   if (!sh) throw err_('server', '找不到工作表「' + name + '」，請先在試算表選單執行「初始化」');
   ensureCols_(sh, name);
   return sh;

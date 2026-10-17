@@ -250,6 +250,11 @@ dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 .timeline .h-meta{font-size:12.5px;color:var(--muted)}
 .timeline .h-meta b{font-family:var(--display);color:var(--ink);margin-right:6px}
 .timeline p{margin:2px 0 0;white-space:pre-wrap}
+/* 編輯工具資訊的紀錄：藍色圓點，跟版本更新（綠色）區分 */
+.timeline li.edit::before{border-color:var(--set)}
+.timeline li.edit:first-child::before{background:var(--set)}
+.timeline li.edit p{color:var(--muted)}
+.timeline .h-kind{font-size:11.5px;font-weight:700;border-radius:99px;padding:0 7px;margin-right:6px;color:var(--set);background:var(--set-soft)}
 .sec-title{font-size:15px;margin:22px 0 4px}
 .sheet-foot{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:10px}
 .link-btn{background:none;border:none;padding:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px}
@@ -689,6 +694,8 @@ const DATE_FMT = new Intl.DateTimeFormat('zh-TW', { year:'numeric', month:'2-dig
 const TIME_FMT = new Intl.DateTimeFormat('zh-TW', { hour:'2-digit', minute:'2-digit', hourCycle:'h23' });
 const REL_FMT = new Intl.RelativeTimeFormat('zh-TW', { numeric:'auto' });
 // 後端日期取前 10 碼（YYYY-MM-DD）當成當地日期，避免被時區換算成前一天
+// 編輯紀錄的時間是 UTC 的 ISO 字串，轉成本地日期＋時間顯示，避免半夜的編輯日期差一天
+const fmtAt = s => { const d = new Date(s); return isNaN(d) ? fmtDate(s) : `${DATE_FMT.format(d)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 const fmtDate = s => { if (!s) return ''; const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? DATE_FMT.format(new Date(+m[1], m[2]-1, +m[3])) : String(s).slice(0,10); };
 const daysAgo = s => { const t = Date.parse(s); return isNaN(t) ? 1e9 : (Date.now()-t)/864e5; };
 const relDate = s => { const d = Math.floor(daysAgo(s)); if (d>=1e8) return ''; if (d<30) return REL_FMT.format(-Math.max(0, d), 'day'); return fmtDate(s); };
@@ -1065,6 +1072,10 @@ function renderDetail(){
   if (!t){ if (dlg.open) dlg.close(); return; }
   const typing = document.activeElement?.id === 'descInput';
   const ups = Array.isArray(t.updates) ? t.updates : [];
+  // 版本更新與編輯工具資訊合在一起，依時間由新到舊
+  const hist = ups.map(u => ({u, at: String(u.createdAt || u.date || '')}))
+    .concat((Array.isArray(t.edits) ? t.edits : []).map(e => ({edit: e, at: String(e.at || '')})))
+    .sort((a, b) => b.at.localeCompare(a.at));
   const links = [['main','open','開啟工具',t.clientUrl],['','code','Repo',t.repoUrl],['','book','使用說明',t.docUrl]]
     .map(([cls,ic,label,u])=>{const x=safeUrl(u); if (x) return `<a class="${cls}" href="${esc(x)}" target="_blank" rel="noopener noreferrer">${icon(ic)}<span class="lt"><span>${label}</span><small>${esc(host(x))}</small></span></a>`; return label==='使用說明' ? `<div class="link-na">${icon(ic)}<span class="lt"><span>${label}</span><small>尚未提供，可在「回報更新」時補上</small></span></div>`
       : label==='開啟工具' && !t.accessPath ? `<div class="link-na">${icon(ic)}<span class="lt"><span>${label}</span><small>沒有線上網址，存取方式請看上方簡介或洽負責人</small></span></div>` : '';}).join('');
@@ -1084,7 +1095,9 @@ function renderDetail(){
       </div>
     </div>
     <h3 class="sec-title">更新紀錄</h3>
-    ${ups.length?`<ol class="timeline">${ups.map(u=>`<li><div class="h-meta">${u.version?`<b translate="no">${esc(u.version)}</b>`:''}${esc(fmtDate(u.date))}${u.via?`　（經由 ${esc(u.via)}）｜${esc(fmtDate(u.createdAt))}`:''}</div><p>${esc(u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
+    ${hist.length?`<ol class="timeline">${hist.map(h => h.edit
+      ? `<li class="edit"><div class="h-meta"><span class="h-kind">編輯</span>${esc(fmtAt(h.edit.at))}${h.edit.byName?`・${esc(h.edit.byName)}`:''}</div><p>編輯了工具資訊${(h.edit.fields||[]).length?`：${esc(h.edit.fields.join('、'))}`:''}</p></li>`
+      : `<li><div class="h-meta">${h.u.version?`<b translate="no">${esc(h.u.version)}</b>`:''}${esc(fmtDate(h.u.date))}${h.u.via?`　（經由 ${esc(h.u.via)}）｜${esc(fmtDate(h.u.createdAt))}`:''}</div><p>${esc(h.u.summary)}</p></li>`).join('')}</ol>`:'<p class="muted">還沒有更新紀錄。</p>'}
     <div class="sheet-foot">
       <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-report="${esc(t.id)}">回報更新</button>
       ${t.canEdit?`<button class="btn" type="button" data-edittool="${esc(t.id)}">編輯工具資訊</button>`:''}</span>
