@@ -194,6 +194,9 @@ Agent 的提交一樣進審核佇列，記在擁有者名下，審核畫面會�
 一次送一整批：把文章寫成 JSON 陣列（格式見 [`examples/news-seed.json`](examples/news-seed.json)），執行
 `ACD_API_KEY=acd_… node examples/push-news.mjs examples/news-seed.json`。已存在的文章會自動略過。
 
+管理者用自己的 Google 登入（`idToken`）替 AI 代理操作時，請求裡加上 `"asAgent": true`，
+編輯紀錄與提交來源就會記成「ART Tool Agents」，不會顯示成管理者本人。只有管理者可以用。
+
 回應：`{ "ok": true, "data": { … } }` 或 `{ "ok": false, "error": { "code": "invalid", "message": "…" } }`。
 
 ```bash

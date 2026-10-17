@@ -40,7 +40,8 @@ const MAX_SUBS = 300;              // list 回傳的提交上限
 const AGENT_HOURLY_LIMIT = 30;     // 每把 Agent 金鑰每小時的呼叫上限
 const VERIFY_PER_MIN = 30;         // 全站每分鐘最多向 Google 驗證幾張新的登入憑證（防止有人灌假憑證耗光對外連線配額）
 const NOT_MEMBER_MAX = 5;          // 白名單外的同一個 Email，10 分鐘內最多查幾次名單
-const MAX_AUTHORS = 10;            // 每個工具最多幾位作者（作者登入後可以編輯工具資訊）
+const MAX_AUTHORS = 10;
+const ADMIN_AGENT_NAME = 'ART Tool Agents'; // 管理者帶 asAgent 時，編輯與提交紀錄上顯示的名稱            // 每個工具最多幾位作者（作者登入後可以編輯工具資訊）
 const MAX_COVER_CHARS = 400000;    // 封面 data URI 長度上限（約 300KB）
 const IMG_HOSTS = ['opengraph.githubassets.com', 'repository-images.githubusercontent.com', 'raw.githubusercontent.com',
                    'user-images.githubusercontent.com', 'private-user-images.githubusercontent.com',
@@ -96,6 +97,11 @@ function doPost(e) {
     const who = auth_(req);
     if (!action.agent && who.kind === 'agent') throw err_('forbidden', 'Agent 金鑰不能執行這個動作');
     if (action.admin && who.role !== 'admin') throw err_('forbidden', '需要管理者權限');
+    // 管理者用自己的登入替 AI 代理操作時帶 asAgent: true，紀錄記成「ART Tool Agents」而不是管理者本人
+    if (req.asAgent === true) {
+      if (who.role !== 'admin' || who.kind === 'agent') throw err_('forbidden', '只有管理者登入時可以用 asAgent');
+      who.via = ADMIN_AGENT_NAME;
+    }
     out = { ok: true, data: action.fn(req, who) };
   } catch (x) {
     if (!x || !x.code) console.error(x && x.stack || x);
@@ -265,7 +271,7 @@ function submit_(req, who) {
       }
       const id = newId_('s');
       appendRows_('submissions', [{
-        id, kind: d.kind, status: 'pending', source: who.kind === 'agent' ? 'agent:' + who.agent : 'web',
+        id, kind: d.kind, status: 'pending', source: who.kind === 'agent' ? 'agent:' + who.agent : who.via ? 'agent:' + who.via : 'web',
         toolId: d.toolId, toolName: d.toolName, tab: d.tab, category: d.category, name: d.name, owner: d.owner, desc: d.desc,
         clientUrl: d.clientUrl, repoUrl: d.repoUrl, docUrl: d.docUrl, newClientUrl: d.newClientUrl, newDocUrl: d.newDocUrl,
         accessPath: d.accessPath, newAccessPath: d.newAccessPath, stage: d.stage, newStage: d.newStage,
@@ -435,7 +441,7 @@ function recordEdit_(tool, patch, who) {
   const now = nowIso_();
   patch.updatedAt = now;
   patch.editedAt = now;
-  patch.editedBy = who.kind === 'agent' ? 'agent:' + who.agent : who.email;
+  patch.editedBy = who.kind === 'agent' ? 'agent:' + who.agent : who.via ? 'agent:' + who.via : who.email;
   patch.editFields = [...new Set(changed.map(k => EDIT_LABELS[k]))].join(', ');
   appendRows_('edits', [{ toolId: tool.id, at: now, by: patch.editedBy, fields: patch.editFields }]);
   return changed;
