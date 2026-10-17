@@ -931,16 +931,19 @@ function renderOverview(){
   el.hidden = false;
   const byRecent = [...inTab].sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
   const top = byRecent[0], l = latest(top);
+  // 最後一筆動作是編輯工具資訊（比最近一次版本更新還新）時，顯示誰改了哪些欄位，而不是上架／版本說明
+  const edit = top.editedAt && (!l || String(top.editedAt) >= String(l.createdAt || l.date)) ? top : null;
   const fresh = inTab.filter(isFresh).length;
   const nSet = inTab.filter(t=>catOf(t)==='setting').length, nPost = inTab.length - nSet;
   el.innerHTML = `
     <article class="tile feature">
       ${cover(top,false)}
       <div>
-        <p class="t-label">最新動態${l?'・'+esc(relDate(l.date)):''}</p>
+        <p class="t-label">最新動態${edit?'・'+esc(relDate(edit.editedAt)):l?'・'+esc(relDate(l.date)):''}</p>
         <h3><button class="card-link" type="button" data-detail="${esc(top.id)}" translate="no">${esc(top.name)}</button></h3>
         <div class="owner">${esc(TABS[top.tab]?.ownerLabel||'')}：${esc(top.owner||'未填')}${stagePill(stageOf(top))}</div>
-        ${l?`<p class="f-sum">${l.version?`<b>${esc(l.version)}</b>　`:''}${esc(l.summary)}</p>`:''}
+        ${edit?`<p class="f-sum">${esc(edit.editedByName||'有人')} 編輯了工具資訊${(edit.editFields||[]).length?`：${esc(edit.editFields.join('、'))}`:''}</p>`
+          : l?`<p class="f-sum">${l.version?`<b>${esc(l.version)}</b>　`:''}${esc(l.summary)}</p>`:''}
         ${safeUrl(top.clientUrl)?`<a class="btn primary small" href="${esc(safeUrl(top.clientUrl))}" target="_blank" rel="noopener noreferrer">${icon('open')}開啟工具</a>`
           : top.accessPath?`<button class="btn primary small" type="button" data-copypath="${esc(top.id)}">${icon('folder')}複製路徑</button>`:''}
       </div>

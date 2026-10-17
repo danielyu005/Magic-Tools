@@ -19,7 +19,8 @@
 const SHEETS = {
   members:     ['email', 'name', 'role', 'note'],
   tools:       ['id', 'tab', 'category', 'name', 'owner', 'desc', 'clientUrl', 'repoUrl', 'docUrl', 'tags', 'version',
-                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors', 'accessPath', 'stage'],
+                'coverFileId', 'coverSeed', 'submitter', 'createdAt', 'updatedAt', 'authors', 'accessPath', 'stage',
+                'editedAt', 'editedBy', 'editFields'],
   updates:     ['toolId', 'date', 'version', 'summary', 'by', 'createdAt'],
   submissions: ['id', 'kind', 'status', 'source', 'toolId', 'toolName', 'tab', 'category', 'name', 'owner', 'desc',
                 'clientUrl', 'repoUrl', 'docUrl', 'newClientUrl', 'newDocUrl', 'tags', 'version', 'date', 'summary',
@@ -208,6 +209,8 @@ function list_(req, who) {
     id: t.id, tab: t.tab, category: t.category, name: t.name, owner: t.owner, desc: t.desc,
     clientUrl: t.clientUrl, repoUrl: t.repoUrl, docUrl: t.docUrl, accessPath: t.accessPath, tags: splitTags_(t.tags), version: t.version,
     stage: STAGES.includes(t.stage) ? t.stage : '',
+    editedAt: t.editedAt, editFields: splitTags_(t.editFields),
+    editedByName: String(t.editedBy).startsWith('agent:') ? String(t.editedBy).slice(6) : (t.editedBy ? names[norm_(t.editedBy)] || String(t.editedBy).split('@')[0] : ''),
     coverUrl: coverUrl_(t.coverFileId), coverSeed: Number(t.coverSeed) || 0, createdAt: t.createdAt, updatedAt: t.updatedAt,
     authorNames: splitTags_(t.authors).map(a => names[norm_(a)] || a.split('@')[0]),
     canEdit: canEditTool_(t, who),
@@ -335,7 +338,7 @@ function removeTool_(req) {
   return { id: req.id };
 }
 
-function setCover_(req) {
+function setCover_(req, who) {
   const data = req.coverData ? checkCover_(req.coverData) : '';
   const fileId = data ? saveCover_(data, 'cover') : '';
   let old = '';
@@ -346,6 +349,7 @@ function setCover_(req) {
       old = tool.coverFileId;
       const patch = { coverFileId: fileId };
       if (req.coverSeed !== undefined) patch.coverSeed = int_(req.coverSeed);
+      recordEdit_(tool, patch, who);
       updateRow_('tools', tool._row, patch);
     });
   } catch (x) {
@@ -401,10 +405,28 @@ function updateTool_(req, who) {
     const tool = readTable_('tools').find(t => t.id === req.id);
     if (!tool) throw err_('not_found', '找不到這個工具');
     if (!canEditTool_(tool, who)) throw err_('forbidden', '只有工具擁有者、作者或管理者可以編輯');
-    patch.updatedAt = nowIso_();
+    const changed = recordEdit_(tool, patch, who);
     updateRow_('tools', tool._row, patch);
-    return { id: tool.id, updated: Object.keys(patch) };
+    return { id: tool.id, updated: changed };
   });
+}
+
+/**
+ * 編輯工具資訊時記下「誰、什麼時候、改了哪些欄位」，首頁的「最新動態」依這個時間排序。
+ * 跟原本值一樣的欄位不算；什麼都沒變就不動 updatedAt。回傳實際改到的欄位。
+ */
+const EDIT_LABELS = { tab: '頁籤', category: '分類', name: '名稱', owner: '開發成員', desc: '簡介', clientUrl: '網址',
+  repoUrl: 'Repo', docUrl: '使用說明', accessPath: '存取路徑', tags: '標籤', authors: '作者', stage: '目前狀態',
+  coverFileId: '封面', coverSeed: '封面' };
+function recordEdit_(tool, patch, who) {
+  const changed = Object.keys(patch).filter(k => EDIT_LABELS[k] && String(patch[k] ?? '') !== String(tool[k] ?? ''));
+  if (!changed.length) return [];
+  const now = nowIso_();
+  patch.updatedAt = now;
+  patch.editedAt = now;
+  patch.editedBy = who.kind === 'agent' ? 'agent:' + who.agent : who.email;
+  patch.editFields = [...new Set(changed.map(k => EDIT_LABELS[k]))].join(', ');
+  return changed;
 }
 
 function setDesc_(req, who) {
@@ -414,7 +436,9 @@ function setDesc_(req, who) {
     const tool = readTable_('tools').find(t => t.id === req.id);
     if (!tool) throw err_('not_found', '找不到這個工具');
     if (!canEditTool_(tool, who)) throw err_('forbidden', '只有工具擁有者、作者或管理者可以編輯簡介');
-    updateRow_('tools', tool._row, { desc });
+    const patch = { desc };
+    recordEdit_(tool, patch, who);
+    updateRow_('tools', tool._row, patch);
     return { id: tool.id, desc };
   });
 }
