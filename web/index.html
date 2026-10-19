@@ -99,7 +99,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .tile.feature{grid-row:span 2;display:grid;grid-template-columns:minmax(200px,1fr) 1.1fr;gap:18px;align-items:start;cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
 .tile.feature:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
 .tile.feature .cover{border-radius:16px}
-.tile.feature h3{margin:2px 0 4px;font-size:21px;line-height:1.3;text-wrap:balance}
+.tile.feature .cover-wrap.has-img .c-title{border-radius:0 0 16px 16px}
 /* 整張卡片可點：標題裡的按鈕用 ::after 撐滿卡片，卡片裡其他連結疊在上面 */
 .card-link{appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .card-link::after{content:"";position:absolute;inset:0;border-radius:20px;z-index:1}
@@ -153,6 +153,11 @@ button.tile{appearance:none;border:0;font:inherit;color:inherit;text-align:left;
 .cover .b2{background:var(--c3);left:var(--x2);top:var(--y2);width:60%}
 .cover .b3{background:var(--c4);left:var(--x3);top:var(--y3);width:50%}
 .cover .grain{position:absolute;inset:0;opacity:.16;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* 工具名稱疊在封面底部：外層用 grid 疊放、不設定 position，標題按鈕的 ::after 才撐得滿整張卡片 */
+.cover-wrap{display:grid;container-type:inline-size}
+.cover-wrap > *{grid-area:1/1}
+.cover-wrap .c-title{z-index:1;align-self:end;margin:0;padding:0 7% 8%;color:var(--ct,#fff);font-family:var(--display);font-weight:800;line-height:1.12;letter-spacing:-.01em;font-size:clamp(16px,8.5cqw,44px);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-wrap:balance;word-break:break-word;text-shadow:0 1px 12px rgba(0,0,0,var(--ts,.18))}
+.cover-wrap.has-img .c-title{color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.5);background:linear-gradient(transparent,rgba(0,0,0,.55));border-radius:0 0 14px 14px;padding-top:16%}
 .cover .cat-tag{position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;background:rgba(255,255,255,.88);color:var(--cc);border-radius:99px;padding:2px 10px;backdrop-filter:blur(6px);z-index:1}
 .cover .cat-tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cc);margin-right:6px;vertical-align:1px}
 .cover[data-cat="setting"]{--cc:#3E63DD}
@@ -161,7 +166,6 @@ button.tile{appearance:none;border:0;font:inherit;color:inherit;text-align:left;
 .fresh{font-size:12px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:99px;padding:2px 9px;display:inline-flex;align-items:center;gap:5px}
 .fresh::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .card-body{padding:0 6px;display:flex;flex-direction:column;gap:6px;flex:1}
-.card h3{margin:0;font-size:17px;line-height:1.35;font-weight:700;word-break:break-word;text-wrap:balance}
 .owner{font-size:13px;color:var(--muted)}
 /* 目前狀態（對應 Notion「目前狀態」）：可展示／Prototype／開發中／待補資料 */
 .stage{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;line-height:1.5;border-radius:99px;padding:1px 9px;white-space:nowrap;color:var(--sc);background:var(--sb);vertical-align:1px}
@@ -891,18 +895,22 @@ function rng(seed){ let x = seed||1; return () => { x^=x<<13; x^=x>>>17; x^=x<<5
 function genStyle(key, seed){
   const r = rng(hash(key+'|'+(seed||0))), p = PALETTES[Math.floor(r()*PALETTES.length)];
   const pos = () => `${Math.round(r()*70-25)}%`;
-  return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]};--c4:${p[3]};--x1:${pos()};--y1:${pos()};--x2:${pos()};--y2:${pos()};--x3:${pos()};--y3:${pos()}`;
+  return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]};--c4:${p[3]};--ct:${p[4]};--ts:${p[5]};--x1:${pos()};--y1:${pos()};--x2:${pos()};--y2:${pos()};--x3:${pos()};--y3:${pos()}`;
 }
 const coverSrc = t => (t && safeUrl(t.coverUrl)) || '';
-function coverHTML({key, cat, seed, src, fresh}){
+/* title：要疊在封面底部的工具名稱（已跳脫的 HTML），不給就只有封面 */
+function coverHTML({key, cat, seed, src, fresh, title=''}){
   const c = cat in CATS ? cat : 'setting';
   const badges = `<span class="cat-tag">${esc(CATS[c].label)}</span>${fresh?'<span class="fresh">近期更新</span>':''}`;
-  if (src) return `<div class="cover" data-cat="${c}">${badges}<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>`;
-  return `<div class="cover" data-cat="${c}" style="${genStyle(key,seed)}">${badges}<i class="b b1"></i><i class="b b2"></i><i class="b b3"></i><span class="grain"></span></div>`;
+  const style = src ? '' : genStyle(key,seed);
+  const inner = src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
+    : '<i class="b b1"></i><i class="b b2"></i><i class="b b3"></i><span class="grain"></span>';
+  if (!title) return `<div class="cover" data-cat="${c}"${style?` style="${style}"`:''}>${badges}${inner}</div>`;
+  return `<div class="cover-wrap${src?' has-img':''}"${style?` style="${style}"`:''}><div class="cover" data-cat="${c}">${badges}${inner}</div><h3 class="c-title">${title}</h3></div>`;
 }
 const stageOf = t => STAGES[t?.stage] ? t.stage : '';
 const stagePill = k => STAGES[k] ? `<span class="stage" data-stage="${k}">${esc(STAGES[k].label)}</span>` : '';
-const cover = (t, fresh) => coverHTML({key:t.id, cat:t.category, seed:t.coverSeed||0, src:coverSrc(t), fresh:fresh&&isFresh(t)});
+const cover = (t, fresh, title) => coverHTML({key:t.id, cat:t.category, seed:t.coverSeed||0, src:coverSrc(t), fresh:fresh&&isFresh(t), title});
 
 /* image (File/Blob) → resized JPEG data URI (16:9 center crop) */
 async function toCoverData(file){
@@ -946,10 +954,9 @@ function renderOverview(){
   const nSet = inTab.filter(t=>catOf(t)==='setting').length, nPost = inTab.length - nSet;
   el.innerHTML = `
     <article class="tile feature">
-      ${cover(top,false)}
+      ${cover(top,false,`<button class="card-link" type="button" data-detail="${esc(top.id)}" translate="no">${esc(top.name)}</button>`)}
       <div>
         <p class="t-label">最新動態${edit?'・'+esc(relDate(edit.editedAt)):l?'・'+esc(relDate(l.date)):''}</p>
-        <h3><button class="card-link" type="button" data-detail="${esc(top.id)}" translate="no">${esc(top.name)}</button></h3>
         <div class="owner">${esc(TABS[top.tab]?.ownerLabel||'')}：${esc(top.owner||'未填')}${stagePill(stageOf(top))}</div>
         ${edit?`<p class="f-sum">${esc(edit.editedByName||'有人')} 編輯了工具資訊${(edit.editFields||[]).length?`：${esc(edit.editFields.join('、'))}`:''}</p>`
           : l?`<p class="f-sum">${l.version?`<b>${esc(l.version)}</b>　`:''}${esc(l.summary)}</p>`:''}
@@ -986,9 +993,8 @@ function renderWho(){
 function cardHTML(t){
   const l = latest(t), client = safeUrl(t.clientUrl), repo = safeUrl(t.repoUrl), doc = safeUrl(t.docUrl);
   return `<article class="card">
-    ${cover(t,true)}
+    ${cover(t,true,`<button class="card-link" type="button" data-detail="${esc(t.id)}" translate="no">${esc(t.name)}</button>`)}
     <div class="card-body">
-      <h3><button class="card-link" type="button" data-detail="${esc(t.id)}" translate="no">${esc(t.name)}</button></h3>
       <div class="owner">${esc(t.owner||'未填')}${stagePill(stageOf(t))}</div>
       ${t.desc?`<p class="c-desc">${esc(t.desc)}</p>`:''}
       ${l?`<div class="update-line"><span class="d">${l.version?`<span class="ver" translate="no">${esc(l.version)}</span>`:''}${esc(relDate(l.date))}更新</span><span class="s">${esc(l.summary)}</span></div>`:''}
@@ -1304,10 +1310,11 @@ const F = { coverData:'', seed:0, touched:false };
 function ghOwnerRepo(u){ const m = String(u||'').trim().match(/^https?:\/\/(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[\/?#]|$)/i); return m ? m[1]+'/'+m[2] : ''; }
 function renderCoverForm(){
   const kind = form.kind.value, tool = kind==='update' ? S.tools.find(t=>t.id===form.toolId.value) : null;
+  const name = kind==='new' ? form.elements.namedItem('name').value.trim() : tool?.name;
   const cat = kind==='new' ? form.category.value : tool?.category;
   let src = F.coverData;
   if (!src && kind==='update' && tool && !F.touched) src = coverSrc(tool);
-  $('#coverPreview').innerHTML = coverHTML({key: tool ? tool.id : 'new', cat, seed:F.seed, src, fresh:false});
+  $('#coverPreview').innerHTML = coverHTML({key: tool ? tool.id : 'new', cat, seed:F.seed, src, fresh:false, title: esc(name || '工具名稱')});
   $('#coverClear').hidden = !src;
   $('#coverShuffle').hidden = !!src;
   $('#coverLabel').textContent = kind==='new' ? '封面' : '封面（要換才需要動）';
