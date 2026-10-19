@@ -113,15 +113,15 @@ nav.tabs::-webkit-scrollbar{display:none}
 .split-bar i{display:block;height:100%}
 .legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
 .legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
-/* 「近期更新」磚塊：點了捲到下方的近期更新區塊 */
+/* 概況磚塊：點了切換工具清單的篩選並捲過去 */
 button.tile{appearance:none;border:0;font:inherit;color:inherit;text-align:left;width:100%;display:block}
 .tile.tile-link{cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
 .tile.tile-link:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
 .tile.tile-link:focus-visible{outline:2px solid var(--set);outline-offset:2px}
 .tile .go{display:inline-flex;align-items:center;gap:4px;margin-top:10px;font-size:13px;font-weight:600}
-.recent,.tools-head{scroll-margin-top:20px}
-.recent .sec-h,.tools-head .sec-h{margin:0}
-.recent > p,.tools-head > p{margin:4px 0 14px;color:var(--muted);font-size:14px}
+.tools-head{scroll-margin-top:20px}
+.tools-head .sec-h{margin:0}
+.tools-head > p{margin:4px 0 14px;color:var(--muted);font-size:14px}
 .tile.cta{background:var(--ink);color:var(--btn-ink);display:flex;flex-direction:column;justify-content:space-between;gap:10px}
 .tile.cta p{margin:0;font-size:14px;opacity:.75}
 .tile.cta b{font-size:17px}
@@ -532,7 +532,6 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
     <label class="search-wrap"><svg aria-hidden="true"><use href="#i-search"/></svg><input class="search" id="search" name="q" type="search" autocomplete="off" placeholder="搜尋名稱、負責人、標籤…" aria-label="搜尋工具"></label>
   </div>
   <div id="grid"></div>
-  <section class="recent" id="recent" aria-labelledby="recentTitle" hidden></section>
 
   <section class="howto" aria-labelledby="howtoTitle">
     <h2 id="howtoTitle">怎麼把工具放上來</h2>
@@ -677,7 +676,7 @@ const NEWS_PAGE = 9; // 本週／上週各先顯示幾篇
 
 // 頁籤放在 hash，分類、搜尋字、文章主題放在 query string，方便分享目前畫面的連結
 const QS = new URLSearchParams(location.search);
-const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat: Object.hasOwn(CATS, QS.get('cat')) ? QS.get('cat') : 'all', q: QS.get('q') || '',
+const S = { tab: TABS[location.hash.slice(1)] ? location.hash.slice(1) : 'rd4', cat: Object.hasOwn(CATS, QS.get('cat')) || QS.get('cat')==='recent' ? QS.get('cat') : 'all', q: QS.get('q') || '',
   tools:[], subs:[], news:[], loaded:false, me:'', meName:'', admin:false, dbState:'loading', lastErr:'', detailId:null, descEdit:null, descDraft:'',
   nTopic: Object.hasOwn(TOPICS, QS.get('topic')) ? QS.get('topic') : 'all', nOpen:{}, nHidden:false };
 function syncUrl(){
@@ -963,16 +962,19 @@ function renderOverview(){
       <div class="split-bar"><i style="width:${nSet/inTab.length*100}%;background:var(--set)"></i><i style="width:${nPost/inTab.length*100}%;background:var(--post)"></i></div>
       <div class="legend"><span style="--c:var(--set)">設定 ${nSet}</span><span style="--c:var(--post)">後製 ${nPost}</span></div></button>
     ${fresh
-      ? `<button class="tile tile-link" type="button" data-gorecent aria-controls="recent"><p class="t-label">近 ${FRESH_DAYS} 天有更新</p><div class="big-num">${fresh}<small>個</small></div><span class="go">查看近期更新 ↓</span></button>`
+      ? `<button class="tile tile-link" type="button" data-gorecent aria-controls="grid"><p class="t-label">近 ${FRESH_DAYS} 天有更新</p><div class="big-num">${fresh}<small>個</small></div><span class="go">查看近期更新 ↓</span></button>`
       : `<div class="tile"><p class="t-label">近 ${FRESH_DAYS} 天有更新</p><div class="big-num">0<small>個</small></div><p class="muted" style="margin:10px 0 0;font-size:13px">最近比較安靜</p></div>`}
     <div class="tile cta" style="grid-column:span 2"><div><b>你也做了好用的工具？</b><p>填一張資訊卡，讓整個團隊都找得到。</p></div><button class="btn small" type="button" data-submit-here>${icon('plus')}提交到 ${esc(TABS[S.tab].code)}</button></div>`;
 }
 function renderChips(){
   const inTab = S.tools.filter(x=>x.tab===S.tab);
-  const opts = [['all','全部',null,inTab.length]].concat(Object.entries(CATS).map(([k,c])=>[k,c.label,c.color,inTab.filter(x=>catOf(x)===k).length]));
+  const nFresh = inTab.filter(isFresh).length;
+  const opts = [['all','全部',null,inTab.length]].concat(Object.entries(CATS).map(([k,c])=>[k,c.label,c.color,inTab.filter(x=>catOf(x)===k).length]))
+    .concat(nFresh || S.cat==='recent' ? [['recent','近期更新','var(--ok)',nFresh]] : []);
   $('#chips').innerHTML = opts.map(([k,l,col,n]) =>
     `<button class="chip" type="button" data-chip="${k}" aria-pressed="${S.cat===k}">${col?`<span class="dot" style="background:${col}"></span>`:''}${esc(l)} <span class="muted">${S.loaded?n:''}</span></button>`).join('');
-  $('#allToolsSub').textContent = S.loaded && inTab.length ? `本頁籤的 ${inTab.length} 個工具，最新的在前面。` : '';
+  $('#allToolsSub').textContent = !S.loaded || !inTab.length ? ''
+    : S.cat==='recent' ? `近 ${FRESH_DAYS} 天新增或更新的工具，最新的在前面。` : '最新的在前面；近期有更新的會標示「近期更新」。';
 }
 function renderBanner(){
   $('#banner').innerHTML = S.dbState==='off' ? `<div class="banner">目前無法連上工具資料庫：${esc(S.lastErr)}　請重新整理頁面，或聯絡管理者。</div>` : '';
@@ -1005,11 +1007,11 @@ function renderGrid(){
   const g = $('#grid');
   if (!S.loaded && S.dbState!=='off'){ g.innerHTML = `<div class="empty">正在載入工具清單…</div>`; return; }
   const q = S.q.trim().toLowerCase();
-  let list = S.tools.filter(t => t.tab===S.tab && (S.cat==='all' || catOf(t)===S.cat));
+  let list = S.tools.filter(t => t.tab===S.tab && (S.cat==='all' || (S.cat==='recent' ? isFresh(t) : catOf(t)===S.cat)));
   if (q) list = list.filter(t => [t.name,t.owner,t.desc,(t.tags||[]).join(' '),STAGES[stageOf(t)]?.label||''].join(' ').toLowerCase().includes(q));
   list.sort(byNewest);
   if (!list.length){
-    const tab = TABS[S.tab], catName = S.cat==='all' ? '' : CATS[S.cat].label;
+    const tab = TABS[S.tab], catName = S.cat==='recent' ? '近期更新' : CATS[S.cat]?.label || '';
     g.innerHTML = q
       ? `<div class="empty"><strong>找不到符合「${esc(S.q)}」的工具</strong>換個關鍵字，或切回「全部」分類再試一次。</div>`
       : `<div class="empty"><strong>${esc(tab.code)}${catName?'・'+esc(catName):''} 還沒有工具</strong>第一個上架的就是你。<br><button class="btn primary" type="button" data-submit-here>${icon('plus')}提交工具到這裡</button></div>`;
@@ -1023,25 +1025,15 @@ function byNewest(a,b){
     || String(b.updatedAt||'').localeCompare(String(a.updatedAt||''))
     || String(b.createdAt||'').localeCompare(String(a.createdAt||''));
 }
-/* 近期更新：本頁籤近 FRESH_DAYS 天有新增或更新的工具，不受分類與搜尋影響 */
-function renderRecent(){
-  const el = $('#recent');
-  const list = S.loaded ? S.tools.filter(t => t.tab===S.tab && isFresh(t)) : [];
-  if (!list.length){ el.hidden = true; el.innerHTML = ''; return; }
-  list.sort(byNewest);
-  el.hidden = false;
-  el.innerHTML = `<h2 class="sec-h" id="recentTitle" tabindex="-1">近期更新</h2>
-    <p>近 ${FRESH_DAYS} 天新增或更新的 ${list.length} 個工具，最新的在前面。</p>
-    <div class="grid">${list.map(cardHTML).join('')}</div>`;
-}
 function scrollToEl(el, focusEl){
   const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   el.scrollIntoView({behavior: smooth ? 'smooth' : 'auto', block: 'start'});
   focusEl?.focus({preventScroll: true});
 }
+/* 「近期更新」磚塊：切到「近期更新」篩選、清掉搜尋字，捲到工具清單 */
 function goRecent(){
-  const el = $('#recent'); if (el.hidden) return;
-  scrollToEl(el, $('#recentTitle'));
+  S.cat = 'recent'; S.q = ''; $('#search').value = ''; syncUrl(); renderChips(); renderGrid();
+  scrollToEl($('#allTools'), $('#chips [data-chip="recent"]'));
 }
 /* 「收錄工具」磚塊：切回「全部」、清掉搜尋字，捲到工具清單 */
 function goAllTools(){
@@ -1206,7 +1198,7 @@ function renderQueueCount(){
   $('#openQueue').firstChild.textContent = S.admin ? '審核佇列 ' : '提交狀態 ';
 }
 function render(){
-  renderTabs(); renderBanner(); renderWho(); renderNews(); renderOverview(); renderChips(); renderGrid(); renderRecent(); renderQueueCount();
+  renderTabs(); renderBanner(); renderWho(); renderNews(); renderOverview(); renderChips(); renderGrid(); renderQueueCount();
   if ($('#queueDlg').open) renderQueue();
   if ($('#detailDlg').open) renderDetail();
 }
@@ -1382,7 +1374,7 @@ function openSubmit({kind='new', toolId=null, tab=S.tab, cat=S.cat}={}){
   form.reset();
   form.querySelectorAll('.err').forEach(e=>e.remove());
   $('#formMsg').textContent='';
-  form.kind.value = kind; form.tab.value = tab; form.category.value = cat==='all' ? '' : cat;
+  form.kind.value = kind; form.tab.value = tab; form.category.value = CATS[cat] ? cat : '';
   $('#f-date').value = today();
   fillToolSelect(toolId); syncKind(); syncOwner();
   setStatus($('#ghStatus'), '', '貼上 GitHub repo 網址，按按鈕就會帶入名稱、簡介、標籤、最新版本與封面。');
