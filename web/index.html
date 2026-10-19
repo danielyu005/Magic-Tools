@@ -119,9 +119,9 @@ button.tile{appearance:none;border:0;font:inherit;color:inherit;text-align:left;
 .tile.tile-link:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
 .tile.tile-link:focus-visible{outline:2px solid var(--set);outline-offset:2px}
 .tile .go{display:inline-flex;align-items:center;gap:4px;margin-top:10px;font-size:13px;font-weight:600}
-.recent,.toolbar{scroll-margin-top:20px}
-.recent .sec-h{margin:0}
-.recent > p{margin:4px 0 14px;color:var(--muted);font-size:14px}
+.recent,.tools-head{scroll-margin-top:20px}
+.recent .sec-h,.tools-head .sec-h{margin:0}
+.recent > p,.tools-head > p{margin:4px 0 14px;color:var(--muted);font-size:14px}
 .tile.cta{background:var(--ink);color:var(--btn-ink);display:flex;flex-direction:column;justify-content:space-between;gap:10px}
 .tile.cta p{margin:0;font-size:14px;opacity:.75}
 .tile.cta b{font-size:17px}
@@ -523,7 +523,11 @@ dialog::backdrop{background:rgba(20,24,50,.22);-webkit-backdrop-filter:blur(8px)
   </section>
   <h2 class="sec-h sr-only" id="toolsHead">內部成員工具</h2>
   <section class="overview" id="overview" aria-label="本頁籤概況"></section>
-  <div class="toolbar" id="allTools">
+  <div class="tools-head" id="allTools">
+    <h2 class="sec-h" id="allToolsTitle">收錄工具</h2>
+    <p id="allToolsSub"></p>
+  </div>
+  <div class="toolbar">
     <div class="chips" id="chips" role="group" aria-label="工具分類"></div>
     <label class="search-wrap"><svg aria-hidden="true"><use href="#i-search"/></svg><input class="search" id="search" name="q" type="search" autocomplete="off" placeholder="搜尋名稱、負責人、標籤…" aria-label="搜尋工具"></label>
   </div>
@@ -968,6 +972,7 @@ function renderChips(){
   const opts = [['all','全部',null,inTab.length]].concat(Object.entries(CATS).map(([k,c])=>[k,c.label,c.color,inTab.filter(x=>catOf(x)===k).length]));
   $('#chips').innerHTML = opts.map(([k,l,col,n]) =>
     `<button class="chip" type="button" data-chip="${k}" aria-pressed="${S.cat===k}">${col?`<span class="dot" style="background:${col}"></span>`:''}${esc(l)} <span class="muted">${S.loaded?n:''}</span></button>`).join('');
+  $('#allToolsSub').textContent = S.loaded && inTab.length ? `本頁籤的 ${inTab.length} 個工具，最新的在前面。` : '';
 }
 function renderBanner(){
   $('#banner').innerHTML = S.dbState==='off' ? `<div class="banner">目前無法連上工具資料庫：${esc(S.lastErr)}　請重新整理頁面，或聯絡管理者。</div>` : '';
@@ -1002,7 +1007,7 @@ function renderGrid(){
   const q = S.q.trim().toLowerCase();
   let list = S.tools.filter(t => t.tab===S.tab && (S.cat==='all' || catOf(t)===S.cat));
   if (q) list = list.filter(t => [t.name,t.owner,t.desc,(t.tags||[]).join(' '),STAGES[stageOf(t)]?.label||''].join(' ').toLowerCase().includes(q));
-  list.sort((a,b) => String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+  list.sort(byNewest);
   if (!list.length){
     const tab = TABS[S.tab], catName = S.cat==='all' ? '' : CATS[S.cat].label;
     g.innerHTML = q
@@ -1012,12 +1017,18 @@ function renderGrid(){
   }
   g.innerHTML = `<div class="grid">${list.map(cardHTML).join('')}</div>`;
 }
+/* 最新的在前面：先比最近一筆更新紀錄的日期，同一天再比資料最後異動時間、上架時間 */
+function byNewest(a,b){
+  return String(latest(b)?.date||'').localeCompare(String(latest(a)?.date||''))
+    || String(b.updatedAt||'').localeCompare(String(a.updatedAt||''))
+    || String(b.createdAt||'').localeCompare(String(a.createdAt||''));
+}
 /* 近期更新：本頁籤近 FRESH_DAYS 天有新增或更新的工具，不受分類與搜尋影響 */
 function renderRecent(){
   const el = $('#recent');
   const list = S.loaded ? S.tools.filter(t => t.tab===S.tab && isFresh(t)) : [];
   if (!list.length){ el.hidden = true; el.innerHTML = ''; return; }
-  list.sort((a,b) => String(latest(b)?.date||'').localeCompare(String(latest(a)?.date||'')));
+  list.sort(byNewest);
   el.hidden = false;
   el.innerHTML = `<h2 class="sec-h" id="recentTitle" tabindex="-1">近期更新</h2>
     <p>近 ${FRESH_DAYS} 天新增或更新的 ${list.length} 個工具，最新的在前面。</p>
