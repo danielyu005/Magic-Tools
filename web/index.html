@@ -212,8 +212,10 @@ dialog[open]{animation:pop .22s var(--ease)}
 dialog.sheet{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(480px,100vw);border-radius:22px 0 0 22px}
 dialog.sheet[open]{animation:slideIn .28s var(--ease)}
 @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
-.sheet .cover{border-radius:18px;margin-bottom:16px}
-.sheet .d-title{font-size:24px;margin:0 0 2px;line-height:1.3;text-wrap:balance}
+.sheet .cover{border-radius:18px}
+.sheet .cover-wrap{margin-bottom:12px}
+.sheet .cover-wrap .c-title{font-size:clamp(20px,6cqw,34px)}
+.sheet .cover-wrap.has-img .c-title{border-radius:0 0 18px 18px}
 .sheet .desc{margin:0;white-space:pre-wrap}
 .desc-wrap{margin:12px 0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .desc-edit{margin:12px 0}
@@ -898,19 +900,19 @@ function genStyle(key, seed){
   return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]};--c4:${p[3]};--ct:${p[4]};--ts:${p[5]};--x1:${pos()};--y1:${pos()};--x2:${pos()};--y2:${pos()};--x3:${pos()};--y3:${pos()}`;
 }
 const coverSrc = t => (t && safeUrl(t.coverUrl)) || '';
-/* title：要疊在封面底部的工具名稱（已跳脫的 HTML），不給就只有封面 */
-function coverHTML({key, cat, seed, src, fresh, title=''}){
+/* title：要疊在封面底部的工具名稱（已跳脫的 HTML），不給就只有封面；head 是標題用的標籤 */
+function coverHTML({key, cat, seed, src, fresh, title='', head='h3'}){
   const c = cat in CATS ? cat : 'setting';
   const badges = `<span class="cat-tag">${esc(CATS[c].label)}</span>${fresh?'<span class="fresh">近期更新</span>':''}`;
   const style = src ? '' : genStyle(key,seed);
   const inner = src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
     : '<i class="b b1"></i><i class="b b2"></i><i class="b b3"></i><span class="grain"></span>';
   if (!title) return `<div class="cover" data-cat="${c}"${style?` style="${style}"`:''}>${badges}${inner}</div>`;
-  return `<div class="cover-wrap${src?' has-img':''}"${style?` style="${style}"`:''}><div class="cover" data-cat="${c}">${badges}${inner}</div><h3 class="c-title">${title}</h3></div>`;
+  return `<div class="cover-wrap${src?' has-img':''}"${style?` style="${style}"`:''}><div class="cover" data-cat="${c}">${badges}${inner}</div><${head} class="c-title">${title}</${head}></div>`;
 }
 const stageOf = t => STAGES[t?.stage] ? t.stage : '';
 const stagePill = k => STAGES[k] ? `<span class="stage" data-stage="${k}">${esc(STAGES[k].label)}</span>` : '';
-const cover = (t, fresh, title) => coverHTML({key:t.id, cat:t.category, seed:t.coverSeed||0, src:coverSrc(t), fresh:fresh&&isFresh(t), title});
+const cover = (t, fresh, title, head) => coverHTML({key:t.id, cat:t.category, seed:t.coverSeed||0, src:coverSrc(t), fresh:fresh&&isFresh(t), title, head});
 
 /* image (File/Blob) → resized JPEG data URI (16:9 center crop) */
 async function toCoverData(file){
@@ -1090,8 +1092,7 @@ function renderDetail(){
   const pathRow = t.accessPath ? `<div class="path-row">${icon('folder')}<span class="lt"><span>存取路徑</span><code translate="no">${esc(t.accessPath)}</code></span><button class="btn small" type="button" data-copypath="${esc(t.id)}">複製路徑</button></div>` : '';
   $('#detailCrumb').textContent = `${TABS[t.tab]?.code||''}・${CATS[catOf(t)].label}`;
   $('#detailBody').innerHTML = `
-    ${cover(t,true)}
-    <h2 class="d-title" id="detailTitle" translate="no">${esc(t.name)}</h2>
+    ${cover(t,true,`<span id="detailTitle" translate="no">${esc(t.name)}</span>`,'h2')}
     <div class="owner">${esc(TABS[t.tab]?.ownerLabel||'負責人')}：${esc(t.owner||'未填')}${stagePill(stageOf(t))}</div>
     ${(t.authorNames||[]).length?`<div class="owner">作者：${esc(t.authorNames.join('、'))}</div>`:''}
     ${descHTML(t)}
