@@ -1,0 +1,110 @@
+[
+  {
+    "url": "https://discussions.unity.com/t/unity-6-6-is-now-available/1735357",
+    "topic": "tool",
+    "title": "Unity 6.6 is now available",
+    "source": "Unity Discussions",
+    "publishedAt": "2026-09-01",
+    "excerpt": "Unity 6.6 推出：2D 光源可用 Rendering Layer 指定影響對象並剔除未用 Shader 變體；GPU 蒙皮 Sprite 可投射 2D 陰影；Profiler 新增 2D 動畫、Tilemap、2D Graphics 模組；Sprite Editor 加入 Delaunay 細分網格。",
+    "note": "2D 光影與效能分析大升級，值得評估升版"
+  },
+  {
+    "url": "https://unity.com/blog/unite-seoul-keynote-2026-recap",
+    "topic": "tool",
+    "title": "Unite Seoul 2026 Keynote Recap: Announcing Unity 7",
+    "source": "Unity Blog",
+    "publishedAt": "2026-07-21",
+    "excerpt": "Unite Seoul 公布 Unity 7 路線：RenderSprite API 免 GameObject 繪製大量 Sprite 並相容 2D 光源；2D Profiler 追蹤 Atlas 使用；Unity Neural 神經紋理壓縮稱省逾 50% 紋理記憶體；另將免費提供 CLI 與 MCP。",
+    "note": "大量 Sprite 與貼圖壓縮的未來方向先看懂"
+  },
+  {
+    "url": "https://godotengine.org/article/dev-snapshot-godot-4-8-beta-1/",
+    "topic": "shader",
+    "title": "Dev snapshot: Godot 4.8 beta 1",
+    "source": "Godot Engine",
+    "publishedAt": "2026-10-15",
+    "excerpt": "Godot 4.8 beta 1 功能凍結：2D 工具列重整、執行中可直接調整 CanvasItem；Label 可自動縮字級；新增多次反彈 AO、接觸陰影、可動畫 Decal；加入 ASTC 6x6 壓縮與 mip 層級串流降低 VRAM。",
+    "note": "ASTC 與貼圖串流對手遊美術很實用"
+  },
+  {
+    "url": "https://www.gamingonlinux.com/2026/11/the-incredible-open-source-3d-creation-suite-blender-5-3-is-out-with-vulkan-by-default/",
+    "topic": "3d",
+    "title": "The incredible open source 3D creation suite Blender 5.3 is out with Vulkan by default",
+    "source": "GamingOnLinux",
+    "publishedAt": "2026-11-11",
+    "excerpt": "Blender 5.3 釋出：Windows 與 Linux 預設改用 Vulkan；原生支援 3D Gaussian Splat；NVIDIA 可用 DLSS 視窗降噪；資產庫可包成擴充套件發佈；合成器效果可堆疊；Grease Pencil 加入新選取、裁切工具與多區域填色。",
+    "note": "資產庫可打包成擴充，適合團隊共享"
+  },
+  {
+    "url": "https://www.blendernation.com/2026/10/27/grease-pencil-in-blender-5-3-no-more-mode-switching-finally-canvas-flip-roll/",
+    "topic": "spine",
+    "title": "Grease Pencil in Blender 5.3: No More Mode-Switching & Finally Canvas Flip/Roll!",
+    "source": "BlenderNation",
+    "publishedAt": "2026-10-27",
+    "excerpt": "整理 Blender 5.3 的 Grease Pencil 2D 動畫改進：終於支援畫布翻轉與旋轉，貼近傳統繪圖習慣；Draw Mode 內可直接用框選、圈選、套索選取修線，不必再切換 Edit Mode；新增可快速切出形狀的 Carver 工具，以及一次為多個區域上色的 Multi-Fill。",
+    "note": "用 Blender 畫 2D 動畫的流程更順手"
+  },
+  {
+    "url": "https://techcrunch.com/2026/11/10/adobe-adds-more-ai-to-its-products-and-launches-an-mcp/",
+    "topic": "ai",
+    "title": "Adobe brings AI agents and new creative tools to Photoshop, Premiere, and Firefly",
+    "source": "TechCrunch",
+    "publishedAt": "2026-11-10",
+    "excerpt": "Adobe MAX 推出本機 MCP，讓 ChatGPT、Claude、Gemini 等呼叫更多 Creative Cloud 功能，首批涵蓋 Photoshop、Illustrator、After Effects、Premiere；開放範圍將依使用者回饋擴充。Adobe AI 代理也轉為主動常駐。",
+    "note": "PS 可被 AI 代理操作，自動化值得追"
+  },
+  {
+    "url": "https://blog.adobe.com/en/publish/2026/11/10/explore-new-ways-create-across-creative-cloud-adobe-firefly-while-advancing-craft-precision-choice-control",
+    "topic": "aiimg",
+    "title": "Explore new ways to create across Creative Cloud and Adobe Firefly while advancing your craft with more precision, choice and control",
+    "source": "Adobe Blog",
+    "publishedAt": "2026-11-10",
+    "excerpt": "Adobe MAX 公布 Photoshop 新功能：Relight 可加非破壞性光源並調位置、顏色、亮度；Generative Restyle 用滑桿調風格強度免重下提示；移除工具會連同陰影倒影偵測；Firefly Graph（beta）可建可分享的 AI 流程。",
+    "note": "Relight 補光很適合宣傳圖與背景修圖"
+  },
+  {
+    "url": "https://seed.bytedance.com/en/blog/more-realistic-images-more-stable-editing-across-100-rounds-introducing-seedream-5-5",
+    "topic": "aiimg",
+    "title": "More Realistic Images, More Stable Editing Across 100 Rounds | Introducing Seedream 5.5",
+    "source": "ByteDance Seed",
+    "publishedAt": "2026-11-09",
+    "excerpt": "字節跳動發表 Seedream 5.5 圖像模型：可在同一張圖上連續編輯達 100 輪，未編輯區域保持像素級不變，減少色偏與細節流失；直接輸出含 Alpha 通道的 RGBA 圖，支援全透明與半透明，生成素材免再去背；光影、材質與密集小字的呈現也更準確。",
+    "note": "原生透明背景輸出，做 UI/道具素材省去背"
+  },
+  {
+    "url": "https://digitalproduction.com/2026/08/04/autodesk-flow-studio-adds-3d-editor-and-canvas/",
+    "topic": "aiimg",
+    "title": "Autodesk Flow Studio adds 3D Editor and Canvas",
+    "source": "Digital Production",
+    "publishedAt": "2026-08-04",
+    "excerpt": "Autodesk Flow Studio 新增 Canvas 與 3D Editor：Canvas 為節點式 2D 工作區，用來生成與修整 AI 圖像和影片；3D Editor 可安排構圖、鏡頭與表演節奏，兩者可互切；並可接 World Labs Marble 生成的環境。",
+    "note": "節點式 AI 出圖流程，可參考做分鏡"
+  },
+  {
+    "url": "https://digitalproduction.com/2026/08/03/cascadeur-2026-2-adds-animation-layers/",
+    "topic": "3d",
+    "title": "Cascadeur 2026.2 Adds Animation Layers",
+    "source": "Digital Production",
+    "publishedAt": "2026-08-03",
+    "excerpt": "AI 輔助動畫軟體 Cascadeur 2026.2 加入 Alpha 版動畫圖層，可分層疊加動作；新增緩動控制；AutoPosing 讓手腳貼合周遭幾何；新增中日韓介面；支援 PySide 自訂 UI，並可從 Scripts 選單啟動簡易 MCP Server。",
+    "note": "有中文介面與 MCP，動作參考可一試"
+  },
+  {
+    "url": "https://www.gamedeveloper.com/press-release/ludo-ai-upgrades-sprite-generator-with-pose-generator-sequence-and-transition-tools-and-updated-export-options",
+    "topic": "spine",
+    "title": "Ludo.ai upgrades Sprite Generator with Pose Generator, Sequence and Transition tools and updated export options",
+    "source": "Game Developer",
+    "publishedAt": "2026-06-17",
+    "excerpt": "Ludo.ai 更新 AI Sprite Generator：Pose Generator 可依文字改姿勢並維持畫風，或由單張生成其他角度；Transition 工具自動補兩段動畫間的過場；可匯出多段動畫包或連續序列 Sprite Sheet，並統一比例對齊。",
+    "note": "AI 補過場動畫，可評估做 2D 原型"
+  },
+  {
+    "url": "https://80.lv/articles/meshy-wants-ai-to-feel-less-like-a-prompt-and-more-like-a-creative-partner",
+    "topic": "aiimg",
+    "title": "Meshy Wants AI to Feel Less Like a Prompt and More Like a Creative Partner",
+    "source": "80 Level",
+    "publishedAt": "2026-07-21",
+    "excerpt": "Meshy 向所有用戶開放 3D Agent Beta，以多輪對話方式發想、修改概念並批次生成相關資產，最後轉成帶貼圖的 3D 模型；可輸入草圖或參考照片，匯出 GLB、FBX、OBJ 給 Blender、Unity 等使用，對話內骨架綁定與動畫也開始推出。（本文為贊助內容）",
+    "note": "對話式 3D 生成，適合快速做道具草模"
+  }
+]

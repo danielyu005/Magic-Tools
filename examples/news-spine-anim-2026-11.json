@@ -1,0 +1,137 @@
+[
+  {
+    "url": "https://esotericsoftware.com/blog/Use-Spine-with-Stake-Engine",
+    "topic": "spine",
+    "title": "Use Spine with Stake Engine",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-08-04",
+    "excerpt": "Spine 官方宣布可在賭場遊戲平台 Stake Engine 使用 Spine 動畫。其 PixiJS 架構 Web SDK 透過官方 spine-pixi-v8 runtime 支援，現有匯出檔可直接放入，以 SpineProvider 加入骨架、SpineTrack 指定動畫、軌道與循環播放。",
+    "note": "做老虎機的必看：Spine 直通 Stake Engine"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/Skins-for-equipped-items-Spine-Tips-11",
+    "topic": "spine",
+    "title": "Skins for equipped items - Spine Tips #11",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-10-20",
+    "excerpt": "Spine Tips 第 11 集影片教學：示範多種可裝備道具的角色如何綁定與製作動畫。重點是把道具專屬的骨骼、約束與附件打包成 Skin 以便切換並提升 runtime 效能，道具動畫疊在跑、待機等基礎動作之上，再結合 Transform 與 Physics 約束做出跟隨的二次動態。附專案檔。",
+    "note": "換裝／道具 Skin 架構的官方示範"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/New-Twitch-streams-optimizing-skeletons",
+    "topic": "spine",
+    "title": "New Twitch streams: Optimizing skeletons in Spine",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-08-21",
+    "excerpt": "Spine 官方新一季 Twitch 直播主題為「骨架優化」：由 Erika 實際優化一款遊戲的 Spine 動畫，並示範如何用 Metrics 與 Problems 檢視面板找出效能與專案問題。直播錄影會放到官網 Twitch 直播存檔頁，適合想降低骨架負擔、檢查專案健康度的動畫師回放學習。",
+    "note": "效能優化實戰，跑不動前先看這集"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/phaser-mesh2d-in-spine-phaser-v4",
+    "topic": "spine",
+    "title": "Phaser Mesh2D in spine-phaser-v4",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-07-14",
+    "excerpt": "spine-phaser-v4 4.3.11 改版：預設改用 Phaser Mesh2D API 繪製，可與 Phaser 物件合批提升效能；新增 addSlotObject 讓文字、精靈跟隨插槽骨骼與繪製順序，Spine 裁剪也能裁到掛上的物件，支援網格、混合模式與 tint black。",
+    "note": "H5 遊戲：插槽掛物件、合批更省"
+  },
+  {
+    "url": "https://esotericsoftware.com/blog/spine-godot-native-3d",
+    "topic": "spine",
+    "title": "Native 3D rendering in spine-godot",
+    "source": "Esoteric Software Blog",
+    "publishedAt": "2026-09-11",
+    "excerpt": "spine-godot 新增 SpineSprite3D 節點，可直接在 Godot 3D 渲染器繪製 Spine 骨架，不必經 SubViewport 轉貼圖。支援網格、裁剪、Skin、法線貼圖打光與陰影、深度寫入；SpineSlotNode3D 可把 3D 物件或粒子插入繪製順序。",
+    "note": "2D 角色放進 3D 場景的新選項"
+  },
+  {
+    "url": "https://gamemakers.jp/article/2026_06_03_138786/",
+    "topic": "spine",
+    "title": "2Dアニメーション制作ソフト「Spine 4.3」がリリース。アニメーション制御・コンストレイント機能の強化など",
+    "source": "ゲームメーカーズ",
+    "publishedAt": "2026-06-03",
+    "excerpt": "日媒整理 Spine 4.3 重點：新「Slider」可把既有動畫特定影格套到目前姿勢，不必複製關鍵影格，一個滑桿可控制含網格變形、旋轉、顏色、繪製順序的整段動畫；Transform 約束可跨屬性連動；另有多網格選取、批次權重與 HTML 匯出。",
+    "note": "4.3 Slider／約束新功能快速入門"
+  },
+  {
+    "url": "https://gamemakers.jp/article/2026_07_27_142027/",
+    "topic": "spine",
+    "title": "「Live2D Cubism 5.4」alpha版が無料でリリース。パラメータコントローラのSDK対応、モデルのステートセット導入など",
+    "source": "ゲームメーカーズ",
+    "publishedAt": "2026-07-27",
+    "excerpt": "Live2D 於 7/14 釋出 Cubism 5.4 alpha 免費試用（至 9/14）。主要新功能：參數控制器（Parameter Controller）支援 SDK、模型新增「State Set」狀態集、擴充外部連動 API 的物件編輯。官方提醒 alpha 功能仍在開發，正式版可能不同。",
+    "note": "掌握 Live2D 動向，選工具時參考"
+  },
+  {
+    "url": "https://gamemakers.jp/article/2026_08_05_142673/",
+    "topic": "spine",
+    "title": "「シャドバらしさ」と「革新性」が融合。『Shadowverse: Worlds Beyond』UIデザイン・アニメーション演出の設計思想【CEDEC2026】",
+    "source": "ゲームメーカーズ",
+    "publishedAt": "2026-08-05",
+    "excerpt": "CEDEC2026 Cygames 講座報導：《Shadowverse: Worlds Beyond》以影片原型先驗證演出再實裝；替勝負場景設定「喜悅數值」，勝利加慢動作、推鏡與爆炸，敗北則去掉 LOSE 字樣快速進結算；全面刪減等待時間，同樣操作總處理時間縮短約 26%，並以毫秒調整轉場模糊。",
+    "note": "贏分演出節奏設計，老虎機很受用"
+  },
+  {
+    "url": "https://80.lv/articles/how-valorant-s-hush-was-animated-using-spine-2d-after-effects",
+    "topic": "spine",
+    "title": "How VALORANT's Hush Was Animated Using Spine 2D & After Effects",
+    "source": "80 Level",
+    "publishedAt": "2026-11-06",
+    "excerpt": "動畫師 Seter MD 用 Spine 2D 綁定並製作《特戰英豪》角色 Hush 的動作，武器與背景特效交給 After Effects（Fractal Noise、CC Vector Blur 等）。他也曾用 Spine 影像變形做擬 3D 主畫面傾斜，每段約 15–30 分鐘，文內附流程影片。",
+    "note": "Spine＋AE 分工的角色展示範例"
+  },
+  {
+    "url": "https://80.lv/articles/bluey-s-simple-2d-look-required-gameloft-s-most-technically-challenging-art-pipeline",
+    "topic": "spine",
+    "title": "Bluey's Simple 2D Look Required Gameloft's Most Technically Challenging Art Pipeline",
+    "source": "80 Level",
+    "publishedAt": "2026-10-23",
+    "excerpt": "Gameloft 拆解《Bluey's Happy Snaps》如何在 3D 遊戲保留 2D 卡通感：角色由多層面向鏡頭的平面組成，SDF 貼圖做向量邊緣、眼睛以 SDF 曲線在 shader 繪製；用 UE5 Control Rig 綁定，主角度加 7 個 45° 角度製作，shader 補間避免跳動。",
+    "note": "2D 紙片角色多角度綁定的工業做法"
+  },
+  {
+    "url": "https://80.lv/articles/live2d-rigging-has-reached-peak-jello-thighs",
+    "topic": "spine",
+    "title": "Live2D Rigging Has Reached Peak Jello Thighs",
+    "source": "80 Level",
+    "publishedAt": "2026-09-14",
+    "excerpt": "介紹 Live2D 動畫師 kitto_jpg 分享的 VTuber 委託角色綁定過程：大腿誇張的 Q 彈物理、細緻手指綁定、鞋底平台內滾動的小球與蓬鬆頭髮擺動。文末延伸連結擬 3D 手部追蹤，以及 UE5 風格化擬物理工具 Kawaii Physics 等作品。",
+    "note": "看物理擺動細節，二次動態找靈感"
+  },
+  {
+    "url": "https://80.lv/articles/this-new-2d-animation-drawing-app-deserves-your-attention",
+    "topic": "spine",
+    "title": "This New 2D Animation & Drawing App Deserves Your Attention",
+    "source": "80 Level",
+    "publishedAt": "2026-10-01",
+    "excerpt": "介紹新 2D 動畫繪圖軟體 Umoupen：同時支援點陣筆刷與可編輯向量線條，提供逐格繪製與補間（靈感來自 Flash），內建分鏡、鏡頭排序與攝影表註記，可匯入 3D 模型並多人即時共繪。採買斷制，一授權可裝三台，目前有 macOS／Windows 版，iPad 與 Android 規劃中。",
+    "note": "逐格＋補間新工具，可留意試用"
+  },
+  {
+    "url": "https://2d-studio.crdg.jp/blog/2026/06/22/4903/",
+    "topic": "spine",
+    "title": "【2DCGアニメーター】新卒２年目が、ベテラン社員へインタビューしてみた！",
+    "source": "2DCGプラネットスタジオBLOG（C&R Creative Studios）",
+    "publishedAt": "2026-06-22",
+    "excerpt": "日本 2D 工作室訪談：手繪出身、現橫跨 Live2D 與 Spine 的動畫導演木村認為，讓角色動起來本質仍是「演戲」，手繪經驗有助判斷自然動作，透視知識用於營造縱深；他以「必要十分＋α」把力氣花在重點，並建議新人多做自主作品。",
+    "note": "骨架動畫也要「演戲」，新人必讀"
+  },
+  {
+    "url": "https://rive.app/blog/brilliant-builds-its-math-and-coding-tutor-character-with-rive",
+    "topic": "spine",
+    "title": "Brilliant builds its math and coding tutor Koji with Rive",
+    "source": "Rive Blog",
+    "publishedAt": "2026-06-04",
+    "excerpt": "Brilliant 用 Rive 打造教學角色 Koji：一套綁定共用於 iOS、Android 與 Web，依學習者答題順利或卡關切換揮手、點頭等狀態；用 Rive Agent 產生記錄狀態機輸入與命名的交接文件；角色無嘴，改以語音音量驅動 Data Binding 變數表現說話。",
+    "note": "狀態機驅動角色反應的實戰參考"
+  },
+  {
+    "url": "https://gamemakers.jp/article/2026_11_10_150167/",
+    "topic": "spine",
+    "title": "無料・オープンソースのモーショングラフィックス制作ツール「Friction 1.0.0」正式リリース。商用利用も可能",
+    "source": "ゲームメーカーズ",
+    "publishedAt": "2026-11-10",
+    "excerpt": "開源免費動態圖像工具 Friction 1.0.0 正式版（GPL-3.0，可商用），支援 Windows／Linux／macOS。可做向量與點陣動畫，輸出 SVG 動畫、MP4、WebM；以關鍵影格搭配時間軸與曲線調整，屬性可寫 ECMAScript 表達式存成預設，另有路徑、模糊、陰影特效。",
+    "note": "免費做 UI／宣傳動態的 AE 替代選項"
+  }
+]

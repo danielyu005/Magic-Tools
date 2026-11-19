@@ -61,7 +61,7 @@ const NEWS_RULES = [
   ['ai',     /\bllms?\b|chatgpt|\bclaude\b|\bgemini\b|copilot|\bcodex\b|agentic|vibe[- ]?cod|語言模型|MCP ?伺服器/i],
   ['aiimg',  /stable diffusion|\bsdxl\b|comfy ?ui|midjourney|\bflux(\.1| ?kontext| ?dev| ?pro| ?schnell)\b|black forest labs|dall-?e|firefly|text-to-(image|video|3d)|image-to-(video|3d)|image generat|video generat|generative fill|controlnet|\blora\b|runway ?(gen|ml)|\bsora\b|\bkling\b|\bveo ?\d?\b|\bai[- ](image|video|art|render)|ai ?(繪圖|生圖|影像|繪畫)|圖像生成|影像生成|文生圖|圖生影片|生成影片/i],
   ['ai',     /generative ai|\bgen ?ai\b|\bai[- ](powered|assisted|driven|tools?|agents?|assistants?|coding)\b|生成式 ?ai|ai ?(工具|助手|輔助|代理)/i],
-  ['spine',  /esoteric ?software|\bspine ?(2d|pro|tips|editor|runtimes?|4\.\d|animation)|skeletal animation|live2d|dragonbones|骨骼動畫|骨骼动画/i, true],
+  ['spine',  /esoteric ?software|\bspine ?(2d|pro|tips|editor|runtimes?|4\.\d|animation)|\bspine-(unity|godot|phaser|player|webgl|ts|c|cpp)\b|skeletal animation|live2d|dragonbones|\brive\b|\bmoho\b|toon ?boom|\b2d (animation|animator|rig)|game animat(ion|or)|frame[- ]by[- ]frame|in-?betweening|骨骼動畫|骨骼动画|2D ?動畫|遊戲動畫/i, true],
   ['vfx',    /\bvfx\b|visual effects?|real-?time ?fx|\bparticles?\b|niagara|shuriken|embergen|effekseer|flipbook|特效|粒子/i, true],
   ['shader', /shaders?\b|\bhlsl\b|\bglsl\b|\bwgsl\b|material (editor|function)s?|\bnpr\b|\btoon\b|cel[- ]?shad|ray ?trac|path ?trac|global illumination|著色器|渲染管線/i, true],
   ['tool',   /plug-?ins?\b|add-?ons?\b|\btools?\b|\bscripts?\b|pipeline|workflow|automat|\bbatch\b|photoshop|krita|aseprite|procedural|工具|插件|外掛|自動化/i],
@@ -79,7 +79,11 @@ const DEFAULT_FEEDS = [
   ['Blender Developers', 'https://code.blender.org/feed/', '3d', 'rss', ''],
   ['BlenderNation', 'https://www.blendernation.com/feed/', 'auto', 'rss', ''],
   ['Game Developer', 'https://www.gamedeveloper.com/rss.xml', 'auto', 'rss', ''],
-  ['Spine（Esoteric Software）', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCg95nRAEFyWzjoTRJJpVWKw', 'spine', 'rss', 'Spine 官方教學影片（Spine Tips）']
+  ['Spine（Esoteric Software）', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCg95nRAEFyWzjoTRJJpVWKw', 'spine', 'rss', 'Spine 官方教學影片（Spine Tips）'],
+  ['Spine 官方部落格', 'https://esotericsoftware.com/blog/rss', 'spine', 'rss', '新版本、執行環境更新、Spine Tips 文章'],
+  ['Google 新聞：Spine 2D', 'https://news.google.com/rss/search?q=%22Spine+2D%22+OR+%22Spine+animation%22+OR+%22Esoteric+Software%22&hl=en-US&gl=US&ceid=US:en', 'spine', 'rss', '各站的 Spine 作品分享、教學影片與新聞'],
+  ['GameAnim', 'https://www.gameanim.com/feed/', 'auto', 'rss', '遊戲動畫師 Jonathan Cooper 的動畫技巧文章'],
+  ['Godot Engine', 'https://godotengine.org/rss.xml', 'auto', 'rss', '']
 ];
 
 /* ============================== 入口 ============================== */
@@ -661,8 +665,12 @@ function parseFeed_(xml, feed) {
       || attr(/<media:content\b(?=[^>]*medium=["']image["'])[^>]*url=["']([^"']+)["']/i)
       || attr(/<enclosure\b(?=[^>]*type=["']image)[^>]*url=["']([^"']+)["']/i)
       || firstImg_(unescapeHtml_(body + ' ' + tag('content:encoded')));
-    out.push({ title, url: link, text: cleanExcerpt_(htmlText_(unescapeHtml_(body))), cats: cats.join(' '), time,
-               image: /^https:\/\//i.test(image) ? image : '' });
+    // Google 新聞的標題會接「 - 來源」，<source> 才是真正的網站名稱；它的摘要只是標題重複，不收
+    const src = htmlText_(tag('source'));
+    const gnews = /news\.google\./i.test(feed.url);
+    const t = src && title.endsWith(' - ' + src) ? title.slice(0, -(src.length + 3)) : title;
+    out.push({ title: t, url: link, text: gnews ? '' : cleanExcerpt_(htmlText_(unescapeHtml_(body))), cats: cats.join(' '), time,
+               image: /^https:\/\//i.test(image) ? image : '', source: src });
   });
   return out;
 }
@@ -716,7 +724,7 @@ function classify_(text, bodyOnly) {
 /** 用 Apps Script 內建的 Google 翻譯轉成繁中；已經是中文或翻譯失敗就留空，前端改顯示原文 */
 function translateRow_(row) {
   const zh = s => {
-    if (!s || /[一-鿿]/.test(s)) return '';
+    if (!s || (/[一-鿿]/.test(s) && !/[぀-ヿ]/.test(s))) return ''; // 中文就不翻；日文（有假名）照樣翻
     try { return LanguageApp.translate(s, '', 'zh-TW'); } catch (x) { return ''; }
   };
   row.titleZh = zh(row.title);
@@ -733,8 +741,12 @@ function ensureNewsSheets_() {
     sh.setFrozenRows(1);
     sh.getRange(1, 1, sh.getMaxRows(), cols.length).setNumberFormat('@');
   });
-  if (!readTable_('feeds').length) {
-    appendRows_('feeds', DEFAULT_FEEDS.map(f => ({ name: f[0], url: f[1], topic: f[2], mode: f[3], enabled: 'TRUE', note: f[4] })));
+  // 補上預設來源裡還沒在 feeds 的（之後新增的預設來源也會自動加進去）；不要的來源請把 enabled 改成 FALSE，不要刪列
+  const have = {};
+  readTable_('feeds').forEach(f => { have[urlKey_(f.url)] = true; });
+  const missing = DEFAULT_FEEDS.filter(f => !have[urlKey_(f[1])]);
+  if (missing.length) {
+    appendRows_('feeds', missing.map(f => ({ name: f[0], url: f[1], topic: f[2], mode: f[3], enabled: 'TRUE', note: f[4] })));
   }
 }
 

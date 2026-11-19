@@ -1,0 +1,128 @@
+[
+  {
+    "url": "https://minimax.io/blog/minimax-h3-image",
+    "topic": "aiimg",
+    "title": "MiniMax H3-Image: Bringing 4K Image Generation into the 10-Second Era",
+    "source": "MiniMax",
+    "publishedAt": "2026-11-11",
+    "excerpt": "MiniMax 發布開放權重圖像模型 H3-Image，建構於 H3 之上，支援文生圖、參考圖生成與編輯，最多可吃 16 張參考圖，10 秒內輸出 4096×4096 的 4K 圖；權重已上 Hugging Face，並提供標準與 Highspeed 兩種模式。",
+    "note": "多參考圖做角色/道具一致性值得實測"
+  },
+  {
+    "url": "https://bfl.ai/blog/flux-3-image-klein",
+    "topic": "aiimg",
+    "title": "FLUX 3 Image Klein: open weights, 5.6B parameters",
+    "source": "Black Forest Labs",
+    "publishedAt": "2026-10-15",
+    "excerpt": "BFL 推出 5.6B 開放權重的 FLUX 3 Image Klein，支援文生圖、編輯、最多 10 張參考圖與 bounding box 定位；INT8 版 8GB VRAM 可跑，RTX 4070 於 ComfyUI 生 1MP 圖不到 9 秒，Base 版可訓練 LoRA。",
+    "note": "本機可跑、可訓 LoRA，適合自家畫風"
+  },
+  {
+    "url": "https://decrypt.co/380257/google-launches-nano-banana-2-1",
+    "topic": "aiimg",
+    "title": "Google Launches Nano Banana 2.1: Better Than Its Predecessor at Half the Price",
+    "source": "Decrypt",
+    "publishedAt": "2026-10-06",
+    "excerpt": "Google 推出 Nano Banana 2.1：最多 14 張參考圖、可追蹤 4 個角色與 10 個物件，強化多次編輯後的主體一致性與遮罩局部編輯，支援 4K 與 8:1 寬比例；API 1K 圖約 0.0336 美元，約為前代一半，效能數據為 Google 自測。",
+    "note": "多角色一致性與局部改圖可直接比較"
+  },
+  {
+    "url": "https://mixed-news.com/en/qwen-image-2-1-transparent-rgba-7b-open-weights-research-licence",
+    "topic": "aiimg",
+    "title": "Qwen-Image-2.1 generates transparent images from open weights, but research use only",
+    "source": "MIXED News",
+    "publishedAt": "2026-09-21",
+    "excerpt": "阿里 Qwen-Image-2.1 以 64 通道 RGBA VAE 直接輸出含 Alpha 的透明圖，免另做去背；同一權重兼做生成與編輯，可用圈選、標註或遮罩局部修改，最多 10 張參考圖，首日支援 ComfyUI。但授權僅限研究，商用需另談。",
+    "note": "原生透明圖適合切圖素材，注意授權"
+  },
+  {
+    "url": "https://www.kombitz.com/2026/11/14/ai-image-video-model-news-roundup-november-14-2026/",
+    "topic": "aiimg",
+    "title": "AI Image & Video Model News Roundup – November 14, 2026",
+    "source": "Kombitz",
+    "publishedAt": "2026-11-14",
+    "excerpt": "11/8–14 開放模型整理：H3-Image 已原生支援 ComfyUI v0.45.0、Qwen-Image 2.1 物件移除 LoRA、MOSS-Image 七種控制 LoRA（canny、depth、pose 等），另有影片模型 HyperFlow H3 Flash 與超解析 ReCaVSR。",
+    "note": "每週追 ComfyUI 可用新模型的好清單"
+  },
+  {
+    "url": "https://www.kombitz.com/2026/10/24/ai-image-video-model-news-roundup-october-24-2026/",
+    "topic": "aiimg",
+    "title": "AI Image & Video Model News Roundup – October 24, 2026",
+    "source": "Kombitz",
+    "publishedAt": "2026-10-24",
+    "excerpt": "整理 Bria Fibo 2.0（8B，Dev 可微調、Edit Turbo 4 步）已原生進 ComfyUI、MOSS-Image 指令式編輯 LoRA 支援 1–4 張參考圖、騰訊 Hy-Nomas 互動式影片世界模型開源，以及 H3 影片少步數 LoRA 等本機可用資訊。",
+    "note": "挑選 ComfyUI 編輯模型時的參考"
+  },
+  {
+    "url": "https://blog.comfy.org/p/the-little-things-that-shipped-in",
+    "topic": "aiimg",
+    "title": "The little things that shipped in October",
+    "source": "ComfyUI Blog",
+    "publishedAt": "2026-11-09",
+    "excerpt": "ComfyUI 十月更新：Branch 節點與 If/Else Switch 只執行選定分支；新 LoRA stack 節點單一節點可疊 20 個 LoRA；多張輸出可一次打包 zip 下載；新增 EXR/HDR 預覽、ACEScg 與 ProRes 輸出，以及連線管理與控件獨立 undo。",
+    "note": "疊 LoRA 與批次匯出省很多手工"
+  },
+  {
+    "url": "https://testingcatalog.com/openai-launches-images-2-6-with-gifs-and-image-reference",
+    "topic": "aiimg",
+    "title": "OpenAI launches Images 2.6 with GIFs and image reference",
+    "source": "TestingCatalog",
+    "publishedAt": "2026-11-05",
+    "excerpt": "ChatGPT Images 2.6 全方案上線：可把角色、吉祥物、分鏡做成短 GIF 循環，可儲存角色參考圖重複使用，強化多輪編輯的一致性，速度快 50%；API 分 Flare（快）與 Sunburst（細節、穩定編輯），並開放圈選標記編輯、SVG 與 complexity 參數。",
+    "note": "存角色參考圖、做吉祥物 GIF 可直接試"
+  },
+  {
+    "url": "https://openart.ai/blog/gpt-image-2-6-prompt-guide/",
+    "topic": "aiimg",
+    "title": "GPT Image 2.6 Prompt Guide: How to Write Prompts for Better Images, Edits, and GIFs",
+    "source": "OpenArt",
+    "publishedAt": "2026-11-17",
+    "excerpt": "GPT Image 2.6 實用寫法：依主體、構圖、風格、限制排序；參考圖編號並各給單一角色；圈選做局部修改，每次只改一處並重複列出要保留的項目；GIF 只描述一個小循環動作；長提示用 SCENE/ART STYLE 等區塊；先用 Flare 試再用 Sunburst 定稿。",
+    "note": "可整理成團隊共用的提示詞模板"
+  },
+  {
+    "url": "https://www.aifire.co/p/chatgpt-images-2-6-best-features-gifs-settings-guide",
+    "topic": "aiimg",
+    "title": "Get the MOST Out of ChatGPT Images 2.6: Make GIFs, Edit Like a Pro & All New Features!",
+    "source": "AI Fire",
+    "publishedAt": "2026-11-05",
+    "excerpt": "Images 2.6 設定指南：簡單改圖用低 complexity，元素多才調高；GIF 從約 6 格、單一小動作、固定鏡頭開始，失敗可改 512×512；API 的 markup 須為同尺寸透明 PNG 且不能與 mask 併用；並列出各品質單張成本以估算批量。",
+    "note": "做動態小圖前先看參數與限制"
+  },
+  {
+    "url": "https://blog.comfy.org/p/comfy-agent-the-first-agent-for-craft",
+    "topic": "ai",
+    "title": "Comfy Agent: The First Agent for Craft",
+    "source": "ComfyUI Blog",
+    "publishedAt": "2026-10-01",
+    "excerpt": "ComfyUI 內建 AI 代理 Comfy Agent 上線 Comfy Cloud（Beta）：用對話規劃、搭建、執行與除錯節點工作流，能和使用者同時在畫布上操作、看懂素材，可建私有/公開 Skills、同時開 5 個對話；桌面版預計數週內支援。",
+    "note": "不會接節點也能讓 AI 幫搭工作流"
+  },
+  {
+    "url": "https://blog.comfy.org/p/open-sourcing-comfy-mcp-on-local",
+    "topic": "ai",
+    "title": "Open Sourcing Comfy MCP on Local",
+    "source": "ComfyUI Blog",
+    "publishedAt": "2026-08-18",
+    "excerpt": "Comfy 開源本機版 Comfy MCP，讓 Claude、Codex、Cursor 等代理直接操作本機 ComfyUI：以自然語言建立/修改/執行/儲存工作流、搜尋模型與節點、讀取 GPU 判斷模型能否跑、安裝自訂節點；同一 MCP 可在本機與雲端間切換。",
+    "note": "用 Claude Code 驅動批次出圖的入口"
+  },
+  {
+    "url": "https://www.tweaktown.com/news/114648/adobe-takes-on-open-source-tools-by-letting-ai-agents-control-photoshop-itself/index.html",
+    "topic": "ai",
+    "title": "Adobe takes on open-source tools by letting AI agents control Photoshop itself",
+    "source": "TweakTown",
+    "publishedAt": "2026-11-12",
+    "excerpt": "Adobe 於 MAX 2026 預告本機 MCP 整合，讓 ChatGPT、Claude、Gemini 等代理直接處理本機 Photoshop、Illustrator、AE、Premiere 專案的圖層、向量路徑與序列；需本機安裝授權，開放哪些操作尚未公布。",
+    "note": "PSD 批次處理自動化值得關注"
+  },
+  {
+    "url": "https://sprixen.com/blog/mcp-game-asset-pipelines",
+    "topic": "ai",
+    "title": "MCP Game Asset Pipelines: What Claude Code and Cursor Can Actually Automate",
+    "source": "Sprixen",
+    "publishedAt": "2026-09-14",
+    "excerpt": "談用 Claude Code、Cursor 透過 MCP 自動化遊戲素材：工具要窄而專（生成 sprite、驗證 sprite sheet），每張產出附上 prompt、模型、尺寸、透明度、幀數/FPS/pivot 等中繼資料，先放暫存區自動驗證，付費生成與覆寫原稿需人工確認。",
+    "note": "自建出圖管線前的設計檢查清單"
+  }
+]
