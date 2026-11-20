@@ -982,7 +982,7 @@ function renderChips(){
   $('#chips').innerHTML = opts.map(([k,l,col,n]) =>
     `<button class="chip" type="button" data-chip="${k}" aria-pressed="${S.cat===k}">${col?`<span class="dot" style="background:${col}"></span>`:''}${esc(l)} <span class="muted">${S.loaded?n:''}</span></button>`).join('');
   $('#allToolsSub').textContent = !S.loaded || !inTab.length ? ''
-    : S.cat==='recent' ? `近 ${FRESH_DAYS} 天新增或更新的工具，最新的在前面。` : '最新的在前面；近期有更新的會標示「近期更新」。';
+    : S.cat==='recent' ? `近 ${FRESH_DAYS} 天新增或更新的工具，最新的在前面。` : '可展示的在前面，同狀態內最新的在前面；近期有更新的會標示「近期更新」。';
 }
 function renderBanner(){
   $('#banner').innerHTML = S.dbState==='off' ? `<div class="banner">目前無法連上工具資料庫：${esc(S.lastErr)}　請重新整理頁面，或聯絡管理者。</div>` : '';
@@ -1016,7 +1016,7 @@ function renderGrid(){
   const q = S.q.trim().toLowerCase();
   let list = S.tools.filter(t => t.tab===S.tab && (S.cat==='all' || (S.cat==='recent' ? isFresh(t) : catOf(t)===S.cat)));
   if (q) list = list.filter(t => [t.name,t.owner,t.desc,(t.tags||[]).join(' '),STAGES[stageOf(t)]?.label||''].join(' ').toLowerCase().includes(q));
-  list.sort(byNewest);
+  list.sort((a,b) => stageRank(a) - stageRank(b) || byNewest(a,b));
   if (!list.length){
     const tab = TABS[S.tab], catName = S.cat==='recent' ? '近期更新' : CATS[S.cat]?.label || '';
     g.innerHTML = q
@@ -1026,6 +1026,9 @@ function renderGrid(){
   }
   g.innerHTML = `<div class="grid">${list.map(cardHTML).join('')}</div>`;
 }
+/* 可展示的排前面：可展示 → Prototype → 沒填狀態 → 開發中 → 待補資料 */
+const STAGE_ORDER = ['ready','prototype','','dev','todo'];
+const stageRank = t => STAGE_ORDER.indexOf(stageOf(t));
 /* 最新的在前面：先比最近一筆更新紀錄的日期，同一天再比資料最後異動時間、上架時間 */
 function byNewest(a,b){
   return String(latest(b)?.date||'').localeCompare(String(latest(a)?.date||''))
